@@ -181,16 +181,7 @@
 
 })();
 
-function toggleDarkMode() {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark"));
-}
-
-// On load, set the theme from saved preference
 window.addEventListener('DOMContentLoaded', () => {
-  const darkMode = localStorage.getItem("darkMode") === "true";
-  if (darkMode) document.body.classList.add("dark");
-
   updateProgress();
   updateMilestoneMessage();
 });
