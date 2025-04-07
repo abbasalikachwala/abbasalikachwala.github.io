@@ -196,7 +196,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function updateProgress() {
-  const targetDate = new Date('2025-12-31'); // CHANGE THIS
+  const targetDate = new Date('2025-07-18');
   const now = new Date();
   const total = targetDate - new Date('2025-01-01'); // Start date
   const progress = now - new Date('2025-01-01');
