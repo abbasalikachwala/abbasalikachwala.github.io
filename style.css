@@ -189,3 +189,15 @@ a.white-out::after {
   text-align: center;
   margin-top: 5px;
 }
+
+h2 {
+    color: white;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0;
+  background-color: #007bff; /* A nice blue */
+  border-radius: 20px;
+  transition: width 0.5s ease-in-out;
+}
