@@ -210,3 +210,23 @@ function updateProgress() {
     progressText.innerText = `Progress: ${percentage.toFixed(2)}% complete`;
   }
 }
+
+function updateMilestoneMessage() {
+  const now = new Date();
+  const target = new Date('2025-12-31'); // Match your countdown
+  const diff = target - now;
+  const daysLeft = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const messageElement = document.getElementById("milestone-message");
+
+  let msg = "";
+
+  if (daysLeft > 30) msg = "Plenty of time! Keep cruising 🚀";
+  else if (daysLeft > 14) msg = "Halfway there! You got this 🔥";
+  else if (daysLeft > 7) msg = "Just over a week to go 🥳";
+  else if (daysLeft > 1) msg = "So close! Hang tight 😮‍💨";
+  else if (daysLeft === 1) msg = "Tomorrow’s the big day 🎉";
+  else if (daysLeft === 0) msg = "Today's the day! 🎊";
+  else msg = "The countdown has ended! 🎆";
+
+  if (messageElement) messageElement.innerText = msg;
+}
