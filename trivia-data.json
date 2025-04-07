@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What is the capital of India?",
+    "options": ["Mumbai", "New Delhi", "Kolkata", "Bangalore"],
+    "answer": "New Delhi"
+  },
+  {
+    "question": "Which planet is known as the Red Planet?",
+    "options": ["Venus", "Mars", "Jupiter", "Mercury"],
+    "answer": "Mars"
+  },
+  {
+    "question": "Who wrote the national anthem of India?",
+    "options": ["Rabindranath Tagore", "Bankim Chandra Chatterjee", "Mahatma Gandhi", "Jawaharlal Nehru"],
+    "answer": "Rabindranath Tagore"
+  },
+  {
+    "question": "What does 'www' stand for in a website browser?",
+    "options": ["World Wide Web", "World Web Window", "Wide Web World", "Web World Wide"],
+    "answer": "World Wide Web"
+  },
+  {
+    "question": "Which animal is known as the 'Ship of the Desert'?",
+    "options": ["Camel", "Horse", "Elephant", "Ox"],
+    "answer": "Camel"
+  },
+  {
+    "question": "In which continent is the Sahara Desert located?",
+    "options": ["Asia", "Africa", "Australia", "Europe"],
+    "answer": "Africa"
+  },
+  {
+    "question": "Which Indian festival is known as the Festival of Lights?",
+    "options": ["Holi", "Diwali", "Eid", "Pongal"],
+    "answer": "Diwali"
+  },
+  {
+    "question": "What is the smallest prime number?",
+    "options": ["0", "1", "2", "3"],
+    "answer": "2"
+  },
+  {
+    "question": "Which is the largest mammal in the world?",
+    "options": ["Elephant", "Blue Whale", "Giraffe", "Rhino"],
+    "answer": "Blue Whale"
+  },
+  {
+    "question": "What is the boiling point of water at sea level?",
+    "options": ["50°C", "90°C", "100°C", "120°C"],
+    "answer": "100°C"
+  }
+]
