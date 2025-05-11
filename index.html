@@ -5,33 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Abbasali's Tools Hub</title>
   <style>
+    /* Reset and base styles */
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      padding: 0;
       height: 100vh;
+      background-color: #0e0e0e;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0e0e0e; /* Subtle dark background to highlight glow */
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
       position: relative;
-      color: white;
+      overflow: hidden;
     }
 
-    /* Glowing border wrapper */
-    .glow-wrapper::before {
+    /* Animated border using pseudo-element */
+    body::before {
       content: '';
-      position: absolute;
-      top: -4px;
-      left: -4px;
-      right: -4px;
-      bottom: -4px;
-      z-index: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background: conic-gradient(
         from 0deg,
         #f9ce34,
@@ -39,25 +39,15 @@
         #6228d7,
         #f9ce34
       );
-      border-radius: 20px;
-      animation: rotate 6s linear infinite;
-      filter: blur(15px);
-    }
-
-    .glow-wrapper {
-      padding: 3px;
-      border-radius: 20px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .container {
-      background-color: #1a1a1a;
-      padding: 3rem 2rem;
-      border-radius: 16px;
-      text-align: center;
-      position: relative;
-      z-index: 2;
+      z-index: 0;
+      pointer-events: none;
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask-composite: exclude;
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: destination-out;
+      padding: 8px;
+      animation: rotate 10s linear infinite;
+      filter: blur(10px);
     }
 
     @keyframes rotate {
@@ -69,6 +59,15 @@
       }
     }
 
+    /* Container for content */
+    .container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    /* Gradient text */
     h1 {
       font-size: 3em;
       margin-bottom: 1.5em;
@@ -90,6 +89,7 @@
       }
     }
 
+    /* Button styles */
     .button-container {
       display: flex;
       justify-content: center;
@@ -115,17 +115,14 @@
       background-color: #45a049;
       transform: scale(1.05);
     }
-
   </style>
 </head>
 <body>
-  <div class="glow-wrapper">
-    <div class="container">
-      <h1>Welcome to Abbasali's Tools Hub</h1>
-      <div class="button-container">
-        <a href="https://abbasalikachwala.github.io/countdown/" class="button">Countdown Timer</a>
-        <a href="https://abbasalikachwala.github.io/financetracker/" class="button">Finance Tracker</a>
-      </div>
+  <div class="container">
+    <h1>Welcome to Abbasali's Tools Hub</h1>
+    <div class="button-container">
+      <a href="https://abbasalikachwala.github.io/countdown/" class="button">Countdown Timer</a>
+      <a href="https://abbasalikachwala.github.io/financetracker/" class="button">Finance Tracker</a>
     </div>
   </div>
 </body>
