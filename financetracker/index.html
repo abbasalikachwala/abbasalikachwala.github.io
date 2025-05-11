@@ -8,12 +8,15 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="container glass">
+  <header class="tracker-header">
+    <h1>
+      <span class="sficon">&#128176;</span>
+      Finance Tracker
+    </h1>
+  </header>
+  <main class="container glass">
     <!-- Column 1: Input -->
-    <div class="column input-column glass">
-      <h1>
-        <span class="sficon">&#128176;</span> Finance Tracker
-      </h1>
+    <section class="column input-column glass" aria-label="Add expense">
       <form id="expense-form" autocomplete="off">
         <label for="date">Date <span class="optional">(optional)</span></label>
         <input type="date" id="date" autocomplete="off"/>
@@ -23,6 +26,11 @@
 
         <label for="description">Description</label>
         <input type="text" id="description" maxlength="50" required autocomplete="off"/>
+
+        <div id="category-suggestion" class="suggestion-bar" style="display:none;">
+          <span id="suggestion-text"></span>
+          <button type="button" id="apply-suggestion-btn" tabindex="-1">Apply</button>
+        </div>
 
         <label for="category">Category</label>
         <select id="category" required>
@@ -46,18 +54,18 @@
           <option value="Investments">Investments</option>
         </select>
 
-        <button type="submit" id="add-expense-btn">
+        <button type="submit" id="add-expense-btn" disabled>
           <span class="sficon">&#43;</span> Add Expense
         </button>
       </form>
       <div class="presets-section">
         <div class="presets-title">Presets</div>
-        <div class="predefined-buttons"></div>
+        <div class="preset-grid"></div>
       </div>
-    </div>
+    </section>
 
     <!-- Column 2: Table -->
-    <div class="column table-column glass">
+    <section class="column table-column glass" aria-label="Expense list">
       <h2>Expenses</h2>
       <table id="expenses-table">
         <thead>
@@ -65,27 +73,30 @@
             <th>Date</th>
             <th>Description</th>
             <th>Category</th>
+            <th>Sub-category</th>
             <th>Amount</th>
             <th></th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
-    </div>
+    </section>
 
     <!-- Column 3: Summary -->
-    <div class="column summary-column glass">
+    <section class="column summary-column glass" aria-label="Summary">
       <h2>Summary</h2>
       <div id="totals-list"></div>
-      <div class="chart-container">
+      <div class="chart-card">
         <canvas id="category-chart"></canvas>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <button class="floating-save-btn" id="save-to-sheets">
-    <span class="sficon">&#128190;</span> Save to Google Sheets
-  </button>
+  <footer>
+    <button class="save-btn-bottom" id="save-to-sheets">
+      <span class="sficon">&#128190;</span> Save to Google Sheets
+    </button>
+  </footer>
 
   <div id="toast" class="toast"></div>
   <script src="script.js"></script>
