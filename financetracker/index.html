@@ -6,6 +6,7 @@
   <title>Finance Tracker</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 </head>
 <body>
   <div id="password-overlay" class="password-overlay">
@@ -23,7 +24,6 @@
     </h1>
   </header>
   <main class="container glass" style="display:none;">
-    <!-- Column 1: Input -->
     <section class="column input-column glass" aria-label="Add expense">
       <form id="expense-form" autocomplete="off">
         <label for="date">Date <span class="optional">(optional)</span></label>
@@ -71,8 +71,6 @@
         <div class="preset-grid"></div>
       </div>
     </section>
-
-    <!-- Column 2: Table -->
     <section class="column table-column glass" aria-label="Expense list">
       <h2>Expenses</h2>
       <table id="expenses-table">
@@ -88,8 +86,6 @@
         <tbody></tbody>
       </table>
     </section>
-
-    <!-- Column 3: Summary -->
     <section class="column summary-column glass" aria-label="Summary">
       <h2>Summary</h2>
       <div class="chart-card">
@@ -97,13 +93,11 @@
       </div>
     </section>
   </main>
-
   <footer style="display:none;">
     <button class="save-btn-bottom" id="save-to-sheets">
       <span class="sficon">&#128190;</span> Save to Google Sheets
     </button>
   </footer>
-
   <div id="toast" class="toast"></div>
   <script src="script.js"></script>
 </body>
