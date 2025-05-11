@@ -5,59 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Abbasali's Tools Hub</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       padding: 0;
-      background: #282828; /* Dark background to make the glow stand out */
+      height: 100vh;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff;
+      background: #0e0e0e; /* Subtle dark background to highlight glow */
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
       overflow: hidden;
+      position: relative;
+      color: white;
     }
 
-    /* Glowing Border Effect */
-    .glowing-border {
+    /* Glowing border wrapper */
+    .glow-wrapper::before {
+      content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      border: 4px solid transparent;
-      background-image: linear-gradient(white, white),
-                        linear-gradient(to left, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
-      background-origin: border-box;
-      background-clip: content-box, border-box;
-      animation: pulse 3s infinite alternate;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      z-index: 0;
+      background: conic-gradient(
+        from 0deg,
+        #f9ce34,
+        #ee2a7b,
+        #6228d7,
+        #f9ce34
+      );
+      border-radius: 20px;
+      animation: rotate 6s linear infinite;
+      filter: blur(15px);
     }
 
-    @keyframes pulse {
-      0% {
-        background-image: linear-gradient(white, white),
-                          linear-gradient(to left, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
-      }
-      50% {
-        background-image: linear-gradient(white, white),
-                          linear-gradient(to left, #ff7a00, #f9ce34, #9a1c9c, #ff7a00);
-      }
-      100% {
-        background-image: linear-gradient(white, white),
-                          linear-gradient(to left, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
-      }
+    .glow-wrapper {
+      padding: 3px;
+      border-radius: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     .container {
-      position: relative;
+      background-color: #1a1a1a;
+      padding: 3rem 2rem;
+      border-radius: 16px;
       text-align: center;
-      padding: 2rem;
-      z-index: 1; /* Ensure content appears on top of the glowing border */
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes rotate {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     h1 {
       font-size: 3em;
       margin-bottom: 1.5em;
+      background: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7);
+      background-size: 200%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 5s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0%;
+      }
+      100% {
+        background-position: 200%;
+      }
     }
 
     .button-container {
@@ -78,6 +108,7 @@
       background-color: #4CAF50;
       border-radius: 12px;
       transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     }
 
     .button:hover {
@@ -88,18 +119,14 @@
   </style>
 </head>
 <body>
-
-  <!-- Glowing border element -->
-  <div class="glowing-border"></div>
-
-  <!-- Main content -->
-  <div class="container">
-    <h1>Welcome to Abbasali's Tools Hub</h1>
-    <div class="button-container">
-      <a href="https://abbasalikachwala.github.io/countdown/" class="button">Countdown Timer</a>
-      <a href="https://abbasalikachwala.github.io/financetracker/" class="button">Finance Tracker</a>
+  <div class="glow-wrapper">
+    <div class="container">
+      <h1>Welcome to Abbasali's Tools Hub</h1>
+      <div class="button-container">
+        <a href="https://abbasalikachwala.github.io/countdown/" class="button">Countdown Timer</a>
+        <a href="https://abbasalikachwala.github.io/financetracker/" class="button">Finance Tracker</a>
+      </div>
     </div>
   </div>
-
 </body>
 </html>
