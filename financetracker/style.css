@@ -1,12 +1,28 @@
-/* Apple-inspired Finance Tracker UI */
-
-/* Global styles */
 body {
   margin: 0;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: linear-gradient(120deg, #f2f2f7 0%, #e5e5ea 100%);
   color: #1c1c1e;
+}
+
+/* Header with centered title */
+.tracker-header {
+  width: 100%;
+  padding-top: 32px;
+  margin-bottom: 12px;
+}
+.tracker-header h1 {
+  text-align: center;
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #161618;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px 0;
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Glassmorphism Card */
@@ -24,8 +40,8 @@ body {
   justify-content: space-between;
   gap: 36px;
   max-width: 1360px;
-  margin: 48px auto 0 auto;
-  padding: 36px;
+  margin: 0 auto 0 auto;
+  padding: 12px 36px 36px 36px;
 }
 
 .column {
@@ -45,35 +61,21 @@ body {
 
 .table-column {
   max-width: 540px;
+  min-width: 290px;
 }
 
 .summary-column {
   max-width: 400px;
 }
 
-h1, h2 {
+h2 {
+  margin-top: 0;
   font-weight: 700;
   color: #161618;
-  margin-bottom: 8px;
-  letter-spacing: -0.01em;
+  font-size: 1.25rem;
 }
 
-h1 {
-  font-size: 2.2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-}
-
-h2 {
-  font-size: 1.3rem;
-}
-
-.sficon {
-  font-size: 1.3em;
-  vertical-align: -0.15em;
-}
-
+/* --- Inputs & Validation --- */
 label {
   font-weight: 500;
   margin-bottom: 4px;
@@ -88,7 +90,6 @@ label {
   font-weight: 400;
 }
 
-/* Inputs and Selects */
 input, select {
   font-size: 17px;
   padding: 13px 12px;
@@ -109,8 +110,8 @@ input:focus, select:focus {
   background: #fff;
 }
 
-/* Buttons */
-button, .predefined-button {
+/* --- Buttons --- */
+button, .preset-btn {
   font-size: 16px;
   border-radius: 16px;
   font-weight: 600;
@@ -121,7 +122,7 @@ button, .predefined-button {
   background: linear-gradient(90deg, #007aff 80%, #62a2fa 100%);
   color: white;
   box-shadow: 0 2px 12px 0 rgba(0,122,255,0.10);
-  transition: background 0.2s, box-shadow 0.18s, transform 0.15s;
+  transition: background 0.2s, box-shadow 0.18s, transform 0.15s, opacity 0.2s;
   cursor: pointer;
   outline: none;
   display: flex;
@@ -130,54 +131,91 @@ button, .predefined-button {
   gap: 0.5em;
 }
 
-button:hover, .predefined-button:hover {
+.sficon {
+  font-size: 1.3em;
+  vertical-align: -0.15em;
+}
+
+button:disabled,
+.save-btn-bottom:disabled {
+  opacity: 0.45;
+  background: #e1e1e1;
+  color: #b1b1b1;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+button:hover:not(:disabled), .preset-btn:hover {
   background: linear-gradient(90deg, #005cbb 80%, #3d7cd9 100%);
   transform: translateY(-2px) scale(1.02);
   box-shadow: 0 4px 18px 0 rgba(0,122,255,0.13);
 }
 
-button:active, .predefined-button:active {
+button:active:not(:disabled), .preset-btn:active {
   background: linear-gradient(90deg, #005cbb 80%, #3d7cd9 100%);
   transform: scale(0.98);
 }
 
-.predefined-button {
-  background: #f2f4f8;
-  color: #007aff;
-  border: 1px solid #d6e2fa;
-  margin: 6px 8px 0 0;
-  min-width: 90px;
-  padding: 11px 14px;
-  font-size: 15px;
-  box-shadow: none;
-  display: inline-block;
-  transition: all 0.18s;
+/* Save button docked to bottom */
+footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0 0 32px 0;
+  background: none;
+}
+.save-btn-bottom {
+  padding: 15px 38px;
+  border-radius: 22px;
+  font-size: 1.14rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  min-width: 270px;
+  margin: 0;
 }
 
-.predefined-button:hover {
-  background: #eaf1fb;
-  color: #005cbb;
-}
-
+/* --- Presets as Cards in a Grid --- */
 .presets-section {
-  margin-top: 22px;
+  margin-top: 18px;
 }
-
 .presets-title {
   font-size: 1.04rem;
   color: #3a3a3c;
-  margin-bottom: 9px;
+  margin-bottom: 10px;
   font-weight: 500;
   letter-spacing: -0.01em;
 }
 
-.predefined-buttons {
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 12px;
+}
+.preset-btn {
+  background: #f5f8fd;
+  color: #1b2330;
+  border: 1.5px solid #dbebff;
+  border-radius: 18px;
+  padding: 14px 12px;
+  font-size: 1.02rem;
+  font-weight: 500;
+  margin: 0;
+  transition: box-shadow 0.22s, border 0.16s, background 0.18s;
+  box-shadow: 0 2px 8px #e0e7ef6e;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em;
+  flex-direction: column;
+  align-items: flex-start;
+  cursor: pointer;
+}
+.preset-btn:hover {
+  background: #eaf1fb;
+  border-color: #b7d6f6;
+  color: #007aff;
+  box-shadow: 0 4px 18px 0 #b7d6f655;
 }
 
-/* Table styles */
+/* --- Table --- */
 #expenses-table {
   width: 100%;
   border-collapse: separate;
@@ -190,7 +228,7 @@ button:active, .predefined-button:active {
 }
 
 #expenses-table th, #expenses-table td {
-  padding: 14px 12px;
+  padding: 14px 10px;
   text-align: left;
   font-size: 15px;
 }
@@ -231,24 +269,47 @@ button:active, .predefined-button:active {
 }
 .delete-btn:hover { background: #e22b27; }
 
-.chart-container {
+.editable-select {
+  font-size: 14px;
+  padding: 6px 10px;
+  border: 1px solid #d1d1d6;
+  border-radius: 8px;
+  background: #fff;
+  margin: -6px 0;
+  min-width: 120px;
+}
+
+.editable-cell {
+  cursor: pointer;
+  border-radius: 8px;
+  background: #eaf1fb;
+  padding: 2px 6px;
+  transition: background 0.16s;
+}
+.editable-cell:hover {
+  background: #d4e7fa;
+}
+
+/* --- Chart --- */
+.chart-card {
   width: 100%;
-  height: 320px;
-  background: rgba(255,255,255,0.82);
-  border-radius: 20px;
-  box-shadow: 0 2px 10px rgba(183,190,220,0.06);
+  padding: 12px 0;
+  background: rgba(255,255,255,0.90);
+  border-radius: 26px;
+  box-shadow: 0 2px 16px 0 rgba(31,38,135,0.09);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: 8px;
-  padding: 12px 0;
+  border: 1.5px solid #e4e9f2;
 }
-
 #category-chart {
   width: 100% !important;
-  height: 264px !important;
+  height: 270px !important;
+  max-width: 320px;
 }
 
+/* --- Totals --- */
 #totals-list {
   font-size: 1.12rem;
   margin-bottom: 16px;
@@ -256,26 +317,32 @@ button:active, .predefined-button:active {
   font-weight: 500;
 }
 
-.floating-save-btn {
-  position: fixed;
-  left: 50%;
-  bottom: 32px;
-  transform: translateX(-50%);
-  z-index: 200;
-  background: linear-gradient(90deg, #007aff 80%, #62a2fa 100%);
-  padding: 15px 38px;
-  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.13), 0 2px 13px #007aff33;
-  border-radius: 22px;
-  font-size: 1.14rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  opacity: 0.97;
-  transition: background 0.2s, opacity 0.18s;
+.suggestion-bar {
+  background: #eaf1fb;
+  color: #007aff;
+  border-radius: 12px;
+  font-size: 15px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fadeIn 0.33s;
 }
 
-.floating-save-btn:hover {
-  opacity: 1;
-  background: linear-gradient(90deg, #005cbb 80%, #3d7cd9 100%);
+.suggestion-bar button {
+  background: #007aff;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 4px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.suggestion-bar button:hover {
+  background: #005cbb;
 }
 
 /* Toast notification */
@@ -296,7 +363,6 @@ button:active, .predefined-button:active {
   opacity: 0;
   transition: visibility 0s, opacity 0.33s cubic-bezier(.4,0,.2,1);
 }
-
 .toast.show {
   visibility: visible;
   opacity: 1;
@@ -304,13 +370,14 @@ button:active, .predefined-button:active {
 
 /* Responsive design */
 @media (max-width: 1200px) {
-  .container { flex-direction: column; gap: 24px; padding: 18px;}
-  .column { max-width: 100%; padding: 24px 10px; min-height: 360px; }
-  .floating-save-btn { bottom: 18px; }
+  .container { flex-direction: column; gap: 20px; padding: 6px;}
+  .column { max-width: 100%; padding: 22px 3px; min-height: 360px; }
+  .save-btn-bottom { min-width: 170px; }
 }
 @media (max-width: 700px) {
-  .container { padding: 8px; }
-  .column { padding: 13px 2px; }
-  h1 { font-size: 1.3rem; }
-  .floating-save-btn { font-size: 1rem; padding: 13px 14px; }
+  .container { padding: 2px; }
+  .column { padding: 9px 2px; }
+  .tracker-header h1 { font-size: 1.4rem;}
+  .save-btn-bottom { font-size: 1rem; padding: 13px 8px; }
+  .preset-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
 }
