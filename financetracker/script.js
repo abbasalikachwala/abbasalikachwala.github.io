@@ -97,27 +97,30 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Predefined buttons logic
-  const predefined = [
-    { name: "Rent", amount: 1000, category: "Needs" },
-    { name: "Netflix", amount: 15, category: "Wants" },
-    { name: "Credit Card", amount: 300, category: "Debt" },
-  ];
+  const predefinedExpenses = [
+  { description: 'Rent', amount: 830, category: 'Housing', subcategory: 'Needs' },
+  { description: '2degrees', amount: 100.5, category: 'Utilities', subcategory: 'Needs' },
+  { description: 'Kernel', amount: 200, category: 'Investments', subcategory: 'Investments' },
+  { description: 'RaboBank Gold', amount: 100, category: 'Investments', subcategory: 'Investments' },
+  { description: 'RaboBank Savings', amount: 50, category: 'Savings', subcategory: 'Savings' },
+  { description: 'ASB Credit Card', amount: 123.62, category: 'Debt Repayment', subcategory: 'Wants' },
+  { description: 'ASB Spending', amount: 100, category: 'Entertainment', subcategory: 'Wants' },
+  { description: 'Car Insurance', amount: 41.75, category: 'Insurance', subcategory: 'Needs' },
+  { description: 'Lotto Syndicate', amount: 4, category: 'Gambling', subcategory: 'Wants' }
+];
 
-  const buttonContainer = document.getElementById("predefined-buttons");
-  predefined.forEach(item => {
-    const btn = document.createElement("button");
-    btn.textContent = item.name;
-    btn.addEventListener("click", () => {
-      expenses.push({
-        amount: item.amount,
-        description: item.name,
-        category: item.category,
-        date: new Date()
-      });
-      updateTable();
-      updateChart();
-      updateTotals();
-    });
-    buttonContainer.appendChild(btn);
-  });
+predefinedExpenses.forEach(exp => {
+  const btn = document.createElement('button');
+  btn.textContent = exp.description;
+  btn.classList.add('predefined-button');
+  btn.onclick = () => {
+    document.getElementById('description').value = exp.description;
+    document.getElementById('amount').value = exp.amount;
+    document.getElementById('category').value = exp.category;
+    document.getElementById('subcategory').value = exp.subcategory;
+
+    // Optionally, auto-submit:
+    // document.getElementById('add-expense-btn').click();
+  };
+  document.getElementById('predefined-buttons').appendChild(btn);
 });
