@@ -135,3 +135,9 @@ button:hover {
     max-width: 100%;
   }
 }
+
+.form-row {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
