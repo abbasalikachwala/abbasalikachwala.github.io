@@ -1,71 +1,123 @@
-let categoryMap = {}; // Memory for learned categories
-let sessionExpenses = [];
+// script.js
 
-const form = document.getElementById('expense-form');
-const expensesList = document.getElementById('session-expenses');
-const pieChartCanvas = document.getElementById('pieChart');
-let pieChart;
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("expense-form");
+  const amountInput = document.getElementById("amount");
+  const descriptionInput = document.getElementById("description");
+  const categoryInput = document.getElementById("category");
+  const expensesTable = document.getElementById("expenses-table");
+  const totalsContainer = document.getElementById("totals");
+  const ctx = document.getElementById("category-chart").getContext("2d");
+  let chart;
 
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
+  const expenses = [];
 
-  const amount = parseFloat(document.getElementById('amount').value);
-  const description = document.getElementById('description').value.trim();
-  const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
-
-  if (!amount || !description) return;
-
-  let category = categoryMap[description];
-
-  if (!category) {
-    category = prompt(`What category does "${description}" belong to? (e.g., Needs > Groceries)`);
-    if (!category) return;
-    categoryMap[description] = category;
+  function formatDate(date) {
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    }).replace(/ /g, " ");
   }
 
-  const expense = { amount, description, date, category };
-  sessionExpenses.push(expense);
-  updateUI();
-});
+  function updateTable() {
+    expensesTable.innerHTML = "";
+    expenses.forEach((exp, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${exp.amount.toFixed(2)}</td>
+        <td>${exp.description}</td>
+        <td>${exp.category}</td>
+        <td>${formatDate(new Date(exp.date))}</td>
+        <td><button onclick="deleteExpense(${index})">Delete</button></td>
+      `;
+      expensesTable.appendChild(row);
+    });
+  }
 
-function updateUI() {
-  expensesList.innerHTML = '';
-  const totals = {};
+  function updateChart() {
+    const totals = {};
+    expenses.forEach(({ category, amount }) => {
+      totals[category] = (totals[category] || 0) + amount;
+    });
 
-  sessionExpenses.forEach((expense, index) => {
-    const div = document.createElement('div');
-    div.className = 'expense-item';
-    div.innerHTML = `
-      <span>${expense.date} - $${expense.amount} - ${expense.description} [${expense.category}]</span>
-      <button onclick="deleteExpense(${index})">🗑️</button>
-    `;
-    expensesList.appendChild(div);
+    const data = {
+      labels: Object.keys(totals),
+      datasets: [{
+        label: "Spending by Category",
+        data: Object.values(totals),
+        backgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#4BC0C0",
+          "#9966FF",
+          "#FF9F40"
+        ]
+      }]
+    };
 
-    const mainCategory = expense.category.split('>')[0].trim();
-    totals[mainCategory] = (totals[mainCategory] || 0) + expense.amount;
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: "pie",
+      data: data
+    });
+  }
+
+  function updateTotals() {
+    const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+    totalsContainer.innerHTML = `<h3>Total: $${totalAmount.toFixed(2)}</h3>`;
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const amount = parseFloat(amountInput.value);
+    const description = descriptionInput.value.trim();
+    const category = categoryInput.value.trim() || "Uncategorised";
+    const date = new Date();
+
+    if (!isNaN(amount) && description) {
+      expenses.push({ amount, description, category, date });
+      updateTable();
+      updateChart();
+      updateTotals();
+
+      // Clear form
+      amountInput.value = "";
+      descriptionInput.value = "";
+      categoryInput.value = "";
+    }
   });
 
-  drawPieChart(totals);
-}
-
-function deleteExpense(index) {
-  sessionExpenses.splice(index, 1);
-  updateUI();
-}
-
-function drawPieChart(totals) {
-  const data = {
-    labels: Object.keys(totals),
-    datasets: [{
-      label: 'Expenses by Category',
-      data: Object.values(totals),
-      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#66bb6a', '#9575cd'],
-    }]
+  window.deleteExpense = function(index) {
+    expenses.splice(index, 1);
+    updateTable();
+    updateChart();
+    updateTotals();
   };
 
-  if (pieChart) pieChart.destroy();
-  pieChart = new Chart(pieChartCanvas, {
-    type: 'pie',
-    data,
+  // Predefined buttons logic
+  const predefined = [
+    { name: "Rent", amount: 1000, category: "Needs" },
+    { name: "Netflix", amount: 15, category: "Wants" },
+    { name: "Credit Card", amount: 300, category: "Debt" },
+  ];
+
+  const buttonContainer = document.getElementById("predefined-buttons");
+  predefined.forEach(item => {
+    const btn = document.createElement("button");
+    btn.textContent = item.name;
+    btn.addEventListener("click", () => {
+      expenses.push({
+        amount: item.amount,
+        description: item.name,
+        category: item.category,
+        date: new Date()
+      });
+      updateTable();
+      updateChart();
+      updateTotals();
+    });
+    buttonContainer.appendChild(btn);
   });
-}
+});
