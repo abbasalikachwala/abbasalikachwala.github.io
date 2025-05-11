@@ -22,8 +22,19 @@ h1, #countdown {
     display: inline-block;
     padding: 15px 30px;
     border-radius: 10px;
-    background-color: rgba(255, 255, 255, 0.2);
     margin: 5px;
+}
+
+#countdown {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 5px 10px;
+    border-radius: 5px; 
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.time-part {
+  padding: 3px 5px;
 }
 
 #calendar {
