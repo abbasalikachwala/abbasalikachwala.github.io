@@ -140,3 +140,4 @@ predefinedExpenses.forEach(exp => {
   };
   document.getElementById('predefined-buttons').appendChild(btn);
 });
+});
