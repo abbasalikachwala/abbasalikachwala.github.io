@@ -116,11 +116,27 @@ predefinedExpenses.forEach(exp => {
   btn.onclick = () => {
     document.getElementById('description').value = exp.description;
     document.getElementById('amount').value = exp.amount;
-    document.getElementById('category').value = exp.category;
-    document.getElementById('subcategory').value = exp.subcategory;
 
-    // Optionally, auto-submit:
-    // document.getElementById('add-expense-btn').click();
+    const categorySelect = document.getElementById('category');
+    const subcategorySelect = document.getElementById('subcategory');
+
+    // Add new category if not present
+    if (![...categorySelect.options].some(o => o.value === exp.category)) {
+      const newOpt = new Option(exp.category, exp.category);
+      categorySelect.add(newOpt);
+    }
+
+    // Add new subcategory if not present
+    if (![...subcategorySelect.options].some(o => o.value === exp.subcategory)) {
+      const newOpt = new Option(exp.subcategory, exp.subcategory);
+      subcategorySelect.add(newOpt);
+    }
+
+    categorySelect.value = exp.category;
+    subcategorySelect.value = exp.subcategory;
+
+    // Auto-submit the form
+    document.getElementById('add-expense-btn').click();
   };
   document.getElementById('predefined-buttons').appendChild(btn);
 });
