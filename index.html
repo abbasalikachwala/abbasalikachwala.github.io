@@ -8,58 +8,51 @@
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7); /* Instagram colors */
+      background: #282828; /* Dark background to make the glow stand out */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      color: #fff;
-      overflow: hidden; /* To prevent scrollbars due to animation */
+      overflow: hidden;
     }
 
-    /* Fluid animation styling */
-    .fluid {
+    /* Glowing Border Effect */
+    .glowing-border {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 200px;
-      height: 200px;
-      background-color: #fff;
-      border-radius: 50%;
-      animation: fluidMovement 5s infinite ease-in-out;
-      z-index: -1; /* Place the fluid behind the text and buttons */
-      transform: translate(-50%, -50%);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 4px solid transparent;
+      background-image: linear-gradient(white, white),
+                        linear-gradient(to left, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+      background-origin: border-box;
+      background-clip: content-box, border-box;
+      animation: pulse 3s infinite alternate;
     }
 
-    @keyframes fluidMovement {
+    @keyframes pulse {
       0% {
-        transform: scale(1) translate(0, 0);
-        background-color: #f9ce34;
-      }
-      25% {
-        transform: scale(1.2) translate(-30px, 30px);
-        background-color: #ee2a7b;
+        background-image: linear-gradient(white, white),
+                          linear-gradient(to left, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
       }
       50% {
-        transform: scale(1) translate(30px, -30px);
-        background-color: #6228d7;
-      }
-      75% {
-        transform: scale(1.2) translate(-20px, 20px);
-        background-color: #f9ce34;
+        background-image: linear-gradient(white, white),
+                          linear-gradient(to left, #ff7a00, #f9ce34, #9a1c9c, #ff7a00);
       }
       100% {
-        transform: scale(1) translate(0, 0);
-        background-color: #ee2a7b;
+        background-image: linear-gradient(white, white),
+                          linear-gradient(to left, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
       }
     }
 
-    /* Main container */
     .container {
+      position: relative;
       text-align: center;
       padding: 2rem;
-      z-index: 1; /* Ensures text and buttons are above the animation */
+      z-index: 1; /* Ensure content appears on top of the glowing border */
     }
 
     h1 {
@@ -91,11 +84,13 @@
       background-color: #45a049;
       transform: scale(1.05);
     }
+
   </style>
 </head>
 <body>
-  <!-- Fluid animation element -->
-  <div class="fluid"></div>
+
+  <!-- Glowing border element -->
+  <div class="glowing-border"></div>
 
   <!-- Main content -->
   <div class="container">
@@ -105,5 +100,6 @@
       <a href="https://abbasalikachwala.github.io/financetracker/" class="button">Finance Tracker</a>
     </div>
   </div>
+
 </body>
 </html>
