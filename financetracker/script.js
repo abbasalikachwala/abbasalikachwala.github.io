@@ -1,4 +1,39 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // --- Password Protection ---
+  const PASSWORD = "admin@1212";
+  const overlay = document.getElementById("password-overlay");
+  const header = document.querySelector(".tracker-header");
+  const main = document.querySelector("main");
+  const footer = document.querySelector("footer");
+  const pwInput = document.getElementById("site-password");
+  const pwBtn = document.getElementById("submit-password");
+  const pwErr = document.getElementById("password-error");
+
+  function unlockSite() {
+    overlay.style.display = "none";
+    header.style.display = "";
+    main.style.display = "";
+    footer.style.display = "";
+    setDefaultDateToday();
+    descriptionInput.focus();
+  }
+
+  pwBtn.onclick = tryPassword;
+  pwInput.onkeydown = e => {
+    if (e.key === "Enter") tryPassword();
+  };
+
+  function tryPassword() {
+    if (pwInput.value === PASSWORD) {
+      unlockSite();
+    } else {
+      pwErr.textContent = "Incorrect password. Try again.";
+      pwInput.value = "";
+      pwInput.focus();
+    }
+  }
+  // --- End Password Protection ---
+
   // Elements
   const form = document.getElementById("expense-form");
   const amountInput = document.getElementById("amount");
@@ -7,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const subcategorySelect = document.getElementById("subcategory");
   const dateInput = document.getElementById("date");
   const expensesTableBody = document.querySelector("#expenses-table tbody");
-  const totalsList = document.getElementById("totals-list");
   const ctx = document.getElementById("category-chart").getContext("2d");
   const saveBtn = document.getElementById("save-to-sheets");
   const toast = document.getElementById("toast");
@@ -19,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const addExpenseBtn = document.getElementById("add-expense-btn");
 
   // Google Sheets WebApp URL
-  const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxbNt1VZwrvXZ3lycjMkL2PHSxqZXkgDFy2MlkpJaNuplrcx8-Uvv-OpEvQCGZlQ_mahg/exec"; // Replace with your Apps Script URL
+  const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxbNt1VZwrvXZ3lycjMkL2PHSxqZXkgDFy2MlkpJaNuplrcx8-Uvv-OpEvQCGZlQ_mahg/exec";
 
   let chart;
   let expenses = [];
@@ -70,7 +104,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Helper: get available options for categories/subcategories
   function getCategoryOptions() {
     return Array.from(categorySelect.options)
       .map(opt => opt.value)
@@ -108,7 +141,6 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>${exp.description}</td>
         <td></td>
         <td></td>
-        <td>$${parseFloat(exp.amount).toFixed(2)}</td>
         <td>
           <button class="delete-btn" title="Delete" aria-label="Delete" tabindex="0">&#128465;</button>
         </td>
@@ -123,7 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           updateTable();
           updateChart();
-          updateTotals();
         }, 210);
       };
       expensesTableBody.appendChild(row);
@@ -133,9 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Inline editing for category/subcategory cells
   function editCellDropdown(cell, type, idx, currentValue) {
-    // Avoid multiple dropdowns
     if (cell.querySelector("select")) return;
-
     const select = document.createElement("select");
     select.className = "editable-select";
     let options = type === "category" ? getCategoryOptions() : getSubcategoryOptions();
@@ -146,85 +175,67 @@ document.addEventListener("DOMContentLoaded", () => {
       select.appendChild(option);
     });
     select.value = currentValue;
-
     select.onchange = () => {
       cell.textContent = select.value;
       expenses[idx][type] = select.value;
       updateChart();
-      updateTotals();
       showToast(`${type.charAt(0).toUpperCase()+type.slice(1)} updated`);
     };
-    select.onblur = () => cell.textContent = select.value; // Restore text if focus lost
-
+    select.onblur = () => cell.textContent = select.value;
     cell.textContent = "";
     cell.appendChild(select);
     select.focus();
   }
 
-  // Update Pie Chart (donut, pretty, Apple-style)
+  // Update Bar Chart (category counts, not amounts)
   function updateChart() {
-    const totals = {};
-    expenses.forEach(({ category, amount }) => {
-      if (!totals[category]) totals[category] = 0;
-      totals[category] += parseFloat(amount);
+    const counts = {};
+    expenses.forEach(({ category }) => {
+      counts[category] = (counts[category] || 0) + 1;
     });
     const data = {
-      labels: Object.keys(totals),
+      labels: Object.keys(counts),
       datasets: [{
-        label: "Spending by Category",
-        data: Object.values(totals),
+        label: "Number of Expenses",
+        data: Object.values(counts),
         backgroundColor: [
           "#007aff", "#34c759", "#ff9500", "#ff2d55", "#af52de", "#5ac8fa", "#ffd60a", "#d1d1d6"
         ],
-        borderWidth: 2.2,
-        borderColor: "#fff",
-        hoverBorderColor: "#007aff",
-        cutout: "60%" // donut
+        borderRadius: 12,
+        barPercentage: 0.6,
+        categoryPercentage: 0.6,
       }]
     };
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
-      type: "doughnut",
+      type: "bar",
       data: data,
       options: {
+        indexAxis: 'y',
         responsive: true,
         plugins: {
-          legend: {
-            position: "bottom",
-            labels: { color: "#212", font: { size: 15 } }
-          },
+          legend: { display: false },
           tooltip: {
             callbacks: {
               label: function(context) {
-                const label = context.label || "";
-                const value = context.raw !== undefined ? context.raw : "";
-                return label + ": $" + value.toFixed(2);
+                return ` ${context.dataset.label}: ${context.raw}`;
               }
             }
           }
         },
-        animation: { animateRotate: true, animateScale: true }
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: { color: "#222" },
+            grid: { color: "#e4e9f2" }
+          },
+          y: {
+            ticks: { color: "#222" },
+            grid: { display: false }
+          }
+        }
       }
     });
-  }
-
-  // Update Totals List
-  function updateTotals() {
-    const totals = {};
-    let grandTotal = 0;
-    expenses.forEach(({ category, amount }) => {
-      if (!totals[category]) totals[category] = 0;
-      totals[category] += parseFloat(amount);
-      grandTotal += parseFloat(amount);
-    });
-    totalsList.innerHTML = `
-      <div><strong>Total:</strong> $${grandTotal.toFixed(2)}</div>
-      <ul style="padding-left: 1em; margin-top: 9px;">
-        ${Object.keys(totals).map(cat =>
-          `<li>${cat}: $${totals[cat].toFixed(2)}</li>`
-        ).join("")}
-      </ul>
-    `;
   }
 
   // Add Expense (with animation)
@@ -232,7 +243,6 @@ document.addEventListener("DOMContentLoaded", () => {
     expenses.push({ amount, description, category, subcategory, date });
     updateTable();
     updateChart();
-    updateTotals();
   }
 
   // Send entry to Google Sheets
@@ -270,12 +280,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Smart suggestion logic
   function getSuggestion(desc) {
     if (!desc) return null;
-    // Find past entries with matching or very similar description
     const matches = expenses.filter(e =>
       e.description.trim().toLowerCase() === desc.trim().toLowerCase()
     );
     if (matches.length) {
-      // Suggest the most common category/subcategory combo
       const freq = {};
       matches.forEach(e => {
         const key = `${e.category}|${e.subcategory}`;
@@ -348,19 +356,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "preset-btn";
-    btn.innerHTML = `
-      <span style="font-size:1.1em;font-weight:600;">${exp.description}</span>
-      <span style="margin-top:2px;font-size:1em;color:#007aff;">$${exp.amount}</span>
-      <span style="font-size:0.97em;color:#888;">${exp.category} › ${exp.subcategory}</span>
-    `;
+    btn.innerHTML = `<span>${exp.description}</span>`;
     btn.onclick = () => {
-      descriptionInput.value = exp.description;
-      amountInput.value = exp.amount;
-      categorySelect.value = exp.category;
-      subcategorySelect.value = exp.subcategory;
-      dateInput.value = todayStr();
-      suggestionBar.style.display = "none";
-      validateForm();
+      // Immediately add expense (one-click)
+      const entry = {
+        amount: exp.amount,
+        description: exp.description,
+        category: exp.category,
+        subcategory: exp.subcategory,
+        date: todayStr()
+      };
+      addExpense(entry);
+      showToast("Preset added!");
+      sendToGoogleSheets();
     };
     presetGrid.appendChild(btn);
   });
@@ -373,15 +381,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Set default date to today for new entries
   function setDefaultDateToday() {
     dateInput.value = todayStr();
   }
-  setDefaultDateToday();
 
-  // Initial render
-  updateTable();
-  updateChart();
-  updateTotals();
-  validateForm();
+  // Initial render (site is locked until password entered)
 });
