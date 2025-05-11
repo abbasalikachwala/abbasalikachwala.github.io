@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Abbasali's Tools Hub</title>
+  <title>My Tools Hub</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(to right, #1e3c72, #2a5298);
-      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1f4037, #99f2c8); /* New vibrant gradient */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -19,35 +19,47 @@
 
     .container {
       text-align: center;
+      padding: 2rem;
     }
 
     h1 {
       font-size: 3em;
-      margin-bottom: 1em;
+      margin-bottom: 1.5em;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
     }
 
     .button {
       display: inline-block;
-      padding: 1em 2em;
-      margin: 1em;
+      min-width: 220px; /* Make buttons equal in width */
+      text-align: center;
+      padding: 1em;
       font-size: 1.2em;
       text-decoration: none;
       color: #fff;
       background-color: #4CAF50;
-      border-radius: 10px;
-      transition: background-color 0.3s ease;
+      border-radius: 12px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     .button:hover {
       background-color: #45a049;
+      transform: scale(1.05);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Welcome to Abbasali's Tools Hub</h1>
-    <a href="https://abbasalikachwala.github.io/countdown/" class="button">Countdown Timer</a>
-    <a href="https://abbasalikachwala.github.io/financetracker/" class="button">Finance Tracker</a>
+    <h1>Welcome to My Tools Hub</h1>
+    <div class="button-container">
+      <a href="https://yourusername.github.io/countdown-timer" class="button">Countdown Timer</a>
+      <a href="https://yourusername.github.io/finance-tracker" class="button">Finance Tracker</a>
+    </div>
   </div>
 </body>
 </html>
