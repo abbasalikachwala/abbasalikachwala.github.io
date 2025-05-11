@@ -100,6 +100,13 @@
         } else {
           const cellDiv = document.createElement("div");
           cellDiv.textContent = date;
+          if (
+  year === targetDate.getFullYear() &&
+  month === targetDate.getMonth() &&
+  date === targetDate.getDate()
+) {
+  cell.classList.add("target");
+}
           // Determine cell classes
           if (
             year === today.getFullYear() &&
