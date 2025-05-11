@@ -8,18 +8,58 @@
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7); /* New vibrant gradient */
+      background: linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7); /* Instagram colors */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       color: #fff;
+      overflow: hidden; /* To prevent scrollbars due to animation */
     }
 
+    /* Fluid animation styling */
+    .fluid {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 200px;
+      height: 200px;
+      background-color: #fff;
+      border-radius: 50%;
+      animation: fluidMovement 5s infinite ease-in-out;
+      z-index: -1; /* Place the fluid behind the text and buttons */
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes fluidMovement {
+      0% {
+        transform: scale(1) translate(0, 0);
+        background-color: #f9ce34;
+      }
+      25% {
+        transform: scale(1.2) translate(-30px, 30px);
+        background-color: #ee2a7b;
+      }
+      50% {
+        transform: scale(1) translate(30px, -30px);
+        background-color: #6228d7;
+      }
+      75% {
+        transform: scale(1.2) translate(-20px, 20px);
+        background-color: #f9ce34;
+      }
+      100% {
+        transform: scale(1) translate(0, 0);
+        background-color: #ee2a7b;
+      }
+    }
+
+    /* Main container */
     .container {
       text-align: center;
       padding: 2rem;
+      z-index: 1; /* Ensures text and buttons are above the animation */
     }
 
     h1 {
@@ -36,7 +76,7 @@
 
     .button {
       display: inline-block;
-      min-width: 220px; /* Make buttons equal in width */
+      min-width: 220px;
       text-align: center;
       padding: 1em;
       font-size: 1.2em;
@@ -54,6 +94,10 @@
   </style>
 </head>
 <body>
+  <!-- Fluid animation element -->
+  <div class="fluid"></div>
+
+  <!-- Main content -->
   <div class="container">
     <h1>Welcome to Abbasali's Tools Hub</h1>
     <div class="button-container">
