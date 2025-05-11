@@ -1,7 +1,7 @@
 // ====== CONFIGURATION ======
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQgRdOL5znMA0GFN-bKDf9YpQh7wpi7A4kASDIvN6qi1FqznKHTTTHiF3K1OrVWXy0/exec"; // <-- Paste your Web App URL here!
 const SECRET_TOKEN = "qewzaq-6Hyrda-xejtys"; // <-- Use same as in Apps Script!
-const PASSWORD_HASH = "09d06d2a4c98e497c06ee3d3e95b6a1f930f05b2a1ce6b3c53c3e5e2a5afc8d0";
+const PASSWORD_HASH = "b40f795cb9d5f6500662cd70fefac144f3abdd7e93306557953af1f246ce374b";
 // ==========================
 
 document.addEventListener("DOMContentLoaded", () => {
