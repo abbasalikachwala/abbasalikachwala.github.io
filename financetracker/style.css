@@ -6,7 +6,17 @@ body {
   color: #1c1c1e;
 }
 
-/* Header with centered title */
+.visually-hidden {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .tracker-header {
   width: 100%;
   padding-top: 32px;
@@ -24,8 +34,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-
-/* Glassmorphism Card */
 .glass {
   background: rgba(255,255,255,0.75);
   box-shadow: 0 8px 32px 0 rgba(31,38,135,0.11);
@@ -38,14 +46,14 @@ body {
 .container {
   display: flex;
   justify-content: space-between;
-  gap: 36px;
-  max-width: 1360px;
+  gap: 60px;
+  max-width: 1700px;
   margin: 0 auto 0 auto;
   padding: 12px 36px 36px 36px;
 }
 
 .column {
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
   padding: 40px 28px 32px 28px;
   display: flex;
@@ -56,14 +64,12 @@ body {
 }
 
 .input-column {
-  max-width: 380px;
+  max-width: 400px;
 }
-
 .table-column {
-  max-width: 540px;
-  min-width: 290px;
+  max-width: 760px;
+  min-width: 380px;
 }
-
 .summary-column {
   max-width: 400px;
 }
@@ -83,13 +89,11 @@ label {
   display: block;
   font-size: 15px;
 }
-
 .optional {
   color: #a1a1aa;
   font-size: 0.93em;
   font-weight: 400;
 }
-
 input, select {
   font-size: 17px;
   padding: 13px 12px;
@@ -104,7 +108,6 @@ input, select {
   outline: none;
   appearance: none;
 }
-
 input:focus, select:focus {
   border-color: #007aff;
   background: #fff;
@@ -122,7 +125,7 @@ button, .preset-btn {
   background: linear-gradient(90deg, #007aff 80%, #62a2fa 100%);
   color: white;
   box-shadow: 0 2px 12px 0 rgba(0,122,255,0.10);
-  transition: background 0.2s, box-shadow 0.18s, transform 0.15s, opacity 0.2s;
+  transition: background 0.2s, box-shadow 0.18s, transform 0.15s, opacity 0.2s, color 0.2s;
   cursor: pointer;
   outline: none;
   display: flex;
@@ -130,12 +133,10 @@ button, .preset-btn {
   justify-content: center;
   gap: 0.5em;
 }
-
 .sficon {
   font-size: 1.3em;
   vertical-align: -0.15em;
 }
-
 button:disabled,
 .save-btn-bottom:disabled {
   opacity: 0.45;
@@ -144,15 +145,14 @@ button:disabled,
   box-shadow: none;
   cursor: not-allowed;
 }
-
 button:hover:not(:disabled), .preset-btn:hover {
-  background: linear-gradient(90deg, #005cbb 80%, #3d7cd9 100%);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 4px 18px 0 rgba(0,122,255,0.13);
+  background: #eaf1fb;
+  color: #007aff;
+  box-shadow: 0 4px 18px 0 #b7d6f655;
 }
-
 button:active:not(:disabled), .preset-btn:active {
-  background: linear-gradient(90deg, #005cbb 80%, #3d7cd9 100%);
+  background: #d4e7fa;
+  color: #007aff;
   transform: scale(0.98);
 }
 
@@ -186,27 +186,28 @@ footer {
   font-weight: 500;
   letter-spacing: -0.01em;
 }
-
 .preset-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
 }
 .preset-btn {
   background: #f5f8fd;
   color: #1b2330;
   border: 1.5px solid #dbebff;
   border-radius: 18px;
-  padding: 14px 12px;
-  font-size: 1.02rem;
-  font-weight: 500;
+  padding: 21px 12px;
+  font-size: 1.11rem;
+  font-weight: 600;
   margin: 0;
-  transition: box-shadow 0.22s, border 0.16s, background 0.18s;
+  transition: box-shadow 0.22s, border 0.16s, background 0.18s, color 0.18s;
   box-shadow: 0 2px 8px #e0e7ef6e;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  text-align: center;
+  min-height: 50px;
 }
 .preset-btn:hover {
   background: #eaf1fb;
@@ -261,7 +262,7 @@ footer {
   color: #fff;
   border: none;
   border-radius: 12px;
-  padding: 5px 14px;
+  padding: 7px 14px;
   font-size: 15px;
   cursor: pointer;
   box-shadow: 0 1px 4px rgba(255,59,48,0.11);
@@ -278,7 +279,6 @@ footer {
   margin: -6px 0;
   min-width: 120px;
 }
-
 .editable-cell {
   cursor: pointer;
   border-radius: 8px;
@@ -293,8 +293,8 @@ footer {
 /* --- Chart --- */
 .chart-card {
   width: 100%;
-  padding: 12px 0;
-  background: rgba(255,255,255,0.90);
+  padding: 30px 0 10px 0;
+  background: rgba(255,255,255,0.92);
   border-radius: 26px;
   box-shadow: 0 2px 16px 0 rgba(31,38,135,0.09);
   display: flex;
@@ -305,47 +305,66 @@ footer {
 }
 #category-chart {
   width: 100% !important;
-  height: 270px !important;
-  max-width: 320px;
+  height: 260px !important;
+  max-width: 340px;
 }
 
-/* --- Totals --- */
-#totals-list {
-  font-size: 1.12rem;
-  margin-bottom: 16px;
-  color: #2c2c2e;
-  font-weight: 500;
-}
-
-.suggestion-bar {
-  background: #eaf1fb;
-  color: #007aff;
-  border-radius: 12px;
-  font-size: 15px;
-  margin-bottom: 8px;
-  padding: 8px 12px;
+/* --- Password Overlay --- */
+.password-overlay {
+  position: fixed;
+  z-index: 99999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #dbeafe 0%, #f1f5f9 100%);
   display: flex;
   align-items: center;
-  gap: 10px;
-  animation: fadeIn 0.33s;
+  justify-content: center;
 }
-
-.suggestion-bar button {
-  background: #007aff;
-  color: #fff;
+.password-panel {
+  padding: 36px 26px 30px 26px;
+  background: white;
+  border-radius: 22px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.09);
+  min-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.password-panel h2 {
+  margin: 0 0 18px 0;
+}
+.password-panel input[type="password"] {
+  font-size: 1.13rem;
+  padding: 10px 13px;
+  border: 1.2px solid #cbd5e1;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  width: 100%;
+  background: #f1f5f9;
+}
+.password-panel button {
+  background: linear-gradient(90deg, #007aff 80%, #62a2fa 100%);
+  color: white;
   border: none;
-  border-radius: 9px;
-  padding: 4px 12px;
-  font-size: 14px;
+  border-radius: 14px;
+  font-size: 1.07rem;
+  font-weight: 700;
+  padding: 12px 25px;
   cursor: pointer;
-  transition: background 0.18s;
+  margin-bottom: 7px;
+  margin-top: 2px;
+  transition: background 0.22s;
+}
+.password-panel button:hover {
+  background: linear-gradient(90deg, #005cbb 80%, #3d7cd9 100%);
+}
+.password-error {
+  color: #ff3b30;
+  font-size: 1rem;
+  margin-top: 3px;
+  min-height: 1.2em;
 }
 
-.suggestion-bar button:hover {
-  background: #005cbb;
-}
-
-/* Toast notification */
+/* --- Toast notification --- */
 .toast {
   visibility: hidden;
   min-width: 240px;
@@ -369,10 +388,14 @@ footer {
 }
 
 /* Responsive design */
+@media (max-width: 1700px) {
+  .container { max-width: 98vw; }
+}
 @media (max-width: 1200px) {
   .container { flex-direction: column; gap: 20px; padding: 6px;}
   .column { max-width: 100%; padding: 22px 3px; min-height: 360px; }
   .save-btn-bottom { min-width: 170px; }
+  .table-column { max-width: 100vw; }
 }
 @media (max-width: 700px) {
   .container { padding: 2px; }
@@ -380,4 +403,5 @@ footer {
   .tracker-header h1 { font-size: 1.4rem;}
   .save-btn-bottom { font-size: 1rem; padding: 13px 8px; }
   .preset-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+  .password-panel { min-width: 95vw; }
 }
