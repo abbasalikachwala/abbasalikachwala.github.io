@@ -1,66 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Finance Tracker</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-  <div class="container">
+  <div class="container glass">
     <!-- Column 1: Input -->
-    <div class="column input-column">
-      <h1>Finance Tracker</h1>
-      <form id="expense-form">
-        <label for="amount">Amount:</label>
-        <input type="number" id="amount" required />
+    <div class="column input-column glass">
+      <h1>
+        <span class="sficon">&#128176;</span> Finance Tracker
+      </h1>
+      <form id="expense-form" autocomplete="off">
+        <label for="date">Date <span class="optional">(optional)</span></label>
+        <input type="date" id="date" autocomplete="off"/>
 
-        <label for="description">Description:</label>
-        <input type="text" id="description" required />
+        <label for="amount">Amount</label>
+        <input type="number" id="amount" min="0" step="0.01" required autocomplete="off"/>
 
-        <label for="date">Date (optional):</label>
-        <input type="date" id="date" />
+        <label for="description">Description</label>
+        <input type="text" id="description" maxlength="50" required autocomplete="off"/>
 
-        <button type="submit" id="add-expense-btn">Add Expense</button>
+        <label for="category">Category</label>
+        <select id="category" required>
+          <option value="">Select category</option>
+          <option value="Housing">Housing</option>
+          <option value="Utilities">Utilities</option>
+          <option value="Investments">Investments</option>
+          <option value="Savings">Savings</option>
+          <option value="Debt Repayment">Debt Repayment</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Insurance">Insurance</option>
+          <option value="Gambling">Gambling</option>
+        </select>
 
-        <div class="form-row">
-  <label for="category">Category:</label>
-  <select id="category">
-    <option value="">Select category</option>
-    <option value="Housing">Housing</option>
-    <option value="Utilities">Utilities</option>
-    <option value="Investments">Investments</option>
-    <option value="Savings">Savings</option>
-    <option value="Debt Repayment">Debt Repayment</option>
-    <option value="Entertainment">Entertainment</option>
-    <option value="Insurance">Insurance</option>
-    <option value="Gambling">Gambling</option>
-  </select>
-</div>
+        <label for="subcategory">Sub-category</label>
+        <select id="subcategory" required>
+          <option value="">Select subcategory</option>
+          <option value="Needs">Needs</option>
+          <option value="Wants">Wants</option>
+          <option value="Savings">Savings</option>
+          <option value="Investments">Investments</option>
+        </select>
 
-<div class="form-row">
-  <label for="subcategory">Subcategory:</label>
-  <select id="subcategory">
-    <option value="">Select subcategory</option>
-    <option value="Needs">Needs</option>
-    <option value="Wants">Wants</option>
-    <option value="Savings">Savings</option>
-    <option value="Investments">Investments</option>
-  </select>
-</div>
-        
+        <button type="submit" id="add-expense-btn">
+          <span class="sficon">&#43;</span> Add Expense
+        </button>
       </form>
-
-      <div class="predefined-buttons">
+      <div class="presets-section">
+        <div class="presets-title">Presets</div>
+        <div class="predefined-buttons"></div>
       </div>
     </div>
 
     <!-- Column 2: Table -->
-    <div class="column table-column">
-      <h2>Session Expenses</h2>
+    <div class="column table-column glass">
+      <h2>Expenses</h2>
       <table id="expenses-table">
         <thead>
           <tr>
@@ -68,7 +66,7 @@
             <th>Description</th>
             <th>Category</th>
             <th>Amount</th>
-            <th>Action</th>
+            <th></th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -76,15 +74,20 @@
     </div>
 
     <!-- Column 3: Summary -->
-    <div class="column summary-column">
+    <div class="column summary-column glass">
       <h2>Summary</h2>
-      <ul id="totals-list"></ul>
-      <canvas id="category-chart"></canvas>
+      <div id="totals-list"></div>
+      <div class="chart-container">
+        <canvas id="category-chart"></canvas>
+      </div>
     </div>
-    <div id="totals"></div>
   </div>
 
+  <button class="floating-save-btn" id="save-to-sheets">
+    <span class="sficon">&#128190;</span> Save to Google Sheets
+  </button>
+
+  <div id="toast" class="toast"></div>
   <script src="script.js"></script>
 </body>
-
 </html>
