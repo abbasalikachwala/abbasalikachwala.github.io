@@ -1,18 +1,21 @@
 body {
   font-family: 'Inter', sans-serif;
-  background: #f8fafc;
+  background: linear-gradient(135deg,#e4ecfb 0%,#f7faff 100%);
   margin: 0;
   color: #222;
 }
+
 .tracker-header {
   text-align: center;
   padding: 2rem 1rem 0.5rem 1rem;
 }
+
 .gradient-text {
   background: linear-gradient(90deg, #0a84ff 20%, #32d74b 80%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
 .container {
   display: flex;
   flex-wrap: wrap;
@@ -21,15 +24,51 @@ body {
   margin: 0 auto;
   max-width: 1200px;
 }
+
 .column {
   flex: 1 1 320px;
   min-width: 320px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 14px #dde2e81a;
   margin: 1.5rem 0;
   padding: 1.5rem 1.2rem;
 }
+
+.glassy-panel {
+  background: rgba(255,255,255,0.48);
+  border-radius: 18px;
+  box-shadow: 0 2px 18px 0 rgba(80,120,180,0.13), 0 1.5px 5px 0 rgba(140,170,200,0.09);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(180, 210, 250, 0.19);
+}
+
+.glassy-blur {
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.chart-card.glassy-blur {
+  background: rgba(255,255,255,0.41);
+  border-radius: 13px;
+  box-shadow: 0 3px 11px #b2c8e62c;
+}
+
+/* Inputs glassy effect */
+input[type="text"], input[type="number"], input[type="date"], select {
+  width: 100%;
+  padding: 0.59em;
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
+  font-size: 1em;
+  background: rgba(255,255,255,0.62);
+  box-shadow: 0 1px 3.5px #b8d0e52a;
+  backdrop-filter: blur(2.5px);
+  transition: border 0.2s;
+}
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
+  border: 1.5px solid #0a84ff;
+  outline: none;
+}
+
 .input-group {
   margin-bottom: 1.1em;
 }
@@ -38,30 +77,9 @@ body {
   margin-bottom: 0.3em;
   font-weight: 500;
 }
-input[type="text"], input[type="number"], input[type="date"], select {
-  width: 100%;
-  padding: 0.59em;
-  border-radius: 6px;
-  border: 1px solid #eaeaea;
-  font-size: 1em;
-  background: #f9fbfc;
-}
-.primary-btn {
-  background: #0a84ff;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.65em 1.15em;
-  font-size: 1em;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 0.5em;
-  transition: background 0.18s;
-}
-.primary-btn:disabled {
-  background: #cfe6fc;
-  color: #8bb7e2;
-  cursor: not-allowed;
+.select-row {
+  display: flex;
+  align-items: center;
 }
 .plus-btn {
   margin-left: 0.6em;
@@ -72,7 +90,32 @@ input[type="text"], input[type="number"], input[type="date"], select {
   border-radius: 50%;
   border: none;
   cursor: pointer;
+  transition: background 0.17s;
 }
+.plus-btn:hover {
+  background: #d7e7fa;
+}
+
+.primary-btn {
+  background: linear-gradient(90deg, #0a84ff 60%, #32d74b 140%);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 0.65em 1.15em;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5em;
+  box-shadow: 0 2px 6px #0a84ff1a;
+  transition: background 0.18s, box-shadow 0.15s;
+}
+.primary-btn:disabled {
+  background: #cfe6fc;
+  color: #8bb7e2;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .presets-section {
   margin-top: 2.2em;
 }
@@ -90,17 +133,19 @@ input[type="text"], input[type="number"], input[type="date"], select {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #f1f7ff;
+  background: rgba(247, 251, 255, 0.80);
   border: 1px solid #e0e7ef;
-  border-radius: 8px;
+  border-radius: 11px;
   padding: 0.7em 0.2em;
   cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s;
   font-size: 1em;
+  box-shadow: 0 1px 7px #a0bfe62c;
+  min-height: 55px;
 }
 .preset-btn:hover {
-  background: #e6f0fa;
-  box-shadow: 0 1px 8px #a0bfe62c;
+  background: rgba(218, 235, 252, 0.92);
+  box-shadow: 0 2px 14px #a0bfe62a;
 }
 .preset-title {
   font-weight: 500;
@@ -111,6 +156,7 @@ input[type="text"], input[type="number"], input[type="date"], select {
   color: #2a7e3f;
   margin-top: 0.1em;
 }
+
 .expenses-list {
   margin-top: 0.8em;
 }
@@ -118,9 +164,13 @@ input[type="text"], input[type="number"], input[type="date"], select {
   display: flex;
   align-items: center;
   padding: 0.8em 0.6em;
-  border-bottom: 1px solid #f1f3f6;
+  border-bottom: 1px solid #e7f0fa;
   font-size: 1.02em;
   position: relative;
+  background: rgba(255,255,255,0.32);
+  border-radius: 9px;
+  margin-bottom: 0.5em;
+  box-shadow: 0 1px 7px #dde2e82a;
 }
 .expense-amount {
   font-weight: 700;
@@ -142,6 +192,7 @@ input[type="text"], input[type="number"], input[type="date"], select {
   border-radius: 9px;
   font-size: 0.93em;
   vertical-align: middle;
+  background: rgba(10,132,255,0.09);
 }
 .expense-date {
   font-size: 0.92em;
@@ -156,14 +207,20 @@ input[type="text"], input[type="number"], input[type="date"], select {
   cursor: pointer;
   margin-left: 0.9em;
 }
+.expense-delete-btn:hover {
+  color: #a82a40;
+}
+
 .summary-column {
-  background: #f8fcff;
+  background: rgba(248, 252, 255, 0.76);
+  border-radius: 13px;
 }
 .chart-card {
-  background: #fff;
+  background: rgba(255,255,255,0.50);
   padding: 1em 0.5em;
   border-radius: 12px;
   margin-bottom: 2em;
+  box-shadow: 0 2px 7px #dde2e81a;
 }
 .summary-totals {
   margin-top: 1em;
@@ -181,12 +238,13 @@ input[type="text"], input[type="number"], input[type="date"], select {
   font-size: 2.5em;
   margin-bottom: 0.6em;
 }
+
 .toast {
   position: fixed;
   bottom: 3em;
   left: 50%;
   transform: translateX(-50%);
-  background: #0a84ff;
+  background: linear-gradient(90deg, #0a84ff 60%, #32d74b 140%);
   color: #fff;
   padding: 0.9em 1.5em;
   border-radius: 9px;
@@ -208,6 +266,17 @@ input[type="text"], input[type="number"], input[type="date"], select {
   font-size: 1.15em;
   margin: 1.5em 0;
 }
+
+/* Optional: subtle scroll for glassy columns */
+.column::-webkit-scrollbar {
+  width: 8px;
+  background: rgba(210,230,255,0.10);
+}
+.column::-webkit-scrollbar-thumb {
+  background: rgba(10,132,255,0.13);
+  border-radius: 8px;
+}
+
 @media (max-width: 900px) {
   .container { flex-direction: column; }
   .column { margin: 1rem 0; }
