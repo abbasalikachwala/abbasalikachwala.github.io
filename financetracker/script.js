@@ -37,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
       pwInput.focus();
     }
   }
-  // --- End Password Protection ---
 
   // --- DOM Elements ---
   const form = document.getElementById("expense-form");
@@ -133,37 +132,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Populate selects ---
   function renderCategoryOptions(selected = "") {
-    categorySelect.innerHTML = "";
+    categorySelect.innerHTML = '<option value="" disabled selected>Select category</option>';
     categories.forEach(c => {
       const opt = document.createElement("option");
       opt.value = c.name;
       opt.textContent = c.name;
       opt.style.color = c.color;
-      if (c.name === selected) opt.selected = true;
+      if (selected && c.name === selected) opt.selected = true;
       categorySelect.appendChild(opt);
     });
   }
   function renderSubcategoryOptions(category, selected = "") {
-    subcategorySelect.innerHTML = "";
+    subcategorySelect.innerHTML = '<option value="" disabled selected>Select sub-category</option>';
     Object.entries(subcategories).forEach(([subcat, {category: cat, emoji}]) => {
       if (cat === category) {
         const opt = document.createElement("option");
         opt.value = subcat;
         opt.textContent = (emoji ? emoji + " " : "") + subcat;
-        if (subcat === selected) opt.selected = true;
+        if (selected && subcat === selected) opt.selected = true;
         subcategorySelect.appendChild(opt);
       }
     });
-    if (!subcategorySelect.children.length) {
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = "(No sub-categories yet)";
-      opt.disabled = true;
-      subcategorySelect.appendChild(opt);
-    }
   }
   function updateSelectsAfterAdd() {
-    const cat = categorySelect.value || categories[0].name;
+    // keep current values when possible
+    const cat = categorySelect.value || "";
     renderCategoryOptions(cat);
     renderSubcategoryOptions(cat, subcategorySelect.value);
   }
@@ -213,8 +206,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const r = await openModal({title: "Add New Category", placeholder: "Eg. Education"});
     if (r && r.value) {
       addCategory(r.value);
-      renderCategoryOptions(r.value);
-      renderSubcategoryOptions(r.value, "");
+      renderCategoryOptions("");
+      renderSubcategoryOptions("", "");
       showToast("Category added!", "#0a84ff");
     }
   };
@@ -223,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const r = await openModal({title: "Add New Sub-category", placeholder: "Eg. Tuition, Mobile Plan", requireCat: true});
     if (r && r.value && r.category) {
       addSubcategory(r.value, r.category);
-      renderSubcategoryOptions(categorySelect.value, r.value);
+      renderSubcategoryOptions(categorySelect.value, "");
       showToast("Sub-category added!", "#32d74b");
     }
   };
@@ -235,8 +228,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- Initial render ---
-  renderCategoryOptions(categories[0].name);
-  renderSubcategoryOptions(categories[0].name, "");
+  renderCategoryOptions("");
+  renderSubcategoryOptions("", "");
 
   // --- Presets: one-click to add expense ---
   const presetGrid = document.querySelector(".preset-grid");
@@ -499,8 +492,8 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast("Expense added!", "#0a84ff");
       amountInput.value = "";
       descriptionInput.value = "";
-      renderCategoryOptions(categories[0].name);
-      renderSubcategoryOptions(categories[0].name, "");
+      renderCategoryOptions("");
+      renderSubcategoryOptions("", "");
       dateInput.value = "";
       suggestionBar.style.display = "none";
       validateForm();
