@@ -26,78 +26,79 @@
     <span id="user_email" style="display:none;margin-left:1em;font-weight:500;color:#0a84ff;"></span>
   </div>
 
-  <main class="container">
-    <section class="column input-column glassy-panel" aria-label="Add expense">
-      <h2>Particulars</h2>
-      <form id="expense-form" autocomplete="off">
-        <div class="input-group">
-          <label for="date">Date <span class="optional">(optional)</span></label>
-          <input type="date" id="date" />
-        </div>
-        <div class="input-group">
-          <label for="amount">Amount</label>
-          <input type="number" id="amount" min="0" step="0.01" required placeholder="$0.00" />
-        </div>
-        <div class="input-group">
-          <label for="description">Description</label>
-          <input type="text" id="description" maxlength="50" required placeholder="Groceries, Netflix, etc." />
-        </div>
-        <div class="input-group">
-          <label for="category">Category</label>
-          <div class="select-row">
-            <select id="category" required>
-              <option value="" disabled selected>Select category</option>
-            </select>
-            <!-- No add-category in this version -->
+  <!-- Main UI is hidden unless logged in -->
+  <div id="main-ui" style="display:none;">
+    <main class="container">
+      <section class="column input-column glassy-panel" aria-label="Add expense">
+        <h2>Particulars</h2>
+        <form id="expense-form" autocomplete="off">
+          <div class="input-group">
+            <label for="date">Date <span class="optional">(optional)</span></label>
+            <input type="date" id="date" />
           </div>
-        </div>
-        <div class="input-group">
-          <label for="subcategory">Sub-category</label>
-          <div class="select-row">
-            <select id="subcategory" required>
-              <option value="" disabled selected>Select sub-category</option>
-            </select>
-            <!-- No add-subcategory in this version -->
+          <div class="input-group">
+            <label for="amount">Amount</label>
+            <input type="number" id="amount" min="0" step="0.01" required placeholder="$0.00" />
           </div>
+          <div class="input-group">
+            <label for="description">Description</label>
+            <input type="text" id="description" maxlength="50" required placeholder="Groceries, Netflix, etc." />
+          </div>
+          <div class="input-group">
+            <label for="category">Category</label>
+            <div class="select-row">
+              <select id="category" required>
+                <option value="" disabled selected>Select category</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="subcategory">Sub-category</label>
+            <div class="select-row">
+              <select id="subcategory" required>
+                <option value="" disabled selected>Select sub-category</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" id="add-expense-btn" disabled class="primary-btn">
+            <span class="sficon">+</span> Add Expense
+          </button>
+        </form>
+        <div class="presets-section">
+          <div class="presets-title">Presets</div>
+          <div class="preset-grid"></div>
         </div>
-        <button type="submit" id="add-expense-btn" disabled class="primary-btn">
-          <span class="sficon">+</span> Add Expense
-        </button>
-      </form>
-      <div class="presets-section">
-        <div class="presets-title">Presets</div>
-        <div class="preset-grid"></div>
-      </div>
-    </section>
+      </section>
 
-    <section class="column table-column glassy-panel" aria-label="Expense list">
-      <h2>Expenses</h2>
-      <div id="expenses-list" class="expenses-list"></div>
-      <div id="empty-table-placeholder" class="empty-placeholder">
-        <div class="emoji-placeholder">&#128181;</div>
-        <div>Add your first expense to see it here!</div>
-      </div>
-      <div id="loading-spinner" class="loading-spinner" style="display:none;">
-        Loading...
-      </div>
-    </section>
+      <section class="column table-column glassy-panel" aria-label="Expense list">
+        <h2>Expenses</h2>
+        <div id="expenses-list" class="expenses-list"></div>
+        <div id="empty-table-placeholder" class="empty-placeholder">
+          <div class="emoji-placeholder">&#128181;</div>
+          <div>Add your first expense to see it here!</div>
+        </div>
+        <div id="loading-spinner" class="loading-spinner" style="display:none;">
+          Loading...
+        </div>
+      </section>
 
-    <section class="column summary-column glassy-panel" aria-label="Summary">
-      <h2>Summary</h2>
-      <div class="chart-card glassy-blur">
-        <canvas id="category-chart"></canvas>
-      </div>
-      <div id="summary-totals" class="summary-totals"></div>
-    </section>
-  </main>
+      <section class="column summary-column glassy-panel" aria-label="Summary">
+        <h2>Summary</h2>
+        <div class="chart-card glassy-blur">
+          <canvas id="category-chart"></canvas>
+        </div>
+        <div id="summary-totals" class="summary-totals"></div>
+      </section>
+    </main>
 
-  <footer>
-    <button class="save-btn-bottom primary-btn" id="refresh-sheet">
-      <span class="sficon">&#10227;</span> Refresh from Google Sheets
-    </button>
-  </footer>
+    <footer>
+      <button class="save-btn-bottom primary-btn" id="refresh-sheet">
+        <span class="sficon">&#10227;</span> Refresh from Google Sheets
+      </button>
+    </footer>
 
-  <div id="toast" class="toast"></div>
+    <div id="toast" class="toast"></div>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
