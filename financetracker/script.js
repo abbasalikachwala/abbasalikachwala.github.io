@@ -13,9 +13,9 @@ const categories = [
 ];
 const subcategories = {
   "Housing":        { category: "Needs", emoji: "🏠" },
+  "Groceries":      { category: "Needs", emoji: "🛒" },
   "Utilities":      { category: "Needs", emoji: "💡" },
   "Insurance":      { category: "Needs", emoji: "🛡️" },
-  "Groceries":      { category: "Needs", emoji: "🛒" },
   "Debt Repayment": { category: "Wants", emoji: "💳" },
   "Entertainment":  { category: "Wants", emoji: "🎬" },
   "Dining Out":     { category: "Wants", emoji: "🍽️" },
@@ -252,18 +252,25 @@ function validateForm() {
 // ---- Google OAuth2 & Sheets API ----
 
 function ensureSignedIn() {
+  // Show/hide auth buttons
   document.getElementById('authorize_button').style.display = accessToken ? 'none' : '';
   document.getElementById('signout_button').style.display = accessToken ? '' : 'none';
-  document.getElementById('expense-form').style.display = accessToken ? '' : 'none';
-  document.getElementById('refresh-sheet').style.display = accessToken ? '' : 'none';
   document.getElementById('user_email').style.display = accessToken ? '' : 'none';
-  if (!accessToken) {
-    document.getElementById('user_email').textContent = '';
-    showLoading(false);
+
+  // Show/hide main UI (Apple Vision Pro effect: fade in)
+  const mainUI = document.getElementById('main-ui');
+  if (accessToken) {
+    mainUI.style.display = '';
+    mainUI.classList.add('active');
+  } else {
+    mainUI.style.display = 'none';
+    mainUI.classList.remove('active');
+    // Reset state
     expenses = [];
     updateTable();
     updateChart();
     updateSummary();
+    showLoading(false);
   }
 }
 
