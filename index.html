@@ -5,30 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Abbasali's Tools Hub</title>
   <style>
+    :root {
+      --main-gradient: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+    }
     body {
       min-height: 100vh;
       margin: 0;
-      background: linear-gradient(120deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
-      background-size: 300% 300%;
-      animation: gradientMove 14s ease-in-out infinite;
+      background: var(--main-gradient);
+      background-size: 400% 100%;
+      animation: gradientOneWay 14s linear infinite;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
     }
-    @keyframes gradientMove {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
+    @keyframes gradientOneWay {
+      0%   { background-position: 0% 0%; }
+      100% { background-position: 100% 0%; }
     }
-
     .center-panel {
       background: rgba(30, 30, 40, 0.55);
       border-radius: 22px;
       padding: 3rem 2.5rem 2.5rem 2.5rem;
-      max-width: 450px;
-      width: 94vw;
+      max-width: 370px;
+      width: 80vw;
       text-align: center;
       z-index: 1;
       box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
@@ -36,68 +37,64 @@
       -webkit-backdrop-filter: blur(14px) saturate(1.2);
       border: 1.5px solid rgba(255,255,255,0.12);
     }
-
     h1 {
       font-size: 2.4em;
       font-weight: 700;
-      background: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+      background: var(--main-gradient);
       background-size: 400% 100%;
       background-clip: text;
       -webkit-background-clip: text;
       color: transparent;
       -webkit-text-fill-color: transparent;
-      animation: gradientShift 6s ease-in-out infinite;
+      animation: gradientOneWay 14s linear infinite;
       margin-bottom: 2.2rem;
       letter-spacing: 1px;
     }
-    @keyframes gradientShift {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
     .button-list {
       display: flex;
       flex-direction: column;
       gap: 1.2rem;
       align-items: stretch;
     }
-
     .tool-btn {
       display: block;
-      width: 100%;
+      width: 75%;
       padding: 1rem 0;
       font-size: 1.2em;
       font-weight: 500;
-      background: #232b36;
+      background: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+      background-size: 200% 100%;
       color: #fff;
       border: none;
       border-radius: 12px;
       box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.10);
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      transition: background-position 0.4s, transform 0.12s, box-shadow 0.25s;
       text-decoration: none;
       outline: none;
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
     }
-    .tool-btn:hover,
-    .tool-btn:focus {
-      background: #3d2a51;
+    .tool-btn::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(120deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 100%);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+    .tool-btn:hover, .tool-btn:focus {
+      background-position: 100% 0;
       transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.18);
     }
-
     .footer {
       margin-top: 2.8em;
       font-size: 0.95em;
       color: #dedede;
       opacity: 0.7;
     }
-
     @media (max-width: 500px) {
       .center-panel {
         padding: 1.2rem 0.3rem 1.5rem 0.3rem;
@@ -111,10 +108,10 @@
 </head>
 <body>
   <main class="center-panel">
-    <h1>Welcome to Abbasali's Tools Hub</h1>
+    <h1>Welcome to<br>Abbasali's Tools Hub</h1>
     <div class="button-list">
       <a href="https://abbasalikachwala.github.io/countdown/" class="tool-btn">Countdown Timer</a>
-      <a href="https://abbasalikachwala.github.io/financetracker/" class="tool-btn">Finance Tracker</a>
+      <a href="https://abbasalikachwala.github.io/financetracker/" class="tool-btn">Expenses Tracker</a>
     </div>
     <div class="footer">
       &copy; 2025 Abbasali Kachwala
