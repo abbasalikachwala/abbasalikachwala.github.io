@@ -5,14 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Finance Tracker</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="https://developer.apple.com/design/human-interface-guidelines/images/og-design-visionos.png" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 </head>
 <body>
   <div id="password-overlay" class="password-overlay glassy-blur">
     <div class="password-panel glassy-panel">
-      <img src="https://developer.apple.com/design/human-interface-guidelines/images/og-design-visionos.png" alt="Apple Intelligence" class="ai-logo" />
       <h2>Enter Password</h2>
       <input type="password" id="site-password" placeholder="Password" autofocus />
       <button id="submit-password" class="primary-btn">Unlock</button>
@@ -20,15 +18,15 @@
     </div>
   </div>
 
-  <header class="tracker-header glassy-blur" style="display:none;">
+  <header class="tracker-header" style="display:none;">
     <h1>
-      <span class="sficon" aria-label="Finance">&#129689;</span>
+      <span class="sficon" aria-label="Money">&#128181;</span>
       <span class="gradient-text">Finance Intelligence</span>
     </h1>
-    <div class="tagline">Smarter, friendlier personal finance – powered by Apple-style clarity.</div>
+    <div class="tagline">Smarter, friendlier personal finance – inspired by Apple-style clarity.</div>
   </header>
 
-  <main class="container glassy-blur" style="display:none;">
+  <main class="container">
     <section class="column input-column glassy-panel" aria-label="Add expense">
       <form id="expense-form" autocomplete="off">
         <label for="date">Date <span class="optional">(optional)</span></label>
@@ -70,23 +68,9 @@
 
     <section class="column table-column glassy-panel" aria-label="Expense list">
       <h2>Expenses</h2>
-      <table id="expenses-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Category</th>
-            <th>Sub-category</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- JS fills this -->
-        </tbody>
-      </table>
+      <div id="expenses-list" class="expenses-list"></div>
       <div id="empty-table-placeholder" class="empty-placeholder">
-        <img src="https://developer.apple.com/design/human-interface-guidelines/images/og-design-visionos.png" alt="" width="72" style="opacity:0.18;margin-bottom:16px;">
+        <div class="emoji-placeholder">&#128181;</div>
         <div>Add your first expense to see it here!</div>
       </div>
     </section>
