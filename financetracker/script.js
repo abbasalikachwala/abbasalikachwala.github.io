@@ -1,7 +1,7 @@
 // ---- CONFIG ----
 const CLIENT_ID = '709689604347-qdvrj86sa0gouuli9vllm6q7hg30u3ui.apps.googleusercontent.com'; // <-- Replace with your OAuth client ID
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
-const SHEET_ID = '0'; // <-- Replace with your Google Sheet ID
+const SHEET_ID = '1yGfJxjPrVh8fa-4-mDkvNwiH2bF9Txf5xNeVREvOGTw'; // <-- Replace with your Google Sheet ID
 const SHEET_RANGE = 'FinanceTracker!A:F'; // Make sure your sheet's name matches
 
 // ---- Static Data for Categories/Subcategories/Presets ----
