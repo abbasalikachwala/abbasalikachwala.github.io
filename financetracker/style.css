@@ -9,11 +9,11 @@
   --apple-violet: #5e5ce6;
   --apple-gray: #f2f2f7;
   --apple-dark: #22223b;
-  --glass-bg: rgba(255,255,255,0.68);
+  --glass-bg: rgba(255,255,255,0.38);
+  --glass-panel-bg: rgba(255,255,255,0.82);
   --glass-border: rgba(255,255,255,0.18);
-  --glass-shadow: 0 18px 48px 0 rgba(31,38,135,0.12);
-  --gradient: linear-gradient(90deg, #8e8efa 0%, #0a84ff 100%);
-  --gradient-alt: linear-gradient(120deg, #f2f2f7 0%, #e5e5ea 100%);
+  --glass-shadow: 0 22px 64px 0 rgba(31,38,135,0.15);
+  --gradient: linear-gradient(135deg, #b7d7ff 0%, #e0c7f7 50%, #aee0e6 100%);
   --glassy-blur: blur(32px);
   --needs: #0a84ff;
   --wants: #ff9f0a;
@@ -25,7 +25,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background: var(--gradient-alt);
+  background: var(--gradient);
   color: var(--apple-dark);
   letter-spacing: -0.015em;
 }
@@ -38,15 +38,15 @@ body {
 }
 
 .glassy-panel {
-  background: rgba(255,255,255,0.87);
+  background: var(--glass-panel-bg);
   border-radius: 32px;
-  box-shadow: 0 8px 40px 0 rgba(31,38,135,0.08);
+  box-shadow: 0 8px 40px 0 rgba(31,38,135,0.13);
   border: 1.6px solid var(--glass-border);
   padding: 40px 32px 38px 32px;
 }
 
 .gradient-text {
-  background: var(--gradient);
+  background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -60,6 +60,7 @@ body {
   padding-top: 32px;
   margin-bottom: 12px;
   text-align: center;
+  background: none;
 }
 .tracker-header h1 {
   display: flex;
@@ -79,10 +80,11 @@ body {
 .container {
   display: flex;
   justify-content: space-between;
-  gap: 60px;
+  gap: 36px;
   max-width: 1700px;
   margin: 0 auto 0 auto;
-  padding: 12px 36px 36px 36px;
+  padding: 32px 18px 38px 18px;
+  background: none;
 }
 
 .column {
@@ -94,6 +96,7 @@ body {
   gap: 24px;
   min-height: 630px;
   box-sizing: border-box;
+  background: none;
 }
 
 .input-column {
@@ -112,6 +115,7 @@ h2 {
   font-weight: 700;
   color: #161618;
   font-size: 1.29rem;
+  background: none;
 }
 
 label {
@@ -147,7 +151,7 @@ input:focus, select:focus {
 }
 
 .primary-btn {
-  background: var(--gradient);
+  background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
   color: white;
   font-weight: 700;
   font-size: 1.09rem;
@@ -224,9 +228,9 @@ input:focus, select:focus {
   gap: 15px;
 }
 .preset-btn {
-  background: #f5f8fd;
+  background: #f7faff;
   color: #1b2330;
-  border: 1.5px solid #dbebff;
+  border: 1.2px solid #dbebff;
   border-radius: 18px;
   padding: 21px 12px;
   font-size: 1.11rem;
@@ -248,70 +252,76 @@ input:focus, select:focus {
   box-shadow: 0 4px 18px 0 #b7d6f655;
 }
 
-#expenses-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  box-shadow: 0 2px 10px rgba(183,190,220,0.06);
-  background: rgba(255,255,255,0.92);
-  border-radius: 16px;
-  overflow: hidden;
-  margin-top: 0;
+.expenses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 12px;
 }
-#expenses-table th, #expenses-table td {
-  padding: 14px 10px;
-  text-align: left;
-  font-size: 15px;
+.expense-card {
+  background: rgba(255,255,255,0.86);
+  backdrop-filter: blur(16px);
+  border-radius: 22px;
+  box-shadow: 0 2px 16px 0 rgba(31,38,135,0.13);
+  border: 1.2px solid #e4e9f2;
+  padding: 18px 22px 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: box-shadow 0.15s;
+  position: relative;
+  min-height: 65px;
 }
-#expenses-table th {
-  background: #ececff;
-  color: #444;
+.expense-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.expense-title {
+  font-weight: 700;
+  font-size: 1.12em;
+  letter-spacing: -0.011em;
+  color: #1c1c1e;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.expense-category-badge {
+  display: inline-block;
+  padding: 0.17em 0.8em;
+  font-size: 0.95em;
+  border-radius: 12px;
   font-weight: 600;
-  border-bottom: 2px solid #e5e8ee;
+  background: linear-gradient(90deg,#e7f0fe 30%,#f4e7ff 100%);
+  margin-left: 7px;
 }
-#expenses-table tr:nth-child(even) {
-  background: #f4f6fb;
+.expense-date {
+  font-size: 0.96em;
+  color: #8598b7;
+  margin-top: 1.5px;
 }
-#expenses-table tr {
-  transition: background 0.18s;
+.expense-amount {
+  font-weight: bold;
+  font-size: 1.19em;
+  color: var(--apple-green);
+  margin-right: 16px;
+  white-space: nowrap;
 }
-#expenses-table tr:hover {
-  background: #dbeafe44;
-}
-#expenses-table td:last-child {
-  text-align: center;
-}
-.delete-btn {
-  background: #ff3b30;
+.expense-delete-btn {
+  background: #ff375f;
   color: #fff;
   border: none;
   border-radius: 12px;
-  padding: 7px 14px;
-  font-size: 15px;
+  padding: 8px 16px;
+  font-size: 1em;
   cursor: pointer;
   box-shadow: 0 1px 4px rgba(255,59,48,0.11);
   transition: background 0.18s;
+  margin-left: 8px;
+  margin-right: 2px;
 }
-.delete-btn:hover { background: #e22b27; }
-.editable-select {
-  font-size: 14px;
-  padding: 6px 10px;
-  border: 1px solid #d1d1d6;
-  border-radius: 8px;
-  background: #fff;
-  margin: -6px 0;
-  min-width: 120px;
-}
-.editable-cell {
-  cursor: pointer;
-  border-radius: 8px;
-  background: #eaf1fb;
-  padding: 2px 6px;
-  transition: background 0.16s;
-}
-.editable-cell:hover {
-  background: #d4e7fa;
-}
+.expense-delete-btn:hover { background: #e22b27; }
 
 .empty-placeholder {
   display: flex;
@@ -323,6 +333,11 @@ input:focus, select:focus {
   font-weight: 500;
   padding: 48px 0 16px 0;
   letter-spacing: -0.01em;
+}
+.emoji-placeholder {
+  font-size: 2.7em;
+  opacity: 0.17;
+  margin-bottom: 16px;
 }
 
 .chart-card {
@@ -393,7 +408,7 @@ input:focus, select:focus {
   background: #f1f5f9;
 }
 .password-panel button {
-  background: var(--gradient);
+  background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
   color: white;
   border: none;
   border-radius: 14px;
@@ -413,13 +428,6 @@ input:focus, select:focus {
   font-size: 1rem;
   margin-top: 3px;
   min-height: 1.2em;
-}
-
-.ai-logo {
-  width: 60px;
-  margin-bottom: 18px;
-  border-radius: 14px;
-  box-shadow: 0 4px 18px #b7d6f644;
 }
 
 footer {
@@ -462,7 +470,6 @@ footer {
   opacity: 1;
 }
 
-/* Add/plus button next to selects */
 .select-row {
   display: flex;
   gap: 10px;
@@ -536,7 +543,7 @@ footer {
   transition: background 0.14s;
 }
 .modal-btn.primary-btn {
-  background: var(--gradient);
+  background: linear-gradient(90deg, #8ec5fc 0%, #e0c3fc 100%);
   color: #fff;
 }
 .modal-btn:hover:not(.primary-btn) {
