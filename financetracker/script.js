@@ -1,10 +1,15 @@
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLeybVH7zjv4lq_K6_oHSuHqm6z1OqJ2RhqY9VcplfaT9br5yMhC6Y7pVI5LWTXgc/exec";
+// ---- CONFIG ----
+const CLIENT_ID = '709689604347-qdvrj86sa0gouuli9vllm6q7hg30u3ui.apps.googleusercontent.com'; // <-- Replace with your OAuth client ID
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+const SHEET_ID = '0'; // <-- Replace with your Google Sheet ID
+const SHEET_RANGE = 'FinanceTracker!A:F'; // Make sure your sheet's name matches
 
+// ---- Static Data for Categories/Subcategories/Presets ----
 const categories = [
-  { name: "Needs", color: "var(--needs)" },
-  { name: "Wants", color: "var(--wants)" },
-  { name: "Savings", color: "var(--savings)" },
-  { name: "Investments", color: "var(--investments)" },
+  { name: "Needs", color: "#0a84ff" },
+  { name: "Wants", color: "#bf5af2" },
+  { name: "Savings", color: "#32d74b" },
+  { name: "Investments", color: "#ff9f0a" },
 ];
 const subcategories = {
   "Housing":        { category: "Needs", emoji: "🏠" },
@@ -17,7 +22,6 @@ const subcategories = {
   "Investments":    { category: "Investments", emoji: "📈" },
   "Savings":        { category: "Savings", emoji: "💰" }
 };
-
 const presets = [
   { description: "Rent", amount: 830, subcategory: "Housing" },
   { description: "2degrees", amount: 100.5, subcategory: "Utilities" },
@@ -31,9 +35,13 @@ const presets = [
   { description: "RaboBank Gold", amount: 100, subcategory: "Investments" }
 ];
 
-let expenses = [];
+// ---- OAuth / Google Sheets API State ----
+let tokenClient;
+let accessToken = null;
 let chart;
+let expenses = [];
 
+// ---- Utility Functions ----
 function getCategoryColor(name) {
   const c = categories.find(c => c.name === name);
   return c ? c.color : "#ccc";
@@ -43,6 +51,27 @@ function getCatForSubcat(subcat) {
 }
 function getEmojiForSubcat(subcat) {
   return subcategories[subcat]?.emoji || "🔖";
+}
+function showToast(message, color = null) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.className = "toast show";
+  if (color) toast.style.background = color;
+  else toast.style.background = "";
+  setTimeout(() => { toast.className = "toast"; toast.style.background = ""; }, 2100);
+}
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  const options = { day: "numeric", month: "short", year: "numeric" };
+  return date.toLocaleDateString("en-GB", options);
+}
+function setDefaultDateToday() {
+  const dateInput = document.getElementById("date");
+  dateInput.value = new Date().toISOString().split("T")[0];
+}
+function showLoading(show) {
+  document.getElementById("loading-spinner").style.display = show ? "block" : "none";
 }
 
 function renderCategoryOptions(selected = "") {
@@ -71,22 +100,6 @@ function renderSubcategoryOptions(category, selected = "") {
   });
 }
 
-function showToast(message, color = null) {
-  const toast = document.getElementById("toast");
-  toast.textContent = message;
-  toast.className = "toast show";
-  if (color) toast.style.background = color;
-  else toast.style.background = "";
-  setTimeout(() => { toast.className = "toast"; toast.style.background = ""; }, 2100);
-}
-
-function formatDateDisplay(dateStr) {
-  if (!dateStr) return "-";
-  const date = new Date(dateStr);
-  const options = { day: "numeric", month: "short", year: "numeric" };
-  return date.toLocaleDateString("en-GB", options);
-}
-
 function renderPresets() {
   const presetGrid = document.querySelector(".preset-grid");
   presetGrid.innerHTML = "";
@@ -101,7 +114,7 @@ function renderPresets() {
     btn.onclick = () => {
       const cat = getCatForSubcat(exp.subcategory);
       const today = new Date().toISOString().split("T")[0];
-      submitExpense({
+      addExpense({
         amount: exp.amount,
         description: exp.description,
         category: cat,
@@ -201,7 +214,7 @@ function updateSummary() {
     perCat[e.category] += Number(e.amount);
   });
   let html = `<div style="font-weight:700;font-size:1.19em;margin-bottom:9px;">
-    Total Spent: <span style="color:var(--apple-blue)">$${total.toLocaleString("en-US", {minimumFractionDigits:2})}</span>
+    Total Spent: <span style="color:#0a84ff">$${total.toLocaleString("en-US", {minimumFractionDigits:2})}</span>
   </div>
   <ul style="padding-left:1.2em;margin:0 0 0 0;">`;
   Object.entries(perCat).forEach(([cat, amt]) => {
@@ -211,9 +224,13 @@ function updateSummary() {
   summaryTotals.innerHTML = html;
 }
 
-function setDefaultDateToday() {
-  const dateInput = document.getElementById("date");
-  dateInput.value = new Date().toISOString().split("T")[0];
+function clearForm() {
+  document.getElementById("amount").value = "";
+  document.getElementById("description").value = "";
+  renderCategoryOptions("");
+  renderSubcategoryOptions("", "");
+  document.getElementById("date").value = "";
+  validateForm();
 }
 
 function validateForm() {
@@ -231,39 +248,42 @@ function validateForm() {
   addExpenseBtn.disabled = !valid;
 }
 
-function submitExpense(entry) {
-  showLoading(true);
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify({ ...entry, action: "add" }),
-    headers: { "Content-Type": "application/json" }
-  })
-  .then(resp => resp.text())
-  .then(txt => {
-    if (txt === "OK") {
-      showToast("Expense added!", "#0a84ff");
-      fetchExpenses();
-      clearForm();
-    } else if (txt === "Unauthorized") {
-      showToast("Unauthorized. Use your Google account.", "#ff375f");
-    } else {
-      showToast("Error saving.", "#ff375f");
-    }
-  })
-  .catch(() => showToast("Network error.", "#ff375f"))
-  .finally(() => showLoading(false));
+// ---- Google OAuth2 & Sheets API ----
+
+function ensureSignedIn() {
+  document.getElementById('authorize_button').style.display = accessToken ? 'none' : '';
+  document.getElementById('signout_button').style.display = accessToken ? '' : 'none';
+  document.getElementById('expense-form').style.display = accessToken ? '' : 'none';
+  document.getElementById('refresh-sheet').style.display = accessToken ? '' : 'none';
+  document.getElementById('user_email').style.display = accessToken ? '' : 'none';
+  if (!accessToken) {
+    document.getElementById('user_email').textContent = '';
+    showLoading(false);
+    expenses = [];
+    updateTable();
+    updateChart();
+    updateSummary();
+  }
 }
 
+// Fetch all rows from the Google Sheet
 function fetchExpenses() {
+  if (!accessToken) return;
   showLoading(true);
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "get" }),
-    headers: { "Content-Type": "application/json" }
+  fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_RANGE}`, {
+    headers: { Authorization: `Bearer ${accessToken}` }
   })
-  .then(resp => resp.json())
+  .then(r => r.json())
   .then(data => {
-    expenses = data;
+    let rows = (data.values || []).slice(1); // skip header
+    expenses = rows.map(row => ({
+      timestamp: row[0],
+      amount: row[1],
+      description: row[2],
+      category: row[3],
+      subcategory: row[4],
+      date: row[5]
+    }));
     updateTable();
     updateChart();
     updateSummary();
@@ -272,46 +292,112 @@ function fetchExpenses() {
   .finally(() => showLoading(false));
 }
 
-function deleteExpense(idx) {
-  if(!confirm("Delete this expense?")) return;
+// Add a new row to the Google Sheet
+function addExpense(expense) {
+  if (!accessToken) return;
   showLoading(true);
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "delete", rowIdx: idx }),
-    headers: { "Content-Type": "application/json" }
+  const values = [[
+    new Date().toISOString(),
+    expense.amount,
+    expense.description,
+    expense.category,
+    expense.subcategory,
+    expense.date
+  ]];
+  fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_RANGE}:append?valueInputOption=USER_ENTERED`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ values })
   })
-  .then(resp => resp.text())
-  .then(txt => {
-    if (txt === "OK") {
-      showToast("Deleted.", "#ff375f");
-      fetchExpenses();
-    } else {
-      showToast("Error deleting.", "#ff375f");
-    }
+  .then(r => r.json())
+  .then(() => {
+    showToast("Expense added!");
+    fetchExpenses();
+    clearForm();
   })
-  .catch(() => showToast("Network error.", "#ff375f"))
+  .catch(() => showToast("Error saving.", "#ff375f"))
   .finally(() => showLoading(false));
 }
 
-function clearForm() {
-  document.getElementById("amount").value = "";
-  document.getElementById("description").value = "";
-  renderCategoryOptions("");
-  renderSubcategoryOptions("", "");
-  document.getElementById("date").value = "";
-  validateForm();
+// Delete a row from the sheet (by index in the local array)
+function deleteExpense(idx) {
+  if (!accessToken) return;
+  if (!confirm("Delete this expense?")) return;
+
+  // For Google Sheets API, deleting a row requires batchUpdate.
+  // Row number = idx+2 (because header is row 1, array is zero-based)
+  const rowNumber = idx + 2;
+  showLoading(true);
+  fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      requests: [
+        { deleteDimension: {
+            range: {
+              sheetId: 0, // assuming first sheet
+              dimension: 'ROWS',
+              startIndex: rowNumber-1,
+              endIndex: rowNumber
+            }
+        }}
+      ]
+    })
+  })
+  .then(r => r.json())
+  .then(() => {
+    showToast("Expense deleted.");
+    fetchExpenses();
+  })
+  .catch(() => showToast("Error deleting.", "#ff375f"))
+  .finally(() => showLoading(false));
 }
 
-function showLoading(show) {
-  document.getElementById("loading-spinner").style.display = show ? "block" : "none";
-}
+// ---- Google OAuth2 Setup ----
 
-document.addEventListener("DOMContentLoaded", () => {
+window.onload = () => {
+  // Setup Google Identity Services
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (tokenResponse) => {
+      if (tokenResponse.error) {
+        showToast("Auth error: " + tokenResponse.error, "#ff375f");
+        return;
+      }
+      accessToken = tokenResponse.access_token;
+      // Get user email
+      fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      })
+      .then(r => r.json())
+      .then(u => {
+        document.getElementById('user_email').textContent = u.email ? `Signed in as: ${u.email}` : '';
+      })
+      .catch(() => {});
+      ensureSignedIn();
+      fetchExpenses();
+    }
+  });
+
+  document.getElementById('authorize_button').onclick = () => tokenClient.requestAccessToken();
+  document.getElementById('signout_button').onclick = () => {
+    accessToken = null;
+    ensureSignedIn();
+  };
+
+  ensureSignedIn();
+
   renderCategoryOptions("");
   renderSubcategoryOptions("", "");
   renderPresets();
   setDefaultDateToday();
-  fetchExpenses();
 
   document.getElementById("category").onchange = function() {
     renderSubcategoryOptions(this.value, "");
@@ -337,11 +423,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const date = dateInput.value || new Date().toISOString().split("T")[0];
     if (!isNaN(amount) && description && category && subcategory) {
       const entry = { amount, description, category, subcategory, date };
-      submitExpense(entry);
+      addExpense(entry);
     } else {
       showToast("Please fill all required fields.", "#ff375f");
     }
   });
 
   document.getElementById("refresh-sheet").addEventListener("click", fetchExpenses);
-});
+
+  // Hide form and refresh button if not signed in
+  ensureSignedIn();
+};
