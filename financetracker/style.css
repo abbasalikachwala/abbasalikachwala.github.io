@@ -1,8 +1,8 @@
 body {
   font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg,#e4ecfb 0%,#f7faff 100%);
-  margin: 0;
+  background: linear-gradient(135deg, #e7f0fa 0%, #f6fafd 100%);
   color: #222;
+  margin: 0;
 }
 
 .tracker-header {
@@ -32,38 +32,41 @@ body {
   padding: 1.5rem 1.2rem;
 }
 
+/* Apple Intelligence Glassy Panels */
 .glassy-panel {
-  background: rgba(255,255,255,0.48);
-  border-radius: 18px;
-  box-shadow: 0 2px 18px 0 rgba(80,120,180,0.13), 0 1.5px 5px 0 rgba(140,170,200,0.09);
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  border: 1px solid rgba(180, 210, 250, 0.19);
+  background: linear-gradient(135deg,rgba(230,245,255,0.7) 0%,rgba(210,230,255,0.7) 100%);
+  border-radius: 20px;
+  box-shadow: 0 8px 40px 0 rgba(80,120,180,0.18);
+  border: 1px solid rgba(200,220,255,0.18);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  transition: box-shadow 0.18s;
 }
 
 .glassy-blur {
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
 }
 
 .chart-card.glassy-blur {
-  background: rgba(255,255,255,0.41);
-  border-radius: 13px;
-  box-shadow: 0 3px 11px #b2c8e62c;
+  background: linear-gradient(135deg,rgba(230,245,255,0.65) 0%,rgba(200,220,255,0.55) 100%);
+  border-radius: 16px;
+  box-shadow: 0 3px 20px #b2c8e62c;
+  border: 1.5px solid rgba(140,180,255,0.16);
 }
 
-/* Inputs glassy effect */
 input[type="text"], input[type="number"], input[type="date"], select {
   width: 100%;
   padding: 0.59em;
-  border-radius: 8px;
-  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  border: 1px solid #e0e7ef;
   font-size: 1em;
-  background: rgba(255,255,255,0.62);
-  box-shadow: 0 1px 3.5px #b8d0e52a;
+  background: rgba(255,255,255,0.72);
+  box-shadow: 0 1px 7px #c2e0ff1a;
   backdrop-filter: blur(2.5px);
   transition: border 0.2s;
 }
+
 input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
   border: 1.5px solid #0a84ff;
   outline: none;
@@ -99,14 +102,12 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
 .primary-btn {
   background: linear-gradient(90deg, #0a84ff 60%, #32d74b 140%);
   color: #fff;
+  font-weight: 600;
   border: none;
-  border-radius: 7px;
+  border-radius: 10px;
   padding: 0.65em 1.15em;
   font-size: 1em;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 0.5em;
-  box-shadow: 0 2px 6px #0a84ff1a;
+  box-shadow: 0 2px 9px #0a84ff2a;
   transition: background 0.18s, box-shadow 0.15s;
 }
 .primary-btn:disabled {
@@ -133,9 +134,9 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(247, 251, 255, 0.80);
+  background: linear-gradient(135deg,rgba(234,244,255,0.92) 0%,rgba(210,230,255,0.72) 100%);
   border: 1px solid #e0e7ef;
-  border-radius: 11px;
+  border-radius: 14px;
   padding: 0.7em 0.2em;
   cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s;
@@ -144,7 +145,7 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
   min-height: 55px;
 }
 .preset-btn:hover {
-  background: rgba(218, 235, 252, 0.92);
+  background: linear-gradient(135deg,rgba(220,240,255,0.96) 0%,rgba(188,224,255,0.85) 100%);
   box-shadow: 0 2px 14px #a0bfe62a;
 }
 .preset-title {
@@ -167,10 +168,11 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
   border-bottom: 1px solid #e7f0fa;
   font-size: 1.02em;
   position: relative;
-  background: rgba(255,255,255,0.32);
-  border-radius: 9px;
+  background: linear-gradient(90deg,rgba(255,255,255,0.48) 0%,rgba(240,244,254,0.54) 100%);
+  border-radius: 11px;
   margin-bottom: 0.5em;
   box-shadow: 0 1px 7px #dde2e82a;
+  border: 1px solid rgba(210,230,255,0.13);
 }
 .expense-amount {
   font-weight: 700;
@@ -212,8 +214,9 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
 }
 
 .summary-column {
-  background: rgba(248, 252, 255, 0.76);
-  border-radius: 13px;
+  background: linear-gradient(135deg,rgba(248,252,255,0.82) 0%,rgba(228,238,255,0.74) 100%);
+  border-radius: 16px;
+  box-shadow: 0 3px 24px #b2c8e62c;
 }
 .chart-card {
   background: rgba(255,255,255,0.50);
@@ -247,9 +250,9 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
   background: linear-gradient(90deg, #0a84ff 60%, #32d74b 140%);
   color: #fff;
   padding: 0.9em 1.5em;
-  border-radius: 9px;
+  border-radius: 12px;
   font-size: 1.1em;
-  box-shadow: 0 6px 24px #0a84ff1a;
+  box-shadow: 0 8px 24px #0a84ff1a;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.22s;
@@ -280,4 +283,14 @@ input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, 
 @media (max-width: 900px) {
   .container { flex-direction: column; }
   .column { margin: 1rem 0; }
+}
+
+#main-ui {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s;
+}
+#main-ui.active {
+  opacity: 1;
+  pointer-events: auto;
 }
