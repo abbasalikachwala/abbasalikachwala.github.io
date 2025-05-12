@@ -5,126 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Abbasali's Tools Hub</title>
   <style>
-    /* Reset and base styles */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    :root {
+      --primary-gradient: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7);
+      --glass-bg: rgba(30, 30, 40, 0.78);
+      --glass-blur: blur(8px);
+      --button-bg: #232b36;
+      --button-hover-bg: #3d2a51;
     }
 
     body {
-      height: 100vh;
-      background-color: #0e0e0e;
+      min-height: 100vh;
+      margin: 0;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
     }
 
-    /* Animated border using pseudo-element */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: repeating-conic-gradient(
-        from 0deg,
-        #f9ce34 0deg,
-        #ee2a7b 90deg,
-        #6228d7 180deg,
-        #f9ce34 270deg,
-        #ee2a7b 360deg
-      );
-      z-index: 0;
-      pointer-events: none;
-      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      mask-composite: exclude;
-      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite: destination-out;
-      padding: 8px;
-      animation: rotate 10s linear infinite;
-      filter: blur(10px);
-    }
-
-    @keyframes rotate {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* Container for content */
-    .container {
-      position: relative;
-      z-index: 1;
+    .center-panel {
+      background: var(--glass-bg);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-radius: 22px;
+      padding: 3rem 2.5rem 2.5rem 2.5rem;
       text-align: center;
-      padding: 2rem;
+      max-width: 370px;
+      width: 94vw;
     }
 
-    /* Gradient text */
     h1 {
-      font-size: 3em;
-      margin-bottom: 1.5em;
-      background: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7);
-      background-size: 200%;
+      font-size: 2.4em;
+      font-weight: 700;
+      background: var(--primary-gradient);
       background-clip: text;
       -webkit-background-clip: text;
       color: transparent;
       -webkit-text-fill-color: transparent;
-      animation: gradientShift 5s ease infinite;
+      margin-bottom: 2.2rem;
+      letter-spacing: 1px;
     }
 
-    @keyframes gradientShift {
-      0% {
-        background-position: 0%;
-      }
-      100% {
-        background-position: 200%;
-      }
-    }
-
-    /* Button styles */
-    .button-container {
+    .button-list {
       display: flex;
-      justify-content: center;
-      gap: 2rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 1.2rem;
+      align-items: stretch;
     }
 
-    .button {
-      display: inline-block;
-      min-width: 220px;
-      text-align: center;
-      padding: 1em;
+    .tool-btn {
+      display: block;
+      width: 100%;
+      padding: 1rem 0;
       font-size: 1.2em;
-      text-decoration: none;
+      font-weight: 500;
+      background: var(--button-bg);
       color: #fff;
-      background-color: #4CAF50;
+      border: none;
       border-radius: 12px;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.10);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      text-decoration: none;
+      outline: none;
+    }
+    .tool-btn:hover,
+    .tool-btn:focus {
+      background: var(--button-hover-bg);
+      transform: translateY(-2px) scale(1.04);
     }
 
-    .button:hover {
-      background-color: #45a049;
-      transform: scale(1.05);
+    .footer {
+      margin-top: 2.8em;
+      font-size: 0.95em;
+      color: #dedede;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 500px) {
+      .center-panel {
+        padding: 1.2rem 0.3rem 1.5rem 0.3rem;
+        max-width: 99vw;
+      }
+      h1 {
+        font-size: 1.4em;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <main class="center-panel">
     <h1>Welcome to Abbasali's Tools Hub</h1>
-    <div class="button-container">
-      <a href="https://abbasalikachwala.github.io/countdown/" class="button">Countdown Timer</a>
-      <a href="https://abbasalikachwala.github.io/financetracker/" class="button">Finance Tracker</a>
+    <div class="button-list">
+      <a href="https://abbasalikachwala.github.io/countdown/" class="tool-btn">Countdown Timer</a>
+      <a href="https://abbasalikachwala.github.io/financetracker/" class="tool-btn">Finance Tracker</a>
     </div>
-  </div>
+    <div class="footer">
+      &copy; 2025 Abbasali Kachwala
+    </div>
+  </main>
 </body>
 </html>
