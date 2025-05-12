@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const categorySelect = document.getElementById("category");
   const subcategorySelect = document.getElementById("subcategory");
   const dateInput = document.getElementById("date");
-  const expensesTableBody = document.querySelector("#expenses-table tbody");
+  const expensesList = document.getElementById("expenses-list");
   const emptyTablePlaceholder = document.getElementById("empty-table-placeholder");
   const ctx = document.getElementById("category-chart").getContext("2d");
   const saveBtn = document.getElementById("save-to-sheets");
@@ -73,32 +73,37 @@ document.addEventListener("DOMContentLoaded", () => {
   let sentEntries = new Set();
 
   // --- Data Structures ---
-  // Default categories and sub-categories with mapping
   let categories = [
     { name: "Needs", color: "var(--needs)" },
     { name: "Wants", color: "var(--wants)" },
     { name: "Savings", color: "var(--savings)" },
     { name: "Investments", color: "var(--investments)" },
   ];
-  // key: subcat, value: {category, emoji}
   let subcategories = {
     "Housing":        { category: "Needs", emoji: "🏠" },
     "Utilities":      { category: "Needs", emoji: "💡" },
-    "Groceries":      { category: "Needs", emoji: "🛒" },
-    "Transportation": { category: "Needs", emoji: "🚌" },
     "Insurance":      { category: "Needs", emoji: "🛡️" },
-    "Healthcare":     { category: "Needs", emoji: "🩺" },
     "Debt Repayment": { category: "Wants", emoji: "💳" },
     "Entertainment":  { category: "Wants", emoji: "🎬" },
     "Dining Out":     { category: "Wants", emoji: "🍽️" },
-    "Shopping":       { category: "Wants", emoji: "🛍️" },
-    "Travel":         { category: "Wants", emoji: "✈️" },
     "Gambling":       { category: "Wants", emoji: "🎲" },
-    "Savings":        { category: "Savings", emoji: "💰" },
-    "Emergency Fund": { category: "Savings", emoji: "🚨" },
     "Investments":    { category: "Investments", emoji: "📈" },
-    "Retirement":     { category: "Investments", emoji: "🏖️" },
+    "Savings":        { category: "Savings", emoji: "💰" }
   };
+
+  // Preset list from user
+  const presets = [
+    { description: "Rent", amount: 830, subcategory: "Housing" },
+    { description: "2degrees", amount: 100.5, subcategory: "Utilities" },
+    { description: "Car Insurance", amount: 41.75, subcategory: "Insurance" },
+    { description: "ASB Credit Card", amount: 123.62, subcategory: "Debt Repayment" },
+    { description: "Netflix", amount: 33.99, subcategory: "Entertainment" },
+    { description: "ASB Spending", amount: 100, subcategory: "Dining Out" },
+    { description: "Lotto Syndicate", amount: 4, subcategory: "Gambling" },
+    { description: "Kernel Invest", amount: 200, subcategory: "Investments" },
+    { description: "RaboBank Savings", amount: 50, subcategory: "Savings" },
+    { description: "RaboBank Gold", amount: 100, subcategory: "Investments" }
+  ];
 
   // --- Utility: Save new cat/subcat in-memory ---
   function addCategory(name, color = null) {
@@ -114,11 +119,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return c ? c.color : "#ccc";
   }
   function randomColor() {
-    // pick a pastel color
     const colors = [
       "#0a84ff", "#bf5af2", "#32d74b", "#ff9f0a", "#ffd60a", "#ff375f", "#64d2ff", "#5e5ce6", "#ffb340"
     ];
     return colors[Math.floor(Math.random()*colors.length)];
+  }
+  function getCatForSubcat(subcat) {
+    return subcategories[subcat]?.category || categories[0].name;
+  }
+  function getEmojiForSubcat(subcat) {
+    return subcategories[subcat]?.emoji || "🔖";
   }
 
   // --- Populate selects ---
@@ -135,7 +145,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function renderSubcategoryOptions(category, selected = "") {
     subcategorySelect.innerHTML = "";
-    // filter subcats by category
     Object.entries(subcategories).forEach(([subcat, {category: cat, emoji}]) => {
       if (cat === category) {
         const opt = document.createElement("option");
@@ -145,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
         subcategorySelect.appendChild(opt);
       }
     });
-    // If none, placeholder
     if (!subcategorySelect.children.length) {
       const opt = document.createElement("option");
       opt.value = "";
@@ -155,7 +163,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   function updateSelectsAfterAdd() {
-    // keep current values when possible
     const cat = categorySelect.value || categories[0].name;
     renderCategoryOptions(cat);
     renderSubcategoryOptions(cat, subcategorySelect.value);
@@ -168,7 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
     modalInput.value = "";
     modalInput.placeholder = placeholder || "";
     modalCatSelector.style.display = requireCat ? "" : "none";
-    // populate selector
     if (requireCat) {
       modalCatSelect.innerHTML = "";
       categories.forEach(c => {
@@ -232,51 +238,34 @@ document.addEventListener("DOMContentLoaded", () => {
   renderCategoryOptions(categories[0].name);
   renderSubcategoryOptions(categories[0].name, "");
 
-  // --- Presets ---
+  // --- Presets: one-click to add expense ---
   const presetGrid = document.querySelector(".preset-grid");
-  const presets = [
-    { description: "Rent", amount: 830, subcategory: "Housing" },
-    { description: "Utilities", amount: 100.5, subcategory: "Utilities" },
-    { description: "Groceries", amount: 400, subcategory: "Groceries" },
-    { description: "Healthcare", amount: 120, subcategory: "Healthcare" },
-    { description: "Car Insurance", amount: 41.75, subcategory: "Insurance" },
-    { description: "Credit Card", amount: 123.62, subcategory: "Debt Repayment" },
-    { description: "Netflix", amount: 20, subcategory: "Entertainment" },
-    { description: "Dining Out", amount: 50, subcategory: "Dining Out" },
-    { description: "ASB Spending", amount: 100, subcategory: "Entertainment" },
-    { description: "Lotto Syndicate", amount: 4, subcategory: "Gambling" },
-    { description: "Stocks", amount: 200, subcategory: "Investments" },
-    { description: "Retirement", amount: 50, subcategory: "Retirement" },
-    { description: "Emergency Fund", amount: 20, subcategory: "Emergency Fund" },
-    { description: "Savings", amount: 100, subcategory: "Savings" }
-  ];
-  function getCatForSubcat(subcat) {
-    return subcategories[subcat]?.category || categories[0].name;
-  }
-  function getEmojiForSubcat(subcat) {
-    return subcategories[subcat]?.emoji || "🔖";
-  }
   presets.forEach(exp => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "preset-btn";
-    btn.innerHTML = `<span>${getEmojiForSubcat(exp.subcategory)} ${exp.description} <span style="color:#c1c1d1;font-size:0.93em;">₹${exp.amount}</span></span>`;
-    btn.onclick = () => {
+    btn.innerHTML = `<span>${getEmojiForSubcat(exp.subcategory)} ${exp.description} <span style="color:#a4b1c7;font-size:0.93em;">$${exp.amount}</span></span>`;
+    btn.onclick = (e) => {
+      e.preventDefault();
       const cat = getCatForSubcat(exp.subcategory);
-      addCategory(cat); // ensure category exists
+      addCategory(cat);
       addSubcategory(exp.subcategory, cat, getEmojiForSubcat(exp.subcategory));
-      renderCategoryOptions(cat);
-      renderSubcategoryOptions(cat, exp.subcategory);
-      categorySelect.value = cat;
-      subcategorySelect.value = exp.subcategory;
-      amountInput.value = exp.amount;
-      descriptionInput.value = exp.description;
-      validateForm();
+      const today = new Date().toISOString().split("T")[0];
+      addExpense({
+        amount: exp.amount,
+        description: exp.description,
+        category: cat,
+        subcategory: exp.subcategory,
+        date: today
+      });
+      showToast("Expense added!", "#0a84ff");
+      updateTable();
+      updateChart();
+      updateSummary();
     };
     presetGrid.appendChild(btn);
   });
 
-  // --- Form validation and suggestion ---
   function validateForm() {
     const valid =
       amountInput.value.trim() !== "" &&
@@ -302,63 +291,45 @@ document.addEventListener("DOMContentLoaded", () => {
     return date.toLocaleDateString("en-GB", options);
   }
 
-  function animateRow(row, type) {
+  function animateCard(card, type) {
     if (type === "add") {
-      row.style.opacity = 0;
-      row.style.transform = "translateY(30px)";
+      card.style.opacity = 0;
+      card.style.transform = "translateY(30px)";
       requestAnimationFrame(() => {
-        row.style.transition = "all 0.33s cubic-bezier(.4,0,.2,1)";
-        row.style.opacity = 1;
-        row.style.transform = "translateY(0)";
+        card.style.transition = "all 0.33s cubic-bezier(.4,0,.2,1)";
+        card.style.opacity = 1;
+        card.style.transform = "translateY(0)";
       });
     } else if (type === "remove") {
-      row.style.transition = "all 0.22s";
-      row.style.opacity = 0;
-      row.style.transform = "translateX(30px)";
-      setTimeout(() => row.remove(), 200);
+      card.style.transition = "all 0.22s";
+      card.style.opacity = 0;
+      card.style.transform = "translateX(30px)";
+      setTimeout(() => card.remove(), 200);
     }
   }
 
-  // --- Table and chart logic ---
   function updateTable() {
-    expensesTableBody.innerHTML = "";
+    expensesList.innerHTML = "";
     if (expenses.length === 0) {
       emptyTablePlaceholder.style.display = "flex";
     } else {
       emptyTablePlaceholder.style.display = "none";
     }
     expenses.forEach((exp, index) => {
-      const row = document.createElement("tr");
-      const catCell = document.createElement("td");
-      catCell.className = "editable-cell";
-      catCell.tabIndex = 0;
-      catCell.innerText = exp.category;
-      catCell.style.color = getCategoryColor(exp.category);
-      catCell.onclick = () => editCellDropdown(catCell, "category", index, exp.category);
-      catCell.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") catCell.click(); };
-
-      const subcatCell = document.createElement("td");
-      subcatCell.className = "editable-cell";
-      subcatCell.tabIndex = 0;
-      subcatCell.innerText = getEmojiForSubcat(exp.subcategory) + " " + exp.subcategory;
-      subcatCell.onclick = () => editCellDropdown(subcatCell, "subcategory", index, exp.subcategory, exp.category);
-      subcatCell.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") subcatCell.click(); };
-
-      row.innerHTML = `
-        <td>${formatDateDisplay(exp.date)}</td>
-        <td>${exp.description}</td>
-        <td>₹${parseFloat(exp.amount).toLocaleString("en-IN", {minimumFractionDigits: 2})}</td>
-        <td></td>
-        <td></td>
-        <td>
-          <button class="delete-btn" title="Delete" aria-label="Delete" tabindex="0">&#128465;</button>
-        </td>
+      const card = document.createElement("div");
+      card.className = "expense-card";
+      card.innerHTML = `
+        <span class="expense-amount">$${parseFloat(exp.amount).toLocaleString("en-US", {minimumFractionDigits: 2})}</span>
+        <div class="expense-info">
+          <div class="expense-title">${exp.description}
+            <span class="expense-category-badge" style="background:${getCategoryColor(exp.category)}22;color:${getCategoryColor(exp.category)};">${exp.category}</span>
+          </div>
+          <div class="expense-date">${formatDateDisplay(exp.date)} &middot; ${getEmojiForSubcat(exp.subcategory)} ${exp.subcategory}</div>
+        </div>
+        <button class="expense-delete-btn" title="Delete" aria-label="Delete">&#128465;</button>
       `;
-      row.children[3].replaceWith(catCell);
-      row.children[4].replaceWith(subcatCell);
-
-      row.querySelector(".delete-btn").onclick = () => {
-        animateRow(row, "remove");
+      card.querySelector(".expense-delete-btn").onclick = () => {
+        animateCard(card, "remove");
         expenses.splice(index, 1);
         setTimeout(() => {
           updateTable();
@@ -366,49 +337,9 @@ document.addEventListener("DOMContentLoaded", () => {
           updateSummary();
         }, 210);
       };
-      expensesTableBody.appendChild(row);
-      animateRow(row, "add");
+      expensesList.appendChild(card);
+      animateCard(card, "add");
     });
-  }
-
-  function editCellDropdown(cell, type, idx, currentValue, catLimit) {
-    if (cell.querySelector("select")) return;
-    const select = document.createElement("select");
-    select.className = "editable-select";
-    let options;
-    if (type === "category") {
-      options = categories.map(c => c.name);
-    } else {
-      options = Object.entries(subcategories)
-        .filter(([_, v]) => v.category === catLimit)
-        .map(([k]) => k);
-    }
-    options.forEach(opt => {
-      const option = document.createElement("option");
-      option.value = opt;
-      option.textContent = type === "category" ? opt : (getEmojiForSubcat(opt) + " " + opt);
-      select.appendChild(option);
-    });
-    select.value = currentValue;
-    select.onchange = () => {
-      cell.textContent = type === "category" ? select.value : (getEmojiForSubcat(select.value) + " " + select.value);
-      expenses[idx][type] = select.value;
-      if (type === "category") {
-        // If category is changed, set subcategory to first available in that category
-        const subcats = Object.entries(subcategories).filter(([_, v]) => v.category === select.value);
-        if (subcats.length) {
-          expenses[idx].subcategory = subcats[0][0];
-        }
-      }
-      updateTable();
-      updateChart();
-      updateSummary();
-      showToast(`${type.charAt(0).toUpperCase()+type.slice(1)} updated`, "#32d74b");
-    };
-    select.onblur = () => cell.textContent = type === "category" ? select.value : (getEmojiForSubcat(select.value) + " " + select.value);
-    cell.textContent = "";
-    cell.appendChild(select);
-    select.focus();
   }
 
   function updateChart() {
@@ -443,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
           tooltip: {
             callbacks: {
               label: function(context) {
-                return ` ₹${context.raw.toLocaleString("en-IN", {minimumFractionDigits:2})}`;
+                return ` $${context.raw.toLocaleString("en-US", {minimumFractionDigits:2})}`;
               }
             }
           }
@@ -464,7 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateSummary() {
-    // Show grand total and per-category breakdown
     const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
     const perCat = {};
     expenses.forEach(e => {
@@ -472,17 +402,16 @@ document.addEventListener("DOMContentLoaded", () => {
       perCat[e.category] += Number(e.amount);
     });
     let html = `<div style="font-weight:700;font-size:1.19em;margin-bottom:9px;">
-      Total Spent: <span style="color:var(--apple-blue)">₹${total.toLocaleString("en-IN", {minimumFractionDigits:2})}</span>
+      Total Spent: <span style="color:var(--apple-blue)">$${total.toLocaleString("en-US", {minimumFractionDigits:2})}</span>
     </div>
     <ul style="padding-left:1.2em;margin:0 0 0 0;">`;
     Object.entries(perCat).forEach(([cat, amt]) => {
-      html += `<li><span style="color:${getCategoryColor(cat)};font-weight:600;">${cat}</span>: ₹${amt.toLocaleString("en-IN", {minimumFractionDigits:2})}</li>`;
+      html += `<li><span style="color:${getCategoryColor(cat)};font-weight:600;">${cat}</span>: $${amt.toLocaleString("en-US", {minimumFractionDigits:2})}</li>`;
     });
     html += "</ul>";
     summaryTotals.innerHTML = html;
   }
 
-  // --- Add expense ---
   function addExpense({ amount, description, category, subcategory, date }) {
     expenses.push({ amount, description, category, subcategory, date });
     updateTable();
@@ -490,7 +419,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSummary();
   }
 
-  // --- Google Sheets integration ---
   function sendToGoogleSheets() {
     if (!expenses.length) {
       showToast("No expenses to save!", "#ff375f");
@@ -516,7 +444,6 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(() => showToast("Error saving to Google Sheets.", "#ff375f"));
   }
 
-  // --- Description suggestion ---
   function getSuggestion(desc) {
     if (!desc) return null;
     const matches = expenses.filter(e =>
@@ -583,13 +510,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   saveBtn.addEventListener("click", sendToGoogleSheets);
-
-  expensesTableBody.addEventListener("keydown", (e) => {
-    if (e.target.classList.contains("delete-btn") && (e.key === "Enter" || e.key === " ")) {
-      e.preventDefault();
-      e.target.click();
-    }
-  });
 
   function setDefaultDateToday() {
     dateInput.value = new Date().toISOString().split("T")[0];
