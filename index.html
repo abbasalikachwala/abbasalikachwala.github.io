@@ -17,8 +17,8 @@
       min-height: 100vh;
       min-width: 100vw;
       background: var(--main-gradient);
-      background-size: cover;
-      animation: hueAnim 14s linear infinite;
+      background-size: 200% 200%;
+      animation: gradientMove 20s linear infinite;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -31,10 +31,10 @@
       left: 0;
       z-index: 0;
     }
-    @keyframes hueAnim {
-      0% { filter: hue-rotate(0deg);}
-      100% { filter: hue-rotate(360deg);}
-    }
+   @keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
     .center-panel {
       background: rgba(30, 30, 40, 0.55);
       border-radius: 22px;
