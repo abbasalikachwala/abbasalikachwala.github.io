@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Abbasali's Tools Hub</title>
   <style>
+    :root {
+      --main-gradient: linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+    }
     body, html {
       min-height: 100vh;
       margin: 0;
@@ -13,7 +16,7 @@
     .bg-animate {
       min-height: 100vh;
       min-width: 100vw;
-      background: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+      background: var(--main-gradient);
       background-size: cover;
       animation: hueAnim 14s linear infinite;
       display: flex;
@@ -37,7 +40,7 @@
       border-radius: 22px;
       padding: 3rem 2.5rem 2.5rem 2.5rem;
       max-width: 50%;
-      width: 90vw;
+      width: 80vw;
       text-align: center;
       z-index: 1;
       box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
@@ -49,7 +52,7 @@
     h1 {
       font-size: 2.4em;
       font-weight: 700;
-      background: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+      background: var(--main-gradient);
       background-size: 400% 100%;
       background-clip: text;
       -webkit-background-clip: text;
@@ -87,7 +90,7 @@
       letter-spacing: 0.02em;
       position: relative;
       overflow: hidden;
-      background: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
+      background: linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
       background-size: 200% 100%;
     }
     .tool-btn::after {
