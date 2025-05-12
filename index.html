@@ -30,18 +30,20 @@
   50% {background-position: 100% 50%;}
   100% {background-position: 0% 50%;}
 }
-
-    .center-panel {
-      background: var(--glass-bg);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      border-radius: 22px;
-      padding: 3rem 2.5rem 2.5rem 2.5rem;
-      text-align: center;
-      max-width: 370px;
-      width: 94vw;
-    }
+    
+.center-panel {
+  background: rgba(30, 30, 40, 0.55);               /* semi-transparent */
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18); /* soft shadow */
+  border-radius: 22px;
+  padding: 3rem 2.5rem 2.5rem 2.5rem;
+  text-align: center;
+  max-width: 370px;
+  width: 94vw;
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border: 1.5px solid rgba(255,255,255,0.12);       /* subtle white border */
+  z-index: 1;
+}
 
     h1 {
       font-size: 2.4em;
