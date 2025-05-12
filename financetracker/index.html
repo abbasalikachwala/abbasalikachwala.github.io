@@ -7,6 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Identity Services SDK for OAuth2 -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <header class="tracker-header">
@@ -16,6 +18,13 @@
     </h1>
     <div class="tagline">Smarter, friendlier personal finance.</div>
   </header>
+
+  <!-- Google Auth Buttons -->
+  <div style="text-align:center;margin-bottom:1em;">
+    <button id="authorize_button" class="primary-btn">Sign in with Google</button>
+    <button id="signout_button" class="primary-btn" style="background:#eee;color:#333;display:none;">Sign out</button>
+    <span id="user_email" style="display:none;margin-left:1em;font-weight:500;color:#0a84ff;"></span>
+  </div>
 
   <main class="container">
     <section class="column input-column glassy-panel" aria-label="Add expense">
@@ -39,7 +48,7 @@
             <select id="category" required>
               <option value="" disabled selected>Select category</option>
             </select>
-            <button type="button" id="add-category-btn" class="plus-btn" title="Add new category">+</button>
+            <!-- No add-category in this version -->
           </div>
         </div>
         <div class="input-group">
@@ -48,7 +57,7 @@
             <select id="subcategory" required>
               <option value="" disabled selected>Select sub-category</option>
             </select>
-            <button type="button" id="add-subcategory-btn" class="plus-btn" title="Add new sub-category">+</button>
+            <!-- No add-subcategory in this version -->
           </div>
         </div>
         <button type="submit" id="add-expense-btn" disabled class="primary-btn">
