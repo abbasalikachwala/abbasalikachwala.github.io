@@ -6,22 +6,10 @@
   <title>Expenses Tracker</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <meta name="robots" content="noindex, nofollow">
-  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div id="password-overlay" class="password-overlay glassy-blur" aria-modal="true" role="dialog">
-    <div class="password-panel glassy-panel">
-      <h2>Enter Password</h2>
-      <input type="password" id="site-password" placeholder="" autofocus autocomplete="current-password" aria-label="Password" />
-      <button id="submit-password" class="primary-btn password-btn">Log In</button>
-      <div id="password-error" class="password-error" aria-live="polite"></div>
-    </div>
-  </div>
-
-  <header class="tracker-header" style="display:none;">
+  <header class="tracker-header">
     <h1>
       <span class="sficon" aria-label="Money">&#128181;</span>
       <span class="gradient-text main-title-text">Expenses Tracker</span>
@@ -29,7 +17,7 @@
     <div class="tagline">Smarter, friendlier personal finance.</div>
   </header>
 
-  <main class="container" aria-label="Main content">
+  <main class="container">
     <section class="column input-column glassy-panel" aria-label="Add expense">
       <h2>Particulars</h2>
       <form id="expense-form" autocomplete="off">
@@ -45,17 +33,13 @@
           <label for="description">Description</label>
           <input type="text" id="description" maxlength="50" required placeholder="Groceries, Netflix, etc." />
         </div>
-        <div id="category-suggestion" class="suggestion-bar" style="display:none;">
-          <span id="suggestion-text"></span>
-          <button type="button" id="apply-suggestion-btn" tabindex="-1" class="suggestion-btn">Apply</button>
-        </div>
         <div class="input-group">
           <label for="category">Category</label>
           <div class="select-row">
             <select id="category" required>
               <option value="" disabled selected>Select category</option>
             </select>
-            <button type="button" id="add-category-btn" class="plus-btn" title="Add new category" aria-label="Add category">+</button>
+            <button type="button" id="add-category-btn" class="plus-btn" title="Add new category">+</button>
           </div>
         </div>
         <div class="input-group">
@@ -64,14 +48,13 @@
             <select id="subcategory" required>
               <option value="" disabled selected>Select sub-category</option>
             </select>
-            <button type="button" id="add-subcategory-btn" class="plus-btn" title="Add new sub-category" aria-label="Add subcategory">+</button>
+            <button type="button" id="add-subcategory-btn" class="plus-btn" title="Add new sub-category">+</button>
           </div>
         </div>
         <button type="submit" id="add-expense-btn" disabled class="primary-btn">
           <span class="sficon">+</span> Add Expense
         </button>
       </form>
-
       <div class="presets-section">
         <div class="presets-title">Presets</div>
         <div class="preset-grid"></div>
@@ -85,6 +68,9 @@
         <div class="emoji-placeholder">&#128181;</div>
         <div>Add your first expense to see it here!</div>
       </div>
+      <div id="loading-spinner" class="loading-spinner" style="display:none;">
+        Loading...
+      </div>
     </section>
 
     <section class="column summary-column glassy-panel" aria-label="Summary">
@@ -96,29 +82,13 @@
     </section>
   </main>
 
-  <footer style="display:none;">
-    <button class="save-btn-bottom primary-btn" id="save-to-local">
-      <span class="sficon">&#128190;</span> Save to Local
+  <footer>
+    <button class="save-btn-bottom primary-btn" id="refresh-sheet">
+      <span class="sficon">&#10227;</span> Refresh from Google Sheets
     </button>
   </footer>
 
-  <div id="toast" class="toast" aria-live="polite"></div>
-
-  <!-- Modal for new category/subcategory -->
-  <div id="modal-overlay" class="modal-overlay" style="display:none;">
-    <div class="modal glassy-panel" role="dialog" aria-modal="true">
-      <h3 id="modal-title"></h3>
-      <input type="text" id="modal-input" maxlength="32" />
-      <div id="modal-category-selector" class="modal-category-selector" style="display:none;">
-        <label for="modal-category-select">Assign to category:</label>
-        <select id="modal-category-select"></select>
-      </div>
-      <div class="modal-actions">
-        <button id="modal-cancel" class="modal-btn">Cancel</button>
-        <button id="modal-ok" class="modal-btn primary-btn">Add</button>
-      </div>
-    </div>
-  </div>
-  <script src="script.js" defer></script>
+  <div id="toast" class="toast"></div>
+  <script src="script.js"></script>
 </body>
 </html>
