@@ -1,14 +1,12 @@
-// Configurable password hash. To set, use SHA-256 hash of your password.
-const PASSWORD_HASH = "b40f795cb9d5f6500662cd70fefac144f3abdd7e93306557953af1f246ce374b"; // Change as needed
+// ====== CONFIGURATION ======
+const PASSWORD_HASH = "b40f795cb9d5f6500662cd70fefac144f3abdd7e93306557953af1f246ce374b"; // SHA-256 hash of your password
 
-// Preset categories and subcategories
 const DEFAULT_CATEGORIES = [
   { name: "Needs", color: "var(--needs)" },
   { name: "Wants", color: "var(--wants)" },
   { name: "Savings", color: "var(--savings)" },
   { name: "Investments", color: "var(--investments)" }
 ];
-
 const DEFAULT_SUBCATEGORIES = {
   "Housing":        { category: "Needs", emoji: "🏠" },
   "Utilities":      { category: "Needs", emoji: "💡" },
@@ -20,8 +18,6 @@ const DEFAULT_SUBCATEGORIES = {
   "Investments":    { category: "Investments", emoji: "📈" },
   "Savings":        { category: "Savings", emoji: "💰" }
 };
-
-// Preset expenses
 const PRESETS = [
   { description: "Rent", amount: 830, subcategory: "Housing" },
   { description: "2degrees", amount: 100.5, subcategory: "Utilities" },
@@ -34,23 +30,20 @@ const PRESETS = [
   { description: "RaboBank Savings", amount: 50, subcategory: "Savings" },
   { description: "RaboBank Gold", amount: 100, subcategory: "Investments" }
 ];
-
-// LocalStorage keys
 const STORAGE_KEYS = {
   expenses: "financetracker_expenses",
   categories: "financetracker_categories",
   subcategories: "financetracker_subcategories"
 };
+// ==========================
 
-// Utility: SHA-256 (using SubtleCrypto)
+// --- Utility Functions ---
 async function sha256(str) {
   const encoder = new TextEncoder();
   const data = encoder.encode(str);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
-
-// Helper functions for LocalStorage
 function saveToStorage(key, val) {
   localStorage.setItem(key, JSON.stringify(val));
 }
@@ -62,14 +55,27 @@ function loadFromStorage(key, fallback) {
     return fallback;
   }
 }
+function randomColor() {
+  const colors = [
+    "#0a84ff", "#bf5af2", "#32d74b", "#ff9f0a", "#ffd60a",
+    "#ff375f", "#64d2ff", "#5e5ce6", "#ffb340"
+  ];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  const options = { day: "numeric", month: "short", year: "numeric" };
+  return date.toLocaleDateString("en-GB", options);
+}
 
-// State
+// --- State ---
 let categories = loadFromStorage(STORAGE_KEYS.categories, DEFAULT_CATEGORIES.slice());
 let subcategories = loadFromStorage(STORAGE_KEYS.subcategories, { ...DEFAULT_SUBCATEGORIES });
 let expenses = loadFromStorage(STORAGE_KEYS.expenses, []);
 let chart;
 
-// DOM elements
+// --- DOM Elements ---
 const overlay = document.getElementById("password-overlay");
 const header = document.querySelector(".tracker-header");
 const main = document.querySelector("main");
@@ -119,7 +125,6 @@ async function tryPassword() {
     pwInput.focus();
   }
 }
-
 function unlockSite() {
   overlay.style.opacity = 0;
   setTimeout(() => {
@@ -133,7 +138,7 @@ function unlockSite() {
   }, 380);
 }
 
-// --- Category/Subcategory Management ---
+// --- Categories/Subcategories ---
 function addCategory(name, color = null) {
   if (!categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
     categories.push({ name, color: color || randomColor() });
@@ -148,13 +153,6 @@ function getCategoryColor(name) {
   const c = categories.find(c => c.name === name);
   return c ? c.color : "#ccc";
 }
-function randomColor() {
-  const colors = [
-    "#0a84ff", "#bf5af2", "#32d74b", "#ff9f0a", "#ffd60a",
-    "#ff375f", "#64d2ff", "#5e5ce6", "#ffb340"
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-}
 function getCatForSubcat(subcat) {
   return subcategories[subcat]?.category || categories[0].name;
 }
@@ -162,7 +160,7 @@ function getEmojiForSubcat(subcat) {
   return subcategories[subcat]?.emoji || "🔖";
 }
 
-// --- Populate selects ---
+// --- Select Rendering ---
 function renderCategoryOptions(selected = "") {
   categorySelect.innerHTML = '<option value="" disabled selected>Select category</option>';
   categories.forEach(c => {
@@ -186,13 +184,8 @@ function renderSubcategoryOptions(category, selected = "") {
     }
   });
 }
-function updateSelectsAfterAdd() {
-  const cat = categorySelect.value || "";
-  renderCategoryOptions(cat);
-  renderSubcategoryOptions(cat, subcategorySelect.value);
-}
 
-// --- Modal logic for new cat/subcat ---
+// --- Modal Logic ---
 let modalResolve;
 function openModal({ title, placeholder, requireCat = false }) {
   modalTitle.textContent = title;
@@ -210,10 +203,14 @@ function openModal({ title, placeholder, requireCat = false }) {
   }
   modalOverlay.style.display = "";
   setTimeout(() => { modalInput.focus(); }, 50);
-  return new Promise(resolve => { modalResolve = resolve; });
+  return new Promise(resolve => {
+    modalResolve = (res) => {
+      modalOverlay.style.display = "none";
+      resolve(res);
+    };
+  });
 }
 function closeModal() {
-  modalOverlay.style.display = "none";
   modalResolve && modalResolve(null);
 }
 modalCancel.onclick = closeModal;
@@ -228,21 +225,20 @@ modalOk.onclick = () => {
   if (modalCatSelector.style.display !== "none") {
     result.category = modalCatSelect.value;
   }
-  closeModal();
   modalResolve && modalResolve(result);
 };
 
-// --- Add new category ---
+// --- Add Category/Subcategory Buttons ---
 addCategoryBtn.onclick = async () => {
   const r = await openModal({ title: "Add New Category", placeholder: "Eg. Education" });
   if (r && r.value) {
     addCategory(r.value);
-    renderCategoryOptions("");
-    renderSubcategoryOptions("", "");
+    renderCategoryOptions(r.value);
+    renderSubcategoryOptions(r.value, "");
+    categorySelect.value = r.value;
     showToast("Category added!", "#0a84ff");
   }
 };
-// --- Add new sub-category ---
 addSubcategoryBtn.onclick = async () => {
   const r = await openModal({ title: "Add New Sub-category", placeholder: "Eg. Tuition, Mobile Plan", requireCat: true });
   if (r && r.value && r.category) {
@@ -251,24 +247,20 @@ addSubcategoryBtn.onclick = async () => {
     showToast("Sub-category added!", "#32d74b");
   }
 };
-
-// --- Change subcats when category changed ---
 categorySelect.onchange = () => {
   renderSubcategoryOptions(categorySelect.value, "");
   validateForm();
 };
 
-// --- Initial render of select options ---
+// --- Initial Render ---
 function renderAll() {
-  renderCategoryOptions();
-  renderSubcategoryOptions();
+  renderCategoryOptions(categorySelect.value);
+  renderSubcategoryOptions(categorySelect.value, subcategorySelect.value);
   renderPresets();
   updateTable();
   updateChart();
   updateSummary();
 }
-
-// --- Presets: one-click to add expense ---
 function renderPresets() {
   presetGrid.innerHTML = "";
   PRESETS.forEach(exp => {
@@ -295,7 +287,7 @@ function renderPresets() {
   });
 }
 
-// --- Form validation ---
+// --- Form, Toast, Suggestion ---
 function validateForm() {
   const valid =
     amountInput.value.trim() !== "" &&
@@ -305,8 +297,6 @@ function validateForm() {
     subcategorySelect.value !== "";
   addExpenseBtn.disabled = !valid;
 }
-
-// --- Toast notifications ---
 function showToast(message, color = null) {
   toast.textContent = message;
   toast.className = "toast show";
@@ -314,16 +304,77 @@ function showToast(message, color = null) {
   else toast.style.background = "";
   setTimeout(() => { toast.className = "toast"; toast.style.background = ""; }, 2100);
 }
-
-// --- Date formatting ---
-function formatDateDisplay(dateStr) {
-  if (!dateStr) return "-";
-  const date = new Date(dateStr);
-  const options = { day: "numeric", month: "short", year: "numeric" };
-  return date.toLocaleDateString("en-GB", options);
+function getSuggestion(desc) {
+  if (!desc) return null;
+  const matches = expenses.filter(e =>
+    e.description.trim().toLowerCase() === desc.trim().toLowerCase()
+  );
+  if (matches.length) {
+    const freq = {};
+    matches.forEach(e => {
+      const key = `${e.category}|${e.subcategory}`;
+      freq[key] = (freq[key] || 0) + 1;
+    });
+    const best = Object.entries(freq).reduce((a, b) => (a[1] > b[1] ? a : b));
+    const [category, subcategory] = best[0].split("|");
+    return { category, subcategory, count: best[1] };
+  }
+  return null;
+}
+descriptionInput.addEventListener("input", () => {
+  const desc = descriptionInput.value.trim();
+  const suggestion = getSuggestion(desc);
+  if (suggestion) {
+    suggestionBar.style.display = "";
+    suggestionText.innerHTML =
+      `Suggestion: <strong>${suggestion.category}</strong> &rsaquo; <strong>${suggestion.subcategory}</strong> <span style="color:#888;">(used ${suggestion.count} time${suggestion.count > 1 ? "s" : ""})</span>`;
+    applySuggestionBtn.onclick = () => {
+      categorySelect.value = suggestion.category;
+      renderSubcategoryOptions(suggestion.category, suggestion.subcategory);
+      subcategorySelect.value = suggestion.subcategory;
+      suggestionBar.style.display = "none";
+      validateForm();
+    };
+  } else {
+    suggestionBar.style.display = "none";
+  }
+  validateForm();
+});
+[amountInput, descriptionInput, categorySelect, subcategorySelect].forEach(input => {
+  input.addEventListener("input", validateForm);
+  input.addEventListener("change", validateForm);
+});
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const amount = parseFloat(amountInput.value);
+  const description = descriptionInput.value.trim();
+  const category = categorySelect.value.trim();
+  const subcategory = subcategorySelect.value.trim();
+  const date = dateInput.value || new Date().toISOString().split("T")[0];
+  if (!isNaN(amount) && description && category && subcategory) {
+    const entry = { amount, description, category, subcategory, date };
+    addExpense(entry);
+    showToast("Expense added!", "#0a84ff");
+    amountInput.value = "";
+    descriptionInput.value = "";
+    renderCategoryOptions("");
+    renderSubcategoryOptions("", "");
+    dateInput.value = "";
+    suggestionBar.style.display = "none";
+    validateForm();
+  } else {
+    showToast("Please fill all required fields.", "#ff375f");
+  }
+});
+saveBtn.addEventListener("click", () => {
+  saveToStorage(STORAGE_KEYS.expenses, expenses);
+  showToast("Expenses saved locally!", "#32d74b");
+});
+function setDefaultDateToday() {
+  dateInput.value = new Date().toISOString().split("T")[0];
 }
 
-// --- Expenses Table ---
+// --- Table, Chart, Summary ---
 function animateCard(card, type) {
   if (type === "add") {
     card.style.opacity = 0;
@@ -374,10 +425,7 @@ function updateTable() {
     animateCard(card, "add");
   });
 }
-
-// --- Chart ---
 function updateChart() {
-  // Chart shows SUM of amounts per main category
   const sums = {};
   expenses.forEach(({ category, amount }) => {
     if (!category) return;
@@ -427,8 +475,6 @@ function updateChart() {
     }
   });
 }
-
-// --- Summary ---
 function updateSummary() {
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const perCat = {};
@@ -446,8 +492,6 @@ function updateSummary() {
   html += "</ul>";
   summaryTotals.innerHTML = html;
 }
-
-// --- Add Expense ---
 function addExpense({ amount, description, category, subcategory, date }) {
   expenses.push({ amount, description, category, subcategory, date });
   saveToStorage(STORAGE_KEYS.expenses, expenses);
@@ -456,86 +500,7 @@ function addExpense({ amount, description, category, subcategory, date }) {
   updateSummary();
 }
 
-// --- Save (redundant, but for footer button parity) ---
-saveBtn.addEventListener("click", () => {
-  saveToStorage(STORAGE_KEYS.expenses, expenses);
-  showToast("Expenses saved locally!", "#32d74b");
-});
-
-// --- Suggestion Logic ---
-function getSuggestion(desc) {
-  if (!desc) return null;
-  const matches = expenses.filter(e =>
-    e.description.trim().toLowerCase() === desc.trim().toLowerCase()
-  );
-  if (matches.length) {
-    const freq = {};
-    matches.forEach(e => {
-      const key = `${e.category}|${e.subcategory}`;
-      freq[key] = (freq[key] || 0) + 1;
-    });
-    const best = Object.entries(freq).reduce((a, b) => (a[1] > b[1] ? a : b));
-    const [category, subcategory] = best[0].split("|");
-    return { category, subcategory, count: best[1] };
-  }
-  return null;
-}
-descriptionInput.addEventListener("input", () => {
-  const desc = descriptionInput.value.trim();
-  const suggestion = getSuggestion(desc);
-  if (suggestion) {
-    suggestionBar.style.display = "";
-    suggestionText.innerHTML =
-      `Suggestion: <strong>${suggestion.category}</strong> &rsaquo; <strong>${suggestion.subcategory}</strong> <span style="color:#888;">(used ${suggestion.count} time${suggestion.count > 1 ? "s" : ""})</span>`;
-    applySuggestionBtn.onclick = () => {
-      categorySelect.value = suggestion.category;
-      renderSubcategoryOptions(suggestion.category, suggestion.subcategory);
-      subcategorySelect.value = suggestion.subcategory;
-      suggestionBar.style.display = "none";
-      validateForm();
-    };
-  } else {
-    suggestionBar.style.display = "none";
-  }
-  validateForm();
-});
-
-// --- Unified Form Inputs Validation ---
-[amountInput, descriptionInput, categorySelect, subcategorySelect].forEach(input => {
-  input.addEventListener("input", validateForm);
-  input.addEventListener("change", validateForm);
-});
-
-// --- Form Submission ---
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const amount = parseFloat(amountInput.value);
-  const description = descriptionInput.value.trim();
-  const category = categorySelect.value.trim();
-  const subcategory = subcategorySelect.value.trim();
-  const date = dateInput.value || new Date().toISOString().split("T")[0];
-  if (!isNaN(amount) && description && category && subcategory) {
-    const entry = { amount, description, category, subcategory, date };
-    addExpense(entry);
-    showToast("Expense added!", "#0a84ff");
-    amountInput.value = "";
-    descriptionInput.value = "";
-    renderCategoryOptions("");
-    renderSubcategoryOptions("", "");
-    dateInput.value = "";
-    suggestionBar.style.display = "none";
-    validateForm();
-  } else {
-    showToast("Please fill all required fields.", "#ff375f");
-  }
-});
-
-// --- Set today's date as default ---
-function setDefaultDateToday() {
-  dateInput.value = new Date().toISOString().split("T")[0];
-}
-
-// --- On page load, show password overlay, hide main content ---
+// --- On Load ---
 window.addEventListener("DOMContentLoaded", () => {
   overlay.style.display = "";
   overlay.style.opacity = 1;
