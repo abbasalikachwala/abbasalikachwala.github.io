@@ -1,13 +1,12 @@
-// ====== CONFIGURATION ======
-const PASSWORD_HASH = "b40f795cb9d5f6500662cd70fefac144f3abdd7e93306557953af1f246ce374b"; // SHA-256 hash of your password
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLeybVH7zjv4lq_K6_oHSuHqm6z1OqJ2RhqY9VcplfaT9br5yMhC6Y7pVI5LWTXgc/exec";
 
-const DEFAULT_CATEGORIES = [
+const categories = [
   { name: "Needs", color: "var(--needs)" },
   { name: "Wants", color: "var(--wants)" },
   { name: "Savings", color: "var(--savings)" },
-  { name: "Investments", color: "var(--investments)" }
+  { name: "Investments", color: "var(--investments)" },
 ];
-const DEFAULT_SUBCATEGORIES = {
+const subcategories = {
   "Housing":        { category: "Needs", emoji: "🏠" },
   "Utilities":      { category: "Needs", emoji: "💡" },
   "Insurance":      { category: "Needs", emoji: "🛡️" },
@@ -18,7 +17,8 @@ const DEFAULT_SUBCATEGORIES = {
   "Investments":    { category: "Investments", emoji: "📈" },
   "Savings":        { category: "Savings", emoji: "💰" }
 };
-const PRESETS = [
+
+const presets = [
   { description: "Rent", amount: 830, subcategory: "Housing" },
   { description: "2degrees", amount: 100.5, subcategory: "Utilities" },
   { description: "Car Insurance", amount: 41.75, subcategory: "Insurance" },
@@ -30,125 +30,10 @@ const PRESETS = [
   { description: "RaboBank Savings", amount: 50, subcategory: "Savings" },
   { description: "RaboBank Gold", amount: 100, subcategory: "Investments" }
 ];
-const STORAGE_KEYS = {
-  expenses: "financetracker_expenses",
-  categories: "financetracker_categories",
-  subcategories: "financetracker_subcategories"
-};
-// ==========================
 
-// --- Utility Functions ---
-async function sha256(str) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
-}
-function saveToStorage(key, val) {
-  localStorage.setItem(key, JSON.stringify(val));
-}
-function loadFromStorage(key, fallback) {
-  try {
-    const val = localStorage.getItem(key);
-    return val ? JSON.parse(val) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-function randomColor() {
-  const colors = [
-    "#0a84ff", "#bf5af2", "#32d74b", "#ff9f0a", "#ffd60a",
-    "#ff375f", "#64d2ff", "#5e5ce6", "#ffb340"
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-function formatDateDisplay(dateStr) {
-  if (!dateStr) return "-";
-  const date = new Date(dateStr);
-  const options = { day: "numeric", month: "short", year: "numeric" };
-  return date.toLocaleDateString("en-GB", options);
-}
-
-// --- State ---
-let categories = loadFromStorage(STORAGE_KEYS.categories, DEFAULT_CATEGORIES.slice());
-let subcategories = loadFromStorage(STORAGE_KEYS.subcategories, { ...DEFAULT_SUBCATEGORIES });
-let expenses = loadFromStorage(STORAGE_KEYS.expenses, []);
+let expenses = [];
 let chart;
 
-// --- DOM Elements ---
-const overlay = document.getElementById("password-overlay");
-const header = document.querySelector(".tracker-header");
-const main = document.querySelector("main");
-const footer = document.querySelector("footer");
-const pwInput = document.getElementById("site-password");
-const pwBtn = document.getElementById("submit-password");
-const pwErr = document.getElementById("password-error");
-const form = document.getElementById("expense-form");
-const amountInput = document.getElementById("amount");
-const descriptionInput = document.getElementById("description");
-const categorySelect = document.getElementById("category");
-const subcategorySelect = document.getElementById("subcategory");
-const dateInput = document.getElementById("date");
-const expensesList = document.getElementById("expenses-list");
-const emptyTablePlaceholder = document.getElementById("empty-table-placeholder");
-const ctx = document.getElementById("category-chart").getContext("2d");
-const saveBtn = document.getElementById("save-to-local");
-const toast = document.getElementById("toast");
-const suggestionBar = document.getElementById("category-suggestion");
-const suggestionText = document.getElementById("suggestion-text");
-const applySuggestionBtn = document.getElementById("apply-suggestion-btn");
-const addExpenseBtn = document.getElementById("add-expense-btn");
-const summaryTotals = document.getElementById("summary-totals");
-const modalOverlay = document.getElementById("modal-overlay");
-const modal = document.querySelector(".modal");
-const modalTitle = document.getElementById("modal-title");
-const modalInput = document.getElementById("modal-input");
-const modalCancel = document.getElementById("modal-cancel");
-const modalOk = document.getElementById("modal-ok");
-const modalCatSelector = document.getElementById("modal-category-selector");
-const modalCatSelect = document.getElementById("modal-category-select");
-const addCategoryBtn = document.getElementById("add-category-btn");
-const addSubcategoryBtn = document.getElementById("add-subcategory-btn");
-const presetGrid = document.querySelector(".preset-grid");
-
-// --- Password Protection ---
-pwBtn.onclick = tryPassword;
-pwInput.onkeydown = e => { if (e.key === "Enter") tryPassword(); };
-async function tryPassword() {
-  const pass = pwInput.value;
-  if (await sha256(pass) === PASSWORD_HASH) {
-    pwErr.textContent = "";
-    unlockSite();
-  } else {
-    pwErr.textContent = "Incorrect password. Try again.";
-    pwInput.value = "";
-    pwInput.focus();
-  }
-}
-function unlockSite() {
-  overlay.style.opacity = 0;
-  setTimeout(() => {
-    overlay.style.display = "none";
-    header.style.display = "";
-    main.style.display = "";
-    footer.style.display = "";
-    setDefaultDateToday();
-    descriptionInput.focus();
-    renderAll();
-  }, 380);
-}
-
-// --- Categories/Subcategories ---
-function addCategory(name, color = null) {
-  if (!categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
-    categories.push({ name, color: color || randomColor() });
-    saveToStorage(STORAGE_KEYS.categories, categories);
-  }
-}
-function addSubcategory(name, category, emoji = "🔖") {
-  subcategories[name] = { category, emoji };
-  saveToStorage(STORAGE_KEYS.subcategories, subcategories);
-}
 function getCategoryColor(name) {
   const c = categories.find(c => c.name === name);
   return c ? c.color : "#ccc";
@@ -160,8 +45,8 @@ function getEmojiForSubcat(subcat) {
   return subcategories[subcat]?.emoji || "🔖";
 }
 
-// --- Select Rendering ---
 function renderCategoryOptions(selected = "") {
+  const categorySelect = document.getElementById("category");
   categorySelect.innerHTML = '<option value="" disabled selected>Select category</option>';
   categories.forEach(c => {
     const opt = document.createElement("option");
@@ -173,8 +58,9 @@ function renderCategoryOptions(selected = "") {
   });
 }
 function renderSubcategoryOptions(category, selected = "") {
+  const subcategorySelect = document.getElementById("subcategory");
   subcategorySelect.innerHTML = '<option value="" disabled selected>Select sub-category</option>';
-  Object.entries(subcategories).forEach(([subcat, { category: cat, emoji }]) => {
+  Object.entries(subcategories).forEach(([subcat, {category: cat, emoji}]) => {
     if (cat === category) {
       const opt = document.createElement("option");
       opt.value = subcat;
@@ -185,213 +71,51 @@ function renderSubcategoryOptions(category, selected = "") {
   });
 }
 
-// --- Modal Logic ---
-let modalResolve;
-function openModal({ title, placeholder, requireCat = false }) {
-  modalTitle.textContent = title;
-  modalInput.value = "";
-  modalInput.placeholder = placeholder || "";
-  modalCatSelector.style.display = requireCat ? "" : "none";
-  if (requireCat) {
-    modalCatSelect.innerHTML = "";
-    categories.forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.name;
-      opt.textContent = c.name;
-      modalCatSelect.appendChild(opt);
-    });
-  }
-  modalOverlay.style.display = "";
-  setTimeout(() => { modalInput.focus(); }, 50);
-  return new Promise(resolve => {
-    modalResolve = (res) => {
-      modalOverlay.style.display = "none";
-      resolve(res);
-    };
-  });
-}
-function closeModal() {
-  modalResolve && modalResolve(null);
-}
-modalCancel.onclick = closeModal;
-modalOverlay.onclick = e => { if (e.target === modalOverlay) closeModal(); };
-modalOk.onclick = () => {
-  const val = modalInput.value.trim();
-  if (!val) {
-    modalInput.focus();
-    return;
-  }
-  let result = { value: val };
-  if (modalCatSelector.style.display !== "none") {
-    result.category = modalCatSelect.value;
-  }
-  modalResolve && modalResolve(result);
-};
-
-// --- Add Category/Subcategory Buttons ---
-addCategoryBtn.onclick = async () => {
-  const r = await openModal({ title: "Add New Category", placeholder: "Eg. Education" });
-  if (r && r.value) {
-    addCategory(r.value);
-    renderCategoryOptions(r.value);
-    renderSubcategoryOptions(r.value, "");
-    categorySelect.value = r.value;
-    showToast("Category added!", "#0a84ff");
-  }
-};
-addSubcategoryBtn.onclick = async () => {
-  const r = await openModal({ title: "Add New Sub-category", placeholder: "Eg. Tuition, Mobile Plan", requireCat: true });
-  if (r && r.value && r.category) {
-    addSubcategory(r.value, r.category);
-    renderSubcategoryOptions(categorySelect.value, "");
-    showToast("Sub-category added!", "#32d74b");
-  }
-};
-categorySelect.onchange = () => {
-  renderSubcategoryOptions(categorySelect.value, "");
-  validateForm();
-};
-
-// --- Initial Render ---
-function renderAll() {
-  renderCategoryOptions(categorySelect.value);
-  renderSubcategoryOptions(categorySelect.value, subcategorySelect.value);
-  renderPresets();
-  updateTable();
-  updateChart();
-  updateSummary();
-}
-function renderPresets() {
-  presetGrid.innerHTML = "";
-  PRESETS.forEach(exp => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "preset-btn";
-    btn.innerHTML = `<span>${getEmojiForSubcat(exp.subcategory)} ${exp.description} <span style="color:#a4b1c7;font-size:0.93em;">$${exp.amount}</span></span>`;
-    btn.onclick = (e) => {
-      e.preventDefault();
-      const cat = getCatForSubcat(exp.subcategory);
-      addCategory(cat);
-      addSubcategory(exp.subcategory, cat, getEmojiForSubcat(exp.subcategory));
-      const today = new Date().toISOString().split("T")[0];
-      addExpense({
-        amount: exp.amount,
-        description: exp.description,
-        category: cat,
-        subcategory: exp.subcategory,
-        date: today
-      });
-      showToast("Expense added!", "#0a84ff");
-    };
-    presetGrid.appendChild(btn);
-  });
-}
-
-// --- Form, Toast, Suggestion ---
-function validateForm() {
-  const valid =
-    amountInput.value.trim() !== "" &&
-    parseFloat(amountInput.value) > 0 &&
-    descriptionInput.value.trim() !== "" &&
-    categorySelect.value !== "" &&
-    subcategorySelect.value !== "";
-  addExpenseBtn.disabled = !valid;
-}
 function showToast(message, color = null) {
+  const toast = document.getElementById("toast");
   toast.textContent = message;
   toast.className = "toast show";
   if (color) toast.style.background = color;
   else toast.style.background = "";
   setTimeout(() => { toast.className = "toast"; toast.style.background = ""; }, 2100);
 }
-function getSuggestion(desc) {
-  if (!desc) return null;
-  const matches = expenses.filter(e =>
-    e.description.trim().toLowerCase() === desc.trim().toLowerCase()
-  );
-  if (matches.length) {
-    const freq = {};
-    matches.forEach(e => {
-      const key = `${e.category}|${e.subcategory}`;
-      freq[key] = (freq[key] || 0) + 1;
-    });
-    const best = Object.entries(freq).reduce((a, b) => (a[1] > b[1] ? a : b));
-    const [category, subcategory] = best[0].split("|");
-    return { category, subcategory, count: best[1] };
-  }
-  return null;
-}
-descriptionInput.addEventListener("input", () => {
-  const desc = descriptionInput.value.trim();
-  const suggestion = getSuggestion(desc);
-  if (suggestion) {
-    suggestionBar.style.display = "";
-    suggestionText.innerHTML =
-      `Suggestion: <strong>${suggestion.category}</strong> &rsaquo; <strong>${suggestion.subcategory}</strong> <span style="color:#888;">(used ${suggestion.count} time${suggestion.count > 1 ? "s" : ""})</span>`;
-    applySuggestionBtn.onclick = () => {
-      categorySelect.value = suggestion.category;
-      renderSubcategoryOptions(suggestion.category, suggestion.subcategory);
-      subcategorySelect.value = suggestion.subcategory;
-      suggestionBar.style.display = "none";
-      validateForm();
-    };
-  } else {
-    suggestionBar.style.display = "none";
-  }
-  validateForm();
-});
-[amountInput, descriptionInput, categorySelect, subcategorySelect].forEach(input => {
-  input.addEventListener("input", validateForm);
-  input.addEventListener("change", validateForm);
-});
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const amount = parseFloat(amountInput.value);
-  const description = descriptionInput.value.trim();
-  const category = categorySelect.value.trim();
-  const subcategory = subcategorySelect.value.trim();
-  const date = dateInput.value || new Date().toISOString().split("T")[0];
-  if (!isNaN(amount) && description && category && subcategory) {
-    const entry = { amount, description, category, subcategory, date };
-    addExpense(entry);
-    showToast("Expense added!", "#0a84ff");
-    amountInput.value = "";
-    descriptionInput.value = "";
-    renderCategoryOptions("");
-    renderSubcategoryOptions("", "");
-    dateInput.value = "";
-    suggestionBar.style.display = "none";
-    validateForm();
-  } else {
-    showToast("Please fill all required fields.", "#ff375f");
-  }
-});
-saveBtn.addEventListener("click", () => {
-  saveToStorage(STORAGE_KEYS.expenses, expenses);
-  showToast("Expenses saved locally!", "#32d74b");
-});
-function setDefaultDateToday() {
-  dateInput.value = new Date().toISOString().split("T")[0];
+
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return "-";
+  const date = new Date(dateStr);
+  const options = { day: "numeric", month: "short", year: "numeric" };
+  return date.toLocaleDateString("en-GB", options);
 }
 
-// --- Table, Chart, Summary ---
-function animateCard(card, type) {
-  if (type === "add") {
-    card.style.opacity = 0;
-    card.style.transform = "translateY(30px)";
-    requestAnimationFrame(() => {
-      card.style.transition = "all 0.33s cubic-bezier(.4,0,.2,1)";
-      card.style.opacity = 1;
-      card.style.transform = "translateY(0)";
-    });
-  } else if (type === "remove") {
-    card.style.transition = "all 0.22s";
-    card.style.opacity = 0;
-    card.style.transform = "translateX(30px)";
-    setTimeout(() => card.remove(), 200);
-  }
+function renderPresets() {
+  const presetGrid = document.querySelector(".preset-grid");
+  presetGrid.innerHTML = "";
+  presets.forEach(exp => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "preset-btn";
+    btn.innerHTML = `
+      <div class="preset-title">${getEmojiForSubcat(exp.subcategory)} ${exp.description}</div>
+      <div class="preset-amount">$${parseFloat(exp.amount).toLocaleString("en-US", {minimumFractionDigits:2})}</div>
+    `;
+    btn.onclick = () => {
+      const cat = getCatForSubcat(exp.subcategory);
+      const today = new Date().toISOString().split("T")[0];
+      submitExpense({
+        amount: exp.amount,
+        description: exp.description,
+        category: cat,
+        subcategory: exp.subcategory,
+        date: today
+      });
+    };
+    presetGrid.appendChild(btn);
+  });
 }
+
 function updateTable() {
+  const expensesList = document.getElementById("expenses-list");
+  const emptyTablePlaceholder = document.getElementById("empty-table-placeholder");
   expensesList.innerHTML = "";
   if (expenses.length === 0) {
     emptyTablePlaceholder.style.display = "flex";
@@ -402,7 +126,7 @@ function updateTable() {
     const card = document.createElement("div");
     card.className = "expense-card";
     card.innerHTML = `
-      <span class="expense-amount">$${parseFloat(exp.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+      <span class="expense-amount">$${parseFloat(exp.amount).toLocaleString("en-US", {minimumFractionDigits: 2})}</span>
       <div class="expense-info">
         <div class="expense-title">${exp.description}
           <span class="expense-category-badge" style="background:${getCategoryColor(exp.category)}22;color:${getCategoryColor(exp.category)};">${exp.category}</span>
@@ -411,21 +135,13 @@ function updateTable() {
       </div>
       <button class="expense-delete-btn" title="Delete" aria-label="Delete">&#128465;</button>
     `;
-    card.querySelector(".expense-delete-btn").onclick = () => {
-      animateCard(card, "remove");
-      expenses.splice(index, 1);
-      saveToStorage(STORAGE_KEYS.expenses, expenses);
-      setTimeout(() => {
-        updateTable();
-        updateChart();
-        updateSummary();
-      }, 210);
-    };
+    card.querySelector(".expense-delete-btn").onclick = () => deleteExpense(index);
     expensesList.appendChild(card);
-    animateCard(card, "add");
   });
 }
+
 function updateChart() {
+  const ctx = document.getElementById("category-chart").getContext("2d");
   const sums = {};
   expenses.forEach(({ category, amount }) => {
     if (!category) return;
@@ -455,8 +171,8 @@ function updateChart() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: function (context) {
-              return ` $${context.raw.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+            label: function(context) {
+              return ` $${context.raw.toLocaleString("en-US", {minimumFractionDigits:2})}`;
             }
           }
         }
@@ -475,7 +191,9 @@ function updateChart() {
     }
   });
 }
+
 function updateSummary() {
+  const summaryTotals = document.getElementById("summary-totals");
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const perCat = {};
   expenses.forEach(e => {
@@ -483,28 +201,147 @@ function updateSummary() {
     perCat[e.category] += Number(e.amount);
   });
   let html = `<div style="font-weight:700;font-size:1.19em;margin-bottom:9px;">
-    Total Spent: <span style="color:var(--apple-blue)">$${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}</span>
+    Total Spent: <span style="color:var(--apple-blue)">$${total.toLocaleString("en-US", {minimumFractionDigits:2})}</span>
   </div>
   <ul style="padding-left:1.2em;margin:0 0 0 0;">`;
   Object.entries(perCat).forEach(([cat, amt]) => {
-    html += `<li><span style="color:${getCategoryColor(cat)};font-weight:600;">${cat}</span>: $${amt.toLocaleString("en-US", { minimumFractionDigits: 2 })}</li>`;
+    html += `<li><span style="color:${getCategoryColor(cat)};font-weight:600;">${cat}</span>: $${amt.toLocaleString("en-US", {minimumFractionDigits:2})}</li>`;
   });
   html += "</ul>";
   summaryTotals.innerHTML = html;
 }
-function addExpense({ amount, description, category, subcategory, date }) {
-  expenses.push({ amount, description, category, subcategory, date });
-  saveToStorage(STORAGE_KEYS.expenses, expenses);
-  updateTable();
-  updateChart();
-  updateSummary();
+
+function setDefaultDateToday() {
+  const dateInput = document.getElementById("date");
+  dateInput.value = new Date().toISOString().split("T")[0];
 }
 
-// --- On Load ---
-window.addEventListener("DOMContentLoaded", () => {
-  overlay.style.display = "";
-  overlay.style.opacity = 1;
-  header.style.display = "none";
-  main.style.display = "none";
-  footer.style.display = "none";
+function validateForm() {
+  const amountInput = document.getElementById("amount");
+  const descriptionInput = document.getElementById("description");
+  const categorySelect = document.getElementById("category");
+  const subcategorySelect = document.getElementById("subcategory");
+  const addExpenseBtn = document.getElementById("add-expense-btn");
+  const valid =
+    amountInput.value.trim() !== "" &&
+    parseFloat(amountInput.value) > 0 &&
+    descriptionInput.value.trim() !== "" &&
+    categorySelect.value !== "" &&
+    subcategorySelect.value !== "";
+  addExpenseBtn.disabled = !valid;
+}
+
+function submitExpense(entry) {
+  showLoading(true);
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    body: JSON.stringify({ ...entry, action: "add" }),
+    headers: { "Content-Type": "application/json" }
+  })
+  .then(resp => resp.text())
+  .then(txt => {
+    if (txt === "OK") {
+      showToast("Expense added!", "#0a84ff");
+      fetchExpenses();
+      clearForm();
+    } else if (txt === "Unauthorized") {
+      showToast("Unauthorized. Use your Google account.", "#ff375f");
+    } else {
+      showToast("Error saving.", "#ff375f");
+    }
+  })
+  .catch(() => showToast("Network error.", "#ff375f"))
+  .finally(() => showLoading(false));
+}
+
+function fetchExpenses() {
+  showLoading(true);
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "get" }),
+    headers: { "Content-Type": "application/json" }
+  })
+  .then(resp => resp.json())
+  .then(data => {
+    expenses = data;
+    updateTable();
+    updateChart();
+    updateSummary();
+  })
+  .catch(() => showToast("Could not load expenses.", "#ff375f"))
+  .finally(() => showLoading(false));
+}
+
+function deleteExpense(idx) {
+  if(!confirm("Delete this expense?")) return;
+  showLoading(true);
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "delete", rowIdx: idx }),
+    headers: { "Content-Type": "application/json" }
+  })
+  .then(resp => resp.text())
+  .then(txt => {
+    if (txt === "OK") {
+      showToast("Deleted.", "#ff375f");
+      fetchExpenses();
+    } else {
+      showToast("Error deleting.", "#ff375f");
+    }
+  })
+  .catch(() => showToast("Network error.", "#ff375f"))
+  .finally(() => showLoading(false));
+}
+
+function clearForm() {
+  document.getElementById("amount").value = "";
+  document.getElementById("description").value = "";
+  renderCategoryOptions("");
+  renderSubcategoryOptions("", "");
+  document.getElementById("date").value = "";
+  validateForm();
+}
+
+function showLoading(show) {
+  document.getElementById("loading-spinner").style.display = show ? "block" : "none";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderCategoryOptions("");
+  renderSubcategoryOptions("", "");
+  renderPresets();
+  setDefaultDateToday();
+  fetchExpenses();
+
+  document.getElementById("category").onchange = function() {
+    renderSubcategoryOptions(this.value, "");
+    validateForm();
+  };
+
+  ["amount", "description", "category", "subcategory"].forEach(id => {
+    document.getElementById(id).addEventListener("input", validateForm);
+    document.getElementById(id).addEventListener("change", validateForm);
+  });
+
+  document.getElementById("expense-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const amountInput = document.getElementById("amount");
+    const descriptionInput = document.getElementById("description");
+    const categorySelect = document.getElementById("category");
+    const subcategorySelect = document.getElementById("subcategory");
+    const dateInput = document.getElementById("date");
+    const amount = parseFloat(amountInput.value);
+    const description = descriptionInput.value.trim();
+    const category = categorySelect.value.trim();
+    const subcategory = subcategorySelect.value.trim();
+    const date = dateInput.value || new Date().toISOString().split("T")[0];
+    if (!isNaN(amount) && description && category && subcategory) {
+      const entry = { amount, description, category, subcategory, date };
+      submitExpense(entry);
+    } else {
+      showToast("Please fill all required fields.", "#ff375f");
+    }
+  });
+
+  document.getElementById("refresh-sheet").addEventListener("click", fetchExpenses);
 });
