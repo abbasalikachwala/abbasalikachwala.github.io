@@ -15,6 +15,7 @@ const subcategories = {
   "Housing":        { category: "Needs", emoji: "🏠" },
   "Utilities":      { category: "Needs", emoji: "💡" },
   "Insurance":      { category: "Needs", emoji: "🛡️" },
+  "Groceries":      { category: "Needs", emoji: "🛒" },
   "Debt Repayment": { category: "Wants", emoji: "💳" },
   "Entertainment":  { category: "Wants", emoji: "🎬" },
   "Dining Out":     { category: "Wants", emoji: "🍽️" },
