@@ -28,8 +28,8 @@
       background: rgba(30, 30, 40, 0.55);
       border-radius: 22px;
       padding: 3rem 2.5rem 2.5rem 2.5rem;
-      max-width: 50%;
-      width: 80vw;
+      max-width: 420px;
+      width: 90vw;
       text-align: center;
       z-index: 1;
       box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
@@ -46,7 +46,7 @@
       -webkit-background-clip: text;
       color: transparent;
       -webkit-text-fill-color: transparent;
-      animation: gradientOneWay 14s linear infinite;
+      animation: gradientLoop 14s linear infinite;
       margin-bottom: 2.2rem;
       letter-spacing: 1px;
     }
@@ -54,64 +54,38 @@
       display: flex;
       flex-direction: column;
       gap: 1.2rem;
-      align-items: stretch;
+      align-items: center;
     }
-    .tool-btn-timer {
+    .tool-btn {
       display: block;
       width: 50%;
       margin: 0 auto;
       padding: 1rem 0;
       font-size: 1.2em;
       font-weight: 500;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.10);
+      cursor: pointer;
+      transition: background-position 0.4s, transform 0.12s, box-shadow 0.25s;
+      text-decoration: none;
+      outline: none;
+      letter-spacing: 0.02em;
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-btn-timer {
       background: linear-gradient(90deg, #f9ce34, #ee2a7b, #6228d7, #f9ce34);
       background-size: 200% 100%;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.10);
-      cursor: pointer;
-      transition: background-position 0.4s, transform 0.12s, box-shadow 0.25s;
-      text-decoration: none;
-      outline: none;
-      letter-spacing: 0.02em;
-      position: relative;
-      overflow: hidden;
-    }
-    .tool-btn-timer::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(120deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 100%);
-      border-radius: 12px;
-      pointer-events: none;
-    }
-    .tool-btn-timer:hover, .tool-btn:focus {
-      background-position: 100% 0;
-      transform: translateY(-2px) scale(1.04);
-      box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.18);
-    }
-        .tool-btn-tracker {
-      display: block;
-      width: 50%;
-      margin: 0 auto;
-      padding: 1rem 0;
-      font-size: 1.2em;
       font-weight: bold;
+    }
+    .tool-btn-tracker {
       background: linear-gradient(90deg, #f9ce34, #6228d7, #ee2a7b, #f9ce34);
       background-size: 200% 100%;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0px 2px 14px 0px rgba(0,0,0,0.10);
-      cursor: pointer;
-      transition: background-position 0.4s, transform 0.12s, box-shadow 0.25s;
-      text-decoration: none;
-      outline: none;
-      letter-spacing: 0.02em;
-      position: relative;
-      overflow: hidden;
+      font-weight: bold;
     }
-    .tool-btn-tracker::after {
+    .tool-btn::after {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -119,7 +93,7 @@
       border-radius: 12px;
       pointer-events: none;
     }
-    .tool-btn-tracker:hover, .tool-btn:focus {
+    .tool-btn:hover, .tool-btn:focus {
       background-position: 100% 0;
       transform: translateY(-2px) scale(1.04);
       box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.18);
@@ -145,8 +119,8 @@
   <main class="center-panel">
     <h1>Welcome to<br>Abbasali's Tools Hub</h1>
     <div class="button-list">
-      <a href="https://abbasalikachwala.github.io/countdown/" class="tool-btn-timer">Countdown Timer</a>
-      <a href="https://abbasalikachwala.github.io/financetracker/" class="tool-btn-tracker">Expenses Tracker</a>
+      <a href="https://abbasalikachwala.github.io/countdown/" class="tool-btn tool-btn-timer">Countdown Timer</a>
+      <a href="https://abbasalikachwala.github.io/financetracker/" class="tool-btn tool-btn-tracker">Expenses Tracker</a>
     </div>
     <div class="footer">
       &copy; 2025 Abbasali Kachwala
