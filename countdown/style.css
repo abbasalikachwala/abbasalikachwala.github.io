@@ -1,220 +1,131 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto:wght@400;500&display=swap');
-
-:root {
-  --bg-color: #ffffff;
-  --primary-color: #3887fa;
-  --text-color: #1a2b3c;
-  --highlight-color: #28a745;
-  --danger-color: #e32c2c;
+body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    color: #222;
+    margin: 0;
 }
-
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100vh;
-  box-sizing: border-box;
-  font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
-  color: var(--text-color);
-  background: url("mobile-background.jpg") no-repeat center center fixed;
-  background-size: cover;
+h1, #countdown {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #222;
 }
-
-@media (min-width: 800px) {
-  body {
-    background: url("desktop-background.jpeg") no-repeat center center fixed;
-    background-size: cover;
-  }
-}
-
-h1#countdown-title {
-  font-size: 2rem;
-  margin: 1.2em 0 0.2em;
-  color: #fff;
-  text-shadow: 0 3px 12px rgba(30, 41, 59, 0.4);
-  text-align: center;
-  letter-spacing: 0.02em;
-}
-
 #countdown {
-  font-size: 1.1rem;
-  background: rgba(255,255,255,0.22);
-  border-radius: 0.7em;
-  padding: 0.4em 1.1em;
-  display: inline-block;
-  margin-bottom: 1.5em;
-  color: #0c1729;
-  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.08);
-  font-weight: 500;
+    padding: 10px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-bottom: 30px;
+    background: #fff;
 }
-
-#countdown span {
-  background: rgba(44,62,80,0.11);
-  border-radius: 6px;
-  margin: 0 0.2em;
-  padding: 0.13em 0.4em;
-  min-width: 2em;
-  display: inline-block;
-  font-size: 1.1em;
+#calendar-header {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
 }
-
-#calendar-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1.1em;
-  margin-bottom: 0.5em;
+#calendar-header td {
+    border: none;
+    padding: 0;
 }
-
-#calendar-controls button {
-  background: var(--bg-color);
-  color: var(--primary-color);
-  border: 2px solid var(--primary-color);
-  border-radius: 1.7em;
-  font-size: 1.08rem;
-  font-weight: 600;
-  padding: 0.4em 1.5em;
-  transition: background 0.15s, color 0.15s, border 0.15s;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(56,135,250,0.04);
+.prev-button-cell,
+.next-button-cell {
+    width: 25%;
+    text-align: center;
 }
-
-#calendar-controls button:hover {
-  background: var(--primary-color);
-  color: #fff;
-  border-color: #2667b3;
+.month-name-cell {
+    width: 50%;
+    text-align: center;
 }
-
-#calendar-controls #monthAndYear {
-  min-width: 120px;
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #fff;
-  text-shadow: 0 1px 8px rgba(30, 41, 59, 0.17);
-  letter-spacing: 0.03em;
+#monthAndYear {
+    font-size: 1.1rem;
+    font-weight: bold;
 }
-
+#prev, #next {
+    background-color: #008CBA;
+    border: none;
+    color: white;
+    padding: 10px 22px;
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 6px 2px;
+    cursor: pointer;
+    border-radius: 10px;
+}
+#prev:hover, #next:hover {
+    background-color: #005f6a;
+}
 #calendar {
-  width: 100%;
-  margin: 0.2em 0 0.8em;
-  border-collapse: collapse;
-  background: rgba(255,255,255,0.6);
-  box-shadow: 0 2px 16px 2px rgba(0,0,0,0.09);
-  table-layout: fixed;
+    margin: 10px auto 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px 2px rgba(0,0,0,0.06);
+    width: 95vw;
+    max-width: 450px;
+    border-collapse: collapse;
 }
-
 #calendar th, #calendar td {
-  border: 2px solid #fff;
-  padding: 0.8em 0;
-  text-align: center;
-  font-size: 1.1rem;
-  width: 14.285%;
-  height: 2.6em;
-  background: transparent;
-  position: relative;
+    border: 2px solid #fff;
+    padding: 16px 0;
+    text-align: center;
+    font-size: 1rem;
+    width: 14.285%;
+    height: 2.5em;
+    box-sizing: border-box;
 }
-
 #calendar th {
-  background: var(--primary-color);
-  color: #fff;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+    background: #008CBA;
+    color: #fff;
+    font-weight: bold;
 }
-
+#calendar td {
+    background: #f6f6f6;
+}
 #calendar td > div {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 2em;
-  font-size: 1.05em;
-  z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 2em;
+    font-size: 1em;
 }
-
 .target > div {
-  background: var(--highlight-color);
-  color: #fff;
-  font-weight: 700;
-  border-radius: 1.1em;
-  padding: 0.2em 0.7em;
-  margin: 0 auto;
-  box-shadow: 0 2px 6px 0 rgba(55, 190, 85, 0.10);
+    background: #28a745;
+    color: #fff !important;
+    font-weight: bold;
+    border-radius: 1em;
+    padding: 0.14em 0.7em;
+    margin: 0 auto;
 }
-
 .present > div {
-  background: var(--primary-color);
-  color: #fff;
-  font-weight: 700;
-  border-radius: 1.1em;
-  padding: 0.2em 0.7em;
-  margin: 0 auto;
-  box-shadow: 0 1px 4px 0 rgba(30, 64, 175, 0.10);
+    background: #008CBA;
+    color: #fff !important;
+    font-weight: bold;
+    border-radius: 1em;
+    padding: 0.14em 0.7em;
+    margin: 0 auto;
 }
-
 .past > div {
-  color: #c7c7c7;
+    color: #bbb;
 }
-.past > div::before, .past > div::after {
-  content: "";
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 70%;
-  height: 0.20em;
-  background: var(--danger-color);
-  border-radius: 2px;
-  opacity: 0.93;
-  transform-origin: center;
-  pointer-events: none;
-  z-index: 2;
-}
-.past > div::before {
-  transform: translate(-50%,-50%) rotate(45deg);
-}
-.past > div::after {
-  transform: translate(-50%,-50%) rotate(-45deg);
-}
-
 .future > div {
-  color: var(--text-color);
-  background: none;
+    color: #222;
+    background: none;
 }
-
 @media (max-width: 600px) {
-  h1#countdown-title {
-    font-size: 1.16rem;
-  }
-  #calendar th, #calendar td {
-    font-size: 0.98rem;
-    padding: 0.5em 0;
-  }
-  #calendar-controls #monthAndYear {
-    font-size: 1.03rem;
-  }
-  #calendar-controls button {
-    font-size: 0.97rem;
-    padding: 0.32em 0.8em;
-  }
-}
-
-#current-time-section {
-  width: 100%;
-  margin: 1em 0 2em;
-  background: rgba(255,255,255,0.18);
-  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.07);
-  padding: 1em 2vw;
-  text-align: left;
-  box-sizing: border-box;
-}
-
-#current-time-section h2 {
-  color: #fff;
-  font-size: 1.15rem;
-  margin-bottom: 0.4em;
-  text-shadow: 0 1px 7px rgba(30, 41, 59, 0.19);
-}
-
-#time-india, #time-nz {
-  color: var(--text-color);
-  font-size: 1.01rem;
-  margin: 0.14em 0;
+    h1, #countdown {
+        font-size: 1rem;
+    }
+    #calendar th, #calendar td {
+        font-size: 0.9rem;
+        padding: 10px 0;
+    }
+    #calendar {
+        max-width: 99vw;
+    }
+    #monthAndYear {
+        font-size: 1rem;
+    }
+    #prev, #next {
+        font-size: 0.9rem;
+        padding: 7px 10px;
+    }
 }
