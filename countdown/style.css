@@ -1,7 +1,7 @@
 body {
     text-align: center;
     font-family: sans-serif;
-    background: url("background-image 15.55.32.jpg") no-repeat center center fixed; 
+    background: url("mobile-background.jpg") no-repeat center center fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -10,8 +10,15 @@ body {
     text-shadow: 0 0 5px #fff;
 }
 
+@media (min-width: 800px) {
+    body {
+        background: url("desktop-background.jpeg") no-repeat center center fixed;
+        background-size: cover;
+    }
+}
+
 h1, #countdown {
-    font-size: 60px;
+    font-size: 5vw;
     font-weight: bold;
     margin-bottom: 30px;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
@@ -27,21 +34,26 @@ h1, #countdown {
 #countdown {
     background-color: rgba(255, 255, 255, 0.2);
     padding: 15px;
-    border-radius: 5px; 
+    border-radius: 5px;
     display: inline-block;
     margin-top: 10px;
 }
 
 .time-part {
-  padding: 3px 5px;
+    padding: 3px 5px;
 }
 
 #calendar {
     margin-top: 40px;
     text-align: center;
-    font-size: 30px;
+    font-size: 2vw;
     color: white;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 600px) {
+    h1, #countdown { font-size: 7vw; }
+    #calendar { font-size: 4vw; }
 }
 
 table {
@@ -66,14 +78,14 @@ th, td {
 }
 
 #calendar-body {
-    font-size: 40px;
+    font-size: 2.5vw;
     font-weight: bold;
     color: white;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); 
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 #monthAndYear {
-    font-size: 48px;
+    font-size: 2.5vw;
     font-weight: bold;
     justify-content: space-between;
     align-items: center;
@@ -81,49 +93,49 @@ th, td {
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
 }
 
-/*Buttons Styling*/
+/* Buttons Styling */
 #prev, #next {
-  background-color: #008CBA; /* Blue background */
-  border: none; /* Remove border */
-  color: white; /* White text color */
-  padding: 15px 32px; /* Some padding */
-  text-align: center; /* Centered text */
-  text-decoration: none; /* Remove underline */
-  display: inline-block;
-  font-size: 20px;
-  font-weight: bold;
-  margin: 4px 2px;
-  cursor: pointer; /* Mouse pointer on hover */
-  border-radius: 12px; /* Rounded edges */
+    background-color: #008CBA;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1.5vw;
+    font-weight: bold;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px;
 }
 
 #prev:hover, #next:hover {
-  background-color: #45a049;
+    background-color: #45a049;
 }
 
 #next {
-  background-color: #008CBA; /* Blue background */
-  text-align: right;
+    background-color: #008CBA;
+    text-align: right;
 }
 
 #next:hover {
-  background-color: #45a049;
+    background-color: #45a049;
 }
 
 #calendar-header {
-  text-align: center;
+    text-align: center;
 }
 
 .prev-button-cell, .month-name-cell, .next-button-cell {
-  border: none;
+    border: none;
 }
 
 .next-button-cell {
-  text-align: right;
+    text-align: right;
 }
 
 .prev-button-cell {
-  text-align: left;
+    text-align: left;
 }
 
 .past div {
@@ -133,9 +145,9 @@ th, td {
 .past div::before, .past div::after {
     content: "";
     position: absolute;
-    background-color: #ff7272; /* red color for the cross */
-    width: 5px; /* Adjust the width of the cross */
-    height: 100%; /* Adjust the height of the cross */
+    background-color: #ff7272;
+    width: 5px;
+    height: 100%;
     left: 50%;
     top: 0;
     opacity: 50%;
@@ -152,7 +164,15 @@ th, td {
 }
 
 .present {
-    background-color: #87CEEB; /* Highlights the current day's cell with sky blue */
+    background-color: #87CEEB;
+}
+
+/* Target date cell style */
+.target {
+    background-color: #28a745 !important;
+    color: #fff !important;
+    font-weight: bold;
+    border: 2px solid #155724;
 }
 
 a.white-out {
@@ -172,20 +192,13 @@ a.white-out::after {
 }
 
 #calendar {
-  border-collapse: collapse;
+    border-collapse: collapse;
 }
 
 #calendar th, #calendar td {
-  border: 3px solid #fff;
+    border: 3px solid #fff;
 }
 
 h2 {
     color: white;
-}
-
-td.target {
-  background-color: #a3e6a3; /* light green */
-  font-weight: bold;
-  color: #155724;
-  border: 2px solid #28a745;
 }
