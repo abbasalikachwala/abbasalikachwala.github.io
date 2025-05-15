@@ -1,14 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto:wght@400;500&display=swap');
 
+:root {
+  --bg-color: #ffffff;
+  --primary-color: #3887fa;
+  --text-color: #1a2b3c;
+  --highlight-color: #28a745;
+  --danger-color: #e32c2c;
+}
+
 html, body {
   margin: 0;
   padding: 0;
-  width: 100vw;
+  width: 100%;
   min-height: 100vh;
   box-sizing: border-box;
+  font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
+  color: var(--text-color);
   background: url("mobile-background.jpg") no-repeat center center fixed;
   background-size: cover;
 }
+
 @media (min-width: 800px) {
   body {
     background: url("desktop-background.jpeg") no-repeat center center fixed;
@@ -16,20 +27,9 @@ html, body {
   }
 }
 
-body {
-  font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
-  color: #1a2b3c;
-  width: 100vw;
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-}
-
 h1#countdown-title {
-  font-family: 'Montserrat', Arial, sans-serif;
   font-size: 2rem;
-  margin-top: 1.2em;
-  margin-bottom: 0.2em;
+  margin: 1.2em 0 0.2em;
   color: #fff;
   text-shadow: 0 3px 12px rgba(30, 41, 59, 0.4);
   text-align: center;
@@ -37,7 +37,6 @@ h1#countdown-title {
 }
 
 #countdown {
-  font-family: 'Roboto', Arial, sans-serif;
   font-size: 1.1rem;
   background: rgba(255,255,255,0.22);
   border-radius: 0.7em;
@@ -57,58 +56,54 @@ h1#countdown-title {
   min-width: 2em;
   display: inline-block;
   font-size: 1.1em;
-  color: #0c1729;
 }
 
 #calendar-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100vw;
+  flex-wrap: wrap;
   gap: 1.1em;
-  margin: 0 auto 0.15em auto;
-  box-sizing: border-box;
+  margin-bottom: 0.5em;
 }
+
 #calendar-controls button {
-  background: #fff;
-  color: #3887fa;
-  border: 2px solid #3887fa;
+  background: var(--bg-color);
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
   border-radius: 1.7em;
   font-size: 1.08rem;
-  font-family: 'Montserrat', Arial, sans-serif;
   font-weight: 600;
   padding: 0.4em 1.5em;
-  margin: 0 0.1em;
   transition: background 0.15s, color 0.15s, border 0.15s;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(56,135,250,0.04);
 }
+
 #calendar-controls button:hover {
-  background: #3887fa;
+  background: var(--primary-color);
   color: #fff;
   border-color: #2667b3;
 }
+
 #calendar-controls #monthAndYear {
   min-width: 120px;
-  font-family: 'Montserrat', Arial, sans-serif;
   font-size: 1.3rem;
   font-weight: 600;
   color: #fff;
-  margin: 0 0.5em;
   text-shadow: 0 1px 8px rgba(30, 41, 59, 0.17);
   letter-spacing: 0.03em;
 }
 
 #calendar {
-  width: 100vw;
-  margin: 0.2em 0 0.8em 0;
+  width: 100%;
+  margin: 0.2em 0 0.8em;
   border-collapse: collapse;
-  background: rgba(255,255,255,0.6); /* translucent! */
-  border-radius: 0;
-  overflow: hidden;
+  background: rgba(255,255,255,0.6);
   box-shadow: 0 2px 16px 2px rgba(0,0,0,0.09);
   table-layout: fixed;
 }
+
 #calendar th, #calendar td {
   border: 2px solid #fff;
   padding: 0.8em 0;
@@ -116,23 +111,17 @@ h1#countdown-title {
   font-size: 1.1rem;
   width: 14.285%;
   height: 2.6em;
-  box-sizing: border-box;
   background: transparent;
+  position: relative;
 }
+
 #calendar th {
-  background: rgba(56,135,250,0.93);
+  background: var(--primary-color);
   color: #fff;
   font-weight: 600;
-  font-family: 'Montserrat', Arial, sans-serif;
   letter-spacing: 0.04em;
 }
-#calendar td {
-  color: #1a2b3c;
-  font-family: 'Roboto', Arial, sans-serif;
-  position: relative;
-  vertical-align: middle;
-  font-weight: 500;
-}
+
 #calendar td > div {
   display: flex;
   justify-content: center;
@@ -142,10 +131,9 @@ h1#countdown-title {
   z-index: 1;
 }
 
-/* Target (green pill) */
 .target > div {
-  background: #28a745;
-  color: #fff !important;
+  background: var(--highlight-color);
+  color: #fff;
   font-weight: 700;
   border-radius: 1.1em;
   padding: 0.2em 0.7em;
@@ -153,10 +141,9 @@ h1#countdown-title {
   box-shadow: 0 2px 6px 0 rgba(55, 190, 85, 0.10);
 }
 
-/* Today (blue pill) */
 .present > div {
-  background: #3887fa;
-  color: #fff !important;
+  background: var(--primary-color);
+  color: #fff;
   font-weight: 700;
   border-radius: 1.1em;
   padding: 0.2em 0.7em;
@@ -164,10 +151,8 @@ h1#countdown-title {
   box-shadow: 0 1px 4px 0 rgba(30, 64, 175, 0.10);
 }
 
-/* Past: strong red cross, centered */
 .past > div {
   color: #c7c7c7;
-  opacity: 1;
 }
 .past > div::before, .past > div::after {
   content: "";
@@ -175,7 +160,7 @@ h1#countdown-title {
   left: 50%; top: 50%;
   width: 70%;
   height: 0.20em;
-  background: #e32c2c;
+  background: var(--danger-color);
   border-radius: 2px;
   opacity: 0.93;
   transform-origin: center;
@@ -190,7 +175,7 @@ h1#countdown-title {
 }
 
 .future > div {
-  color: #1a2b3c;
+  color: var(--text-color);
   background: none;
 }
 
@@ -205,37 +190,31 @@ h1#countdown-title {
   #calendar-controls #monthAndYear {
     font-size: 1.03rem;
   }
-  #calendar {
-    border-radius: 0;
-  }
   #calendar-controls button {
     font-size: 0.97rem;
     padding: 0.32em 0.8em;
   }
 }
 
-/* Current Time Section */
 #current-time-section {
-  width: 100vw;
-  margin: 1em 0 2em 0;
+  width: 100%;
+  margin: 1em 0 2em;
   background: rgba(255,255,255,0.18);
-  border-radius: 0;
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.07);
   padding: 1em 2vw;
   text-align: left;
   box-sizing: border-box;
 }
-#current-time-section h1 {
+
+#current-time-section h2 {
   color: #fff;
   font-size: 1.15rem;
-  margin: 0 0 0.4em 0;
-  font-family: 'Montserrat', Arial, sans-serif;
+  margin-bottom: 0.4em;
   text-shadow: 0 1px 7px rgba(30, 41, 59, 0.19);
 }
+
 #time-india, #time-nz {
-  color: #0c1729;
+  color: var(--text-color);
   font-size: 1.01rem;
-  font-family: 'Roboto', Arial, sans-serif;
   margin: 0.14em 0;
-  text-shadow: none;
 }
