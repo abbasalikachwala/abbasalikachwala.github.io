@@ -4,6 +4,8 @@
     display: "Countdown to 18th June 2025, 6:50 PM"
   };
 
+  document.getElementById("countdown-title").textContent = TARGET.display;
+
   const targetDateUTC = new Date(Date.UTC(
     TARGET.date.getFullYear(),
     TARGET.date.getMonth(),
@@ -12,8 +14,6 @@
     TARGET.date.getMinutes(),
     TARGET.date.getSeconds()
   ));
-
-  document.getElementById("countdown-title").textContent = TARGET.display;
 
   const countdownElements = {
     days: document.getElementById("days"),
@@ -35,12 +35,13 @@
     newzealand: document.getElementById("newzealand")
   };
 
+  // --- COUNTDOWN TIMER ---
   const updateCountdown = () => {
     const now = new Date();
     const distance = targetDateUTC - now;
     if (distance < 0) {
       clearInterval(countdownInterval);
-      countdownElements.countdown.innerHTML = "<span style='color:red;'>EXPIRED</span>";
+      countdownElements.countdown.textContent = "EXPIRED";
       return;
     }
     const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -55,13 +56,15 @@
   const countdownInterval = setInterval(updateCountdown, 1000);
   updateCountdown();
 
+  // --- CALENDAR GENERATION ---
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
 
-  let currentMonth = new Date().getMonth();
-  let currentYear = new Date().getFullYear();
+  let today = new Date();
+  let currentMonth = today.getMonth();
+  let currentYear = today.getFullYear();
 
   function createCell(content, classes = []) {
     const cell = document.createElement("td");
@@ -79,7 +82,6 @@
     calendarBody.innerHTML = "";
     monthAndYear.textContent = `${months[month]} ${year}`;
 
-    const today = new Date();
     let firstDay = new Date(year, month, 1).getDay();
     firstDay = (firstDay === 0) ? 6 : firstDay - 1;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -99,22 +101,17 @@
             month === TARGET.date.getMonth() &&
             date === TARGET.date.getDate()
           ) classes.push("target");
-
           if (
             year === today.getFullYear() &&
             month === today.getMonth() &&
             date === today.getDate()
-          ) {
-            classes.push("present");
-          } else if (
+          ) classes.push("present");
+          else if (
             year < today.getFullYear() ||
             (year === today.getFullYear() && month < today.getMonth()) ||
             (year === today.getFullYear() && month === today.getMonth() && date < today.getDate())
-          ) {
-            classes.push("past");
-          } else {
-            classes.push("future");
-          }
+          ) classes.push("past");
+          else classes.push("future");
           row.appendChild(createCell(date, classes));
           date++;
         }
@@ -146,6 +143,7 @@
     generateCalendar(currentMonth, currentYear);
   });
 
+  // --- REAL-TIME CLOCKS ---
   const updateTime = () => {
     const now = new Date();
     const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
@@ -155,7 +153,6 @@
       second: "2-digit",
       hour12: true
     });
-
     const nzTime = new Date(now.toLocaleString("en-US", { timeZone: "Pacific/Auckland" }));
     timeElements.newzealand.textContent = nzTime.toLocaleTimeString("en-US", {
       hour: "2-digit",
