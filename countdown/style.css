@@ -99,14 +99,15 @@ h1#countdown-title {
     text-align: center;
 }
 
+/* --- CALENDAR FONT SIZES AND DYNAMIC CELL HEIGHT --- */
 #calendar th, #calendar td {
     border: 2px solid rgba(255,255,255,0.8);
     padding: 0;
     text-align: center;
-    font-size: 1.18rem;
+    font-size: 1rem; /* SMALLER calendar text */
     width: calc(100% / 7);
-    height: 7vw;
-    min-height: 54px;
+    height: 2.7em;    /* Cell height scales with font size */
+    min-height: 2.7em;
     background: transparent;
     color: #fff;
     box-sizing: border-box;
@@ -118,22 +119,21 @@ h1#countdown-title {
     color: #fff;
     font-weight: bold;
     letter-spacing: 0.05em;
-    height: 7vw;
+    height: 2.7em;
 }
 #calendar td {
     background: transparent;
     position: relative;
     font-weight: bold;
-    height: 7vw;
-    min-height: 54px;
+    height: 2.7em;
+    min-height: 2.7em;
 }
 #calendar td > div {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
-    min-height: 54px;
-    font-size: 1.18rem;
+    height: 2.7em;
+    font-size: 1rem;
     color: #fff;
     width: 100%;
 }
@@ -192,16 +192,17 @@ h1#countdown-title {
         font-size: 0.93rem;
     }
     #calendar th, #calendar td {
-        font-size: 0.82rem;
-        height: 14vw;
-        min-height: 32px;
+        font-size: 0.72rem;
+        height: 2em;
+        min-height: 2em;
     }
     #calendar th {
-        height: 14vw;
+        height: 2em;
     }
     #calendar td > div {
-        font-size: 0.82rem;
-        min-height: 32px;
+        font-size: 0.72rem;
+        height: 2em;
+        min-height: 2em;
     }
 }
 
