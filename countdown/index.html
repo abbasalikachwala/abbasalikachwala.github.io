@@ -13,13 +13,11 @@
     <span id="minutes"></span>m
     <span id="seconds"></span>s
   </p>
-  <table id="calendar-header">
-    <tr>
-      <td class="prev-button-cell"><button id="prev">Prev</button></td>
-      <td class="month-name-cell"><header id="monthAndYear"></header></td>
-      <td class="next-button-cell"><button id="next">Next</button></td>
-    </tr>
-  </table>
+  <div id="calendar-controls">
+    <button id="prev">Prev</button>
+    <span id="monthAndYear"></span>
+    <button id="next">Next</button>
+  </div>
   <table id="calendar">
     <thead>
       <tr>
@@ -34,9 +32,11 @@
     </thead>
     <tbody id="calendar-body"></tbody>
   </table>
-  <h1>Current Time</h1>
-  <h1 id="time-india">Time in India: <span id="india"></span></h1>
-  <h1 id="time-nz">Time in NZ: <span id="newzealand"></span></h1>
+  <div id="current-time-section">
+    <h1>Current Time</h1>
+    <div id="time-india">Time in India: <span id="india"></span></div>
+    <div id="time-nz">Time in NZ: <span id="newzealand"></span></div>
+  </div>
   <script src="./script.js"></script>
 </body>
 </html>
