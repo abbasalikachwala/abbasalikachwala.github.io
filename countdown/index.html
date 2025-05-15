@@ -6,39 +6,43 @@
   <link rel="stylesheet" type="text/css" href="./style.css">
 </head>
 <body>
-  <h1 id="countdown-title">Countdown to 18th June 2025, 6:50 PM</h1>
-  <p id="countdown">
-    <span id="days"></span>d
-    <span id="hours"></span>h
-    <span id="minutes"></span>m
-    <span id="seconds"></span>s
-  </p>
-  <table id="calendar">
-    <thead>
-      <tr class="controls-row">
-        <th colspan="7" style="padding:0;">
-          <div id="calendar-controls-inner">
-            <button id="prev">Prev</button>
-            <span id="monthAndYear"></span>
-            <button id="next">Next</button>
-          </div>
-        </th>
-      </tr>
-      <tr>
-        <th>Mon</th>
-        <th>Tue</th>
-        <th>Wed</th>
-        <th>Thu</th>
-        <th>Fri</th>
-        <th>Sat</th>
-        <th>Sun</th>
-      </tr>
-    </thead>
-    <tbody id="calendar-body"></tbody>
-  </table>
-  <h1>Current Time</h1>
-  <h1 id="time-india">Time in India: <span id="india"></span></h1>
-  <h1 id="time-nz">Time in NZ: <span id="newzealand"></span></h1>
+  <div id="main-content">
+    <h1 id="countdown-title">Countdown to 18th June 2025, 6:50 PM</h1>
+    <p id="countdown">
+      <span id="days"></span>d
+      <span id="hours"></span>h
+      <span id="minutes"></span>m
+      <span id="seconds"></span>s
+    </p>
+    <table id="calendar">
+      <thead>
+        <tr class="controls-row">
+          <th colspan="7" style="padding:0;">
+            <div id="calendar-controls-inner">
+              <button id="prev">Prev</button>
+              <span id="monthAndYear"></span>
+              <button id="next">Next</button>
+            </div>
+          </th>
+        </tr>
+        <tr>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+          <th>Sun</th>
+        </tr>
+      </thead>
+      <tbody id="calendar-body"></tbody>
+    </table>
+  </div>
+  <div id="current-time-section">
+    <h1>Current Time</h1>
+    <div id="time-india">Time in India: <span id="india"></span></div>
+    <div id="time-nz">Time in NZ: <span id="newzealand"></span></div>
+  </div>
   <script src="./script.js"></script>
 </body>
 </html>
