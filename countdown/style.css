@@ -1,221 +1,228 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto:wght@400;500&display=swap');
+
 body {
-    text-align: center;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: url("mobile-background.jpg") no-repeat center center fixed;
-    background-size: cover;
-    color: #222;
-    margin: 0;
+  font-family: 'Montserrat', 'Roboto', Arial, sans-serif;
+  background: url("mobile-background.jpg") no-repeat center center fixed;
+  background-size: cover;
+  color: #1a2b3c;
+  margin: 0;
+  min-height: 100vh;
 }
 @media (min-width: 800px) {
-    body {
-        background: url("desktop-background.jpeg") no-repeat center center fixed;
-        background-size: cover;
-    }
+  body {
+    background: url("desktop-background.jpeg") no-repeat center center fixed;
+    background-size: cover;
+  }
 }
-h1, #countdown {
-    font-size: 1.15rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #fff;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+h1#countdown-title {
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 2rem;
+  margin-top: 1.2em;
+  margin-bottom: 0.2em;
+  color: #fff;
+  text-shadow: 0 3px 12px rgba(30, 41, 59, 0.4);
+  letter-spacing: 0.02em;
 }
+
 #countdown {
-    font-size: 1.1rem;
-    background: rgba(30, 41, 59, 0.16);
-    border-radius: 0.8em;
-    padding: 0.4em 0.9em;
-    display: inline-block;
-    margin-top: 0.2em;
-    margin-bottom: 1.3em;
-    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.10);
+  font-family: 'Roboto', Arial, sans-serif;
+  font-size: 1.1rem;
+  background: rgba(255,255,255,0.22);
+  border-radius: 0.7em;
+  padding: 0.4em 1.1em;
+  display: inline-block;
+  margin-bottom: 1.5em;
+  color: #0c1729;
+  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.08);
+  font-weight: 500;
 }
 #countdown span {
-    background: rgba(255,255,255,0.14);
-    border-radius: 7px;
-    margin: 0 0.10em;
-    padding: 0.10em 0.25em;
-    min-width: 1.7em;
-    display: inline-block;
-    font-size: 1em;
-    color: #fff;
+  background: rgba(44,62,80,0.11);
+  border-radius: 6px;
+  margin: 0 0.2em;
+  padding: 0.13em 0.4em;
+  min-width: 2em;
+  display: inline-block;
+  font-size: 1.1em;
+  color: #0c1729;
 }
 
-/* Calendar header and nav */
-#calendar-header {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 0;
-    background: none;
-    padding: 0;
+#calendar-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 98vw;
+  max-width: 550px;
+  margin: 0 auto 0.15em auto;
+  gap: 1.1em;
 }
-#calendar-header td {
-    border: none;
-    padding: 0;
+#calendar-controls button {
+  background: #fff;
+  color: #3887fa;
+  border: 2px solid #3887fa;
+  border-radius: 1.7em;
+  font-size: 1.08rem;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: 600;
+  padding: 0.4em 1.5em;
+  margin: 0 0.1em;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(56,135,250,0.04);
 }
-.prev-button-cell,
-.next-button-cell {
-    width: 25%;
-    text-align: center;
+#calendar-controls button:hover {
+  background: #3887fa;
+  color: #fff;
+  border-color: #2667b3;
 }
-.month-name-cell {
-    width: 50%;
-    text-align: center;
-}
-#monthAndYear {
-    font-size: 1.08rem;
-    font-weight: 600;
-    color: #fff;
-    background: none;
-    text-shadow: 0 1px 8px rgba(0,0,0,0.14);
-    margin: 0.2em 0 0.2em 0;
-    padding: 0.18em 0;
-    letter-spacing: 0.02em;
-}
-
-/* Prev/Next Buttons */
-#prev, #next {
-    background: #fff;
-    color: #2563eb;
-    border: 2px solid #2563eb;
-    border-radius: 1.2em;
-    font-size: 0.98rem;
-    font-weight: 500;
-    padding: 0.33em 1.1em;
-    margin: 0.19em 0.18em;
-    transition: background 0.13s, color 0.13s, border 0.13s;
-    cursor: pointer;
-    outline: none;
-}
-#prev:hover, #next:hover {
-    background: #2563eb;
-    color: #fff;
-    border-color: #2563eb;
+#calendar-controls #monthAndYear {
+  min-width: 120px;
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0.5em;
+  text-shadow: 0 1px 8px rgba(30, 41, 59, 0.17);
+  letter-spacing: 0.03em;
 }
 
-/* Calendar Table */
 #calendar {
-    margin: 1em auto 0 auto;
-    background: rgba(255,255,255,0.82);
-    border-radius: 1.1em;
-    box-shadow: 0 2px 10px 2px rgba(0,0,0,0.09);
-    overflow: hidden;
-    width: 98vw;
-    max-width: 480px;
-    border-collapse: collapse;
-    border: 3px solid #fff;
+  width: 98vw;
+  max-width: 550px;
+  margin: 0.2em auto 0.8em auto;
+  border-collapse: collapse;
+  background: rgba(255,255,255,0.90);
+  border-radius: 1em;
+  overflow: hidden;
+  box-shadow: 0 2px 16px 2px rgba(0,0,0,0.09);
 }
-
-#calendar th,
-#calendar td {
-    font-size: 1.01rem;
-    color: #222;
-    font-weight: 500;
-    border: 2px solid #fff;
-    padding: 0.55em 0;
-    width: 14.2857%;
-    text-align: center;
-    background: none;
-    height: 2.2em;
-    box-sizing: border-box;
+#calendar th, #calendar td {
+  border: 2px solid #fff;
+  padding: 0.8em 0;
+  text-align: center;
+  font-size: 1.1rem;
+  width: 14.285%;
+  height: 2.6em;
+  box-sizing: border-box;
 }
-
 #calendar th {
-    background: rgba(60,60,60,0.15);
-    color: #fff;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+  background: #3887fa;
+  color: #fff;
+  font-weight: 600;
+  font-family: 'Montserrat', Arial, sans-serif;
+  letter-spacing: 0.04em;
 }
-
 #calendar td {
-    background: rgba(255,255,255,0.92);
-    position: relative;
-    vertical-align: middle;
+  background: rgba(255,255,255,0.85);
+  color: #1a2b3c;
+  font-family: 'Roboto', Arial, sans-serif;
+  position: relative;
+  vertical-align: middle;
+  font-weight: 500;
 }
-
 #calendar td > div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 2em;
-    position: relative;
-    font-size: 1em;
-    z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 2em;
+  font-size: 1.05em;
+  z-index: 1;
 }
 
 /* Target (green pill) */
 .target > div {
-    background: #28a745;
-    color: #fff !important;
-    font-weight: 700;
-    border-radius: 1.1em;
-    padding: 0.15em 0.65em;
-    margin: 0.05em auto;
-    box-shadow: 0 2px 6px 0 rgba(55, 190, 85, 0.10);
+  background: #28a745;
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 1.1em;
+  padding: 0.2em 0.7em;
+  margin: 0 auto;
+  box-shadow: 0 2px 6px 0 rgba(55, 190, 85, 0.10);
 }
 
 /* Today (blue pill) */
 .present > div {
-    background: #2563eb;
-    color: #fff !important;
-    font-weight: 700;
-    border-radius: 1.1em;
-    padding: 0.15em 0.65em;
-    margin: 0.05em auto;
-    box-shadow: 0 1px 4px 0 rgba(30, 64, 175, 0.10);
+  background: #3887fa;
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 1.1em;
+  padding: 0.2em 0.7em;
+  margin: 0 auto;
+  box-shadow: 0 1px 4px 0 rgba(30, 64, 175, 0.10);
 }
 
 /* Past: strong red cross, centered */
 .past > div {
-    color: #c7c7c7;
-    opacity: 1;
+  color: #c7c7c7;
+  opacity: 1;
 }
 .past > div::before, .past > div::after {
-    content: "";
-    position: absolute;
-    left: 50%; top: 50%;
-    width: 70%;
-    height: 0.20em;
-    background: #e32c2c;
-    border-radius: 2px;
-    opacity: 0.93;
-    transform-origin: center;
-    pointer-events: none;
-    z-index: 2;
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 70%;
+  height: 0.20em;
+  background: #e32c2c;
+  border-radius: 2px;
+  opacity: 0.93;
+  transform-origin: center;
+  pointer-events: none;
+  z-index: 2;
 }
 .past > div::before {
-    transform: translate(-50%,-50%) rotate(45deg);
+  transform: translate(-50%,-50%) rotate(45deg);
 }
 .past > div::after {
-    transform: translate(-50%,-50%) rotate(-45deg);
-}
-
-/* Empty cells */
-#calendar td:empty {
-    background: rgba(255,255,255,0.5);
-    border: 2px solid #fff;
+  transform: translate(-50%,-50%) rotate(-45deg);
 }
 
 .future > div {
-    color: #222;
-    background: none;
+  color: #1a2b3c;
+  background: none;
 }
 
 @media (max-width: 600px) {
-    h1, #countdown {
-        font-size: 1.01rem;
-    }
-    #calendar th, #calendar td {
-        font-size: 0.92rem;
-        padding: 0.36em 0;
-    }
-    #calendar {
-        max-width: 99vw;
-    }
-    #monthAndYear {
-        font-size: 0.95rem;
-    }
-    #prev, #next {
-        font-size: 0.91rem;
-        padding: 0.27em 0.7em;
-    }
+  h1#countdown-title {
+    font-size: 1.16rem;
+  }
+  #calendar th, #calendar td {
+    font-size: 0.98rem;
+    padding: 0.5em 0;
+  }
+  #calendar-controls #monthAndYear {
+    font-size: 1.03rem;
+  }
+  #calendar {
+    max-width: 99vw;
+  }
+  #calendar-controls button {
+    font-size: 0.97rem;
+    padding: 0.32em 0.8em;
+  }
+}
+
+/* Current Time Section */
+#current-time-section {
+  width: 98vw;
+  max-width: 550px;
+  margin: 1em auto 2em auto;
+  background: rgba(255,255,255,0.25);
+  border-radius: 0.8em;
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.08);
+  padding: 1em 0.8em;
+  text-align: left;
+}
+#current-time-section h1 {
+  color: #fff;
+  font-size: 1.15rem;
+  margin: 0 0 0.4em 0;
+  font-family: 'Montserrat', Arial, sans-serif;
+  text-shadow: 0 1px 7px rgba(30, 41, 59, 0.19);
+}
+#time-india, #time-nz {
+  color: #0c1729;
+  font-size: 1.01rem;
+  font-family: 'Roboto', Arial, sans-serif;
+  margin: 0.14em 0;
+  text-shadow: none;
 }
