@@ -3,7 +3,7 @@ body {
     font-family: Arial, sans-serif;
     background: url("mobile-background.jpg") no-repeat center center fixed;
     background-size: cover;
-    color: #222;
+    color: #fff;
     margin: 0;
 }
 @media (min-width: 800px) {
@@ -13,126 +13,144 @@ body {
     }
 }
 h1, #countdown {
-    font-size: 1.2rem;
+    font-size: 1.45rem;
     font-weight: bold;
-    margin-bottom: 20px;
-    color: #222;
-    text-shadow: 0 2px 8px rgba(255,255,255,0.20);
+    margin-bottom: 24px;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.25);
 }
 #countdown {
-    padding: 10px;
-    border-radius: 5px;
+    padding: 14px;
+    border-radius: 8px;
     display: inline-block;
-    margin-bottom: 30px;
-    background: #fff;
+    margin-bottom: 34px;
+    background: rgba(0,0,0,0.18);
+    font-size: 1.25rem;
 }
-#calendar-header {
-    width: 100%;
-    margin-bottom: 0;
-    border-collapse: collapse;
+#countdown span {
+    color: #fff;
 }
-#calendar-header td {
-    border: none;
-    padding: 0;
-}
-.prev-button-cell,
-.next-button-cell {
-    width: 25%;
-    text-align: center;
-}
-.month-name-cell {
-    width: 50%;
-    text-align: center;
-}
-#monthAndYear {
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-#prev, #next {
-    background-color: #008CBA;
-    border: none;
-    color: white;
-    padding: 10px 22px;
-    font-size: 1rem;
-    font-weight: bold;
-    margin: 6px 2px;
-    cursor: pointer;
-    border-radius: 10px;
-}
-#prev:hover, #next:hover {
-    background-color: #005f6a;
-}
+/* Calendar table */
 #calendar {
-    margin: 10px auto 0 auto;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px 2px rgba(0,0,0,0.06);
-    width: 95vw;
+    margin: 16px auto 0 auto;
+    width: 97vw;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px 2px rgba(0,0,0,0.10);
     border-collapse: collapse;
+    background: rgba(255,255,255,0.11);
+    overflow: hidden;
+}
+#calendar thead tr.controls-row th {
+    background: rgba(255,255,255,0.11);
+    padding: 0;
+    border: none;
+    height: 3.3em;
+}
+#calendar-controls-inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 0.7em;
+}
+#calendar-controls-inner button {
+    background: rgba(0,140,186,0.32);
+    color: #fff;
+    border: none;
+    padding: 0.72em 2.0em;
+    border-radius: 10px;
+    font-size: 1.22rem;
+    font-weight: bold;
+    margin: 0 0.25em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+#calendar-controls-inner button:hover {
+    background: rgba(0,140,186,0.7);
+}
+#calendar-controls-inner #monthAndYear {
+    font-size: 1.33rem;
+    font-weight: bold;
+    color: #fff;
+    margin: 0 0.6em;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.22);
 }
 #calendar th, #calendar td {
-    border: 2px solid #fff;
-    padding: 16px 0;
+    border: 2px solid rgba(255,255,255,0.8);
+    padding: 19px 0;
     text-align: center;
-    font-size: 1rem;
+    font-size: 1.18rem;
     width: 14.285%;
-    height: 2.5em;
+    height: 2.8em;
+    background: transparent;
+    color: #fff;
     box-sizing: border-box;
+    transition: background 0.2s, color 0.2s;
 }
 #calendar th {
-    background: #008CBA;
+    background: rgba(0,140,186,0.38);
     color: #fff;
     font-weight: bold;
+    letter-spacing: 0.05em;
 }
 #calendar td {
-    background: #f6f6f6;
+    background: transparent;
+    position: relative;
+    vertical-align: middle;
+    font-weight: bold;
 }
 #calendar td > div {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 2em;
-    font-size: 1em;
+    height: 2.2em;
+    font-size: 1.10em;
+    color: #fff;
+    width: 100%;
 }
+/* Target (green pill) */
 .target > div {
     background: #28a745;
     color: #fff !important;
     font-weight: bold;
     border-radius: 1em;
-    padding: 0.14em 0.7em;
+    padding: 0.20em 0.9em;
     margin: 0 auto;
 }
+.present {
+    background: rgba(0,140,186,0.45) !important;
+    /* The whole cell background is colored for today */
+}
 .present > div {
-    background: #008CBA;
+    background: none !important;
     color: #fff !important;
     font-weight: bold;
-    border-radius: 1em;
-    padding: 0.14em 0.7em;
-    margin: 0 auto;
 }
 .past > div {
     color: #bbb;
 }
 .future > div {
-    color: #222;
+    color: #fff;
     background: none;
 }
 @media (max-width: 600px) {
     h1, #countdown {
-        font-size: 1rem;
+        font-size: 1.13rem;
     }
     #calendar th, #calendar td {
-        font-size: 0.9rem;
-        padding: 10px 0;
+        font-size: 1.01rem;
+        padding: 13px 0;
     }
     #calendar {
         width: 99vw;
     }
-    #monthAndYear {
+    #calendar-controls-inner button {
         font-size: 1rem;
+        padding: 0.55em 1.1em;
+        border-radius: 8px;
     }
-    #prev, #next {
-        font-size: 0.9rem;
-        padding: 7px 10px;
+    #calendar-controls-inner #monthAndYear {
+        font-size: 1.09rem;
     }
 }
