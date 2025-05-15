@@ -1,13 +1,10 @@
 body {
-    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    text-align: center;
+    font-family: 'Segoe UI', Arial, sans-serif;
     background: url("mobile-background.jpg") no-repeat center center fixed;
     background-size: cover;
-    margin: 0;
-    min-height: 100vh;
     color: #222;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    margin: 0;
 }
 @media (min-width: 800px) {
     body {
@@ -15,28 +12,25 @@ body {
         background-size: cover;
     }
 }
-
 h1, #countdown {
     font-size: 1.15rem;
     font-weight: 600;
     margin-bottom: 1rem;
     color: #fff;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-
 #countdown {
     font-size: 1.1rem;
-    background: rgba(30, 41, 59, 0.18);
+    background: rgba(30, 41, 59, 0.16);
     border-radius: 0.8em;
     padding: 0.4em 0.9em;
     display: inline-block;
     margin-top: 0.2em;
     margin-bottom: 1.3em;
-    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.11);
+    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.10);
 }
-
 #countdown span {
-    background: rgba(255,255,255,0.17);
+    background: rgba(255,255,255,0.14);
     border-radius: 7px;
     margin: 0 0.10em;
     padding: 0.10em 0.25em;
@@ -46,74 +40,131 @@ h1, #countdown {
     color: #fff;
 }
 
-#calendar {
-    margin: 1em auto 0 auto;
-    background: rgba(255,255,255,0.97);
-    border-radius: 1.3em;
-    box-shadow: 0 2px 16px 2px rgba(0,0,0,0.10);
-    overflow: hidden;
-    width: 94vw;
-    max-width: 370px;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
+/* Calendar header and nav */
 #calendar-header {
     width: 100%;
-    border: none;
-    margin-bottom: 0.2em;
+    border-collapse: collapse;
+    margin-bottom: 0;
     background: none;
+    padding: 0;
+}
+#calendar-header td {
+    border: none;
+    padding: 0;
+}
+.prev-button-cell,
+.next-button-cell {
+    width: 25%;
+    text-align: center;
+}
+.month-name-cell {
+    width: 50%;
+    text-align: center;
+}
+#monthAndYear {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #fff;
+    background: none;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.14);
+    margin: 0.2em 0 0.2em 0;
+    padding: 0.18em 0;
+    letter-spacing: 0.02em;
+}
+
+/* Prev/Next Buttons */
+#prev, #next {
+    background: #fff;
+    color: #2563eb;
+    border: 2px solid #2563eb;
+    border-radius: 1.2em;
+    font-size: 0.98rem;
+    font-weight: 500;
+    padding: 0.33em 1.1em;
+    margin: 0.19em 0.18em;
+    transition: background 0.13s, color 0.13s, border 0.13s;
+    cursor: pointer;
+    outline: none;
+}
+#prev:hover, #next:hover {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+/* Calendar Table */
+#calendar {
+    margin: 1em auto 0 auto;
+    background: rgba(255,255,255,0.82);
+    border-radius: 1.1em;
+    box-shadow: 0 2px 10px 2px rgba(0,0,0,0.09);
+    overflow: hidden;
+    width: 98vw;
+    max-width: 480px;
+    border-collapse: collapse;
+    border: 3px solid #fff;
+}
+
+#calendar th,
+#calendar td {
+    font-size: 1.01rem;
+    color: #222;
+    font-weight: 500;
+    border: 2px solid #fff;
+    padding: 0.55em 0;
+    width: 14.2857%;
+    text-align: center;
+    background: none;
+    height: 2.2em;
+    box-sizing: border-box;
 }
 
 #calendar th {
-    font-size: 0.92rem;
-    color: #555;
-    font-weight: 500;
-    background: none;
-    border: none;
-    padding: 0.35em 0;
+    background: rgba(60,60,60,0.15);
+    color: #fff;
+    font-weight: 600;
     letter-spacing: 0.04em;
 }
 
-#calendar-body td {
-    background: none;
-    border: none;
-    padding: 0;
-    height: 2.25em;
-    width: 1em;
-}
-
-#calendar-body td > div {
-    width: 2.15em;
-    height: 2.15em;
-    margin: 0.12em auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    border-radius: 50%;
-    transition: background 0.13s;
+#calendar td {
+    background: rgba(255,255,255,0.92);
     position: relative;
+    vertical-align: middle;
 }
 
-/* Target (pill) */
+#calendar td > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 2em;
+    position: relative;
+    font-size: 1em;
+    z-index: 1;
+}
+
+/* Target (green pill) */
 .target > div {
-    background: linear-gradient(135deg, #38d78a 75%, #14b85a 100%);
+    background: #28a745;
     color: #fff !important;
-    font-weight: 600;
-    box-shadow: 0 2px 8px 0 rgba(55, 190, 85, 0.12);
-    border-radius: 2em;
+    font-weight: 700;
+    border-radius: 1.1em;
+    padding: 0.15em 0.65em;
+    margin: 0.05em auto;
+    box-shadow: 0 2px 6px 0 rgba(55, 190, 85, 0.10);
 }
 
-/* Today */
+/* Today (blue pill) */
 .present > div {
-    background: linear-gradient(135deg, #3b82f6 70%, #1d4ed8 100%);
+    background: #2563eb;
     color: #fff !important;
-    font-weight: 600;
-    border-radius: 2em;
+    font-weight: 700;
+    border-radius: 1.1em;
+    padding: 0.15em 0.65em;
+    margin: 0.05em auto;
+    box-shadow: 0 1px 4px 0 rgba(30, 64, 175, 0.10);
 }
 
-/* Past: faded & cross */
+/* Past: strong red cross, centered */
 .past > div {
     color: #c7c7c7;
     opacity: 1;
@@ -122,13 +173,14 @@ h1, #countdown {
     content: "";
     position: absolute;
     left: 50%; top: 50%;
-    width: 1.25em;
-    height: 0.17em;
+    width: 70%;
+    height: 0.20em;
     background: #e32c2c;
     border-radius: 2px;
-    opacity: 0.88;
+    opacity: 0.93;
     transform-origin: center;
     pointer-events: none;
+    z-index: 2;
 }
 .past > div::before {
     transform: translate(-50%,-50%) rotate(45deg);
@@ -137,58 +189,33 @@ h1, #countdown {
     transform: translate(-50%,-50%) rotate(-45deg);
 }
 
-/* Future: subtle */
+/* Empty cells */
+#calendar td:empty {
+    background: rgba(255,255,255,0.5);
+    border: 2px solid #fff;
+}
+
 .future > div {
-    color: #333;
+    color: #222;
     background: none;
-}
-
-#monthAndYear {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #333;
-    margin: 0.5em 0 0.3em 0;
-    padding: 0.2em 0;
-    background: none;
-    text-shadow: none;
-    letter-spacing: 0.03em;
-}
-
-/* Calendar nav buttons */
-#prev, #next {
-    background: #f1f5f9;
-    color: #2563eb;
-    border: none;
-    border-radius: 2em;
-    font-size: 0.93rem;
-    font-weight: 500;
-    padding: 0.37em 1.1em;
-    margin: 0.19em 0.18em;
-    box-shadow: 0 1px 2px 0 rgba(30, 64, 175, 0.06);
-    transition: background 0.14s, color 0.14s;
-    cursor: pointer;
-    outline: none;
-}
-#prev:hover, #next:hover {
-    background: #c7d5fa;
-    color: #1e40af;
 }
 
 @media (max-width: 600px) {
     h1, #countdown {
-        font-size: 1.02rem;
+        font-size: 1.01rem;
     }
-    #calendar th, #calendar-body td > div {
-        font-size: 0.97rem;
+    #calendar th, #calendar td {
+        font-size: 0.92rem;
+        padding: 0.36em 0;
     }
     #calendar {
         max-width: 99vw;
     }
     #monthAndYear {
-        font-size: 0.97rem;
+        font-size: 0.95rem;
     }
     #prev, #next {
-        font-size: 0.93rem;
-        padding: 0.30em 0.8em;
+        font-size: 0.91rem;
+        padding: 0.27em 0.7em;
     }
 }
