@@ -1,15 +1,10 @@
 (() => {
-  // -----------------------------
-  // CONFIGURATION: CHANGE TARGET DATE & DETAILS HERE!
-  // -----------------------------
+  // --- CONFIGURATION: CHANGE TARGET DATE & DETAILS HERE! ---
   const TARGET = {
-    // Set your target date/time here (local time)
     date: new Date(2025, 5, 18, 18, 50, 0), // June is 5 (0-indexed); 6:50 PM local
-    // Set the display string for the heading here
     display: "Countdown to 18th June 2025, 6:50 PM"
   };
 
-  // Convert to UTC for calculations, but use local for calendar display
   const targetDateUTC = new Date(Date.UTC(
     TARGET.date.getFullYear(),
     TARGET.date.getMonth(),
@@ -19,12 +14,8 @@
     TARGET.date.getSeconds()
   ));
 
-  // Set heading dynamically
   document.getElementById("countdown-title").textContent = TARGET.display;
 
-  // -----------------------------
-  // DOM ELEMENTS
-  // -----------------------------
   const countdownElements = {
     days: document.getElementById("days"),
     hours: document.getElementById("hours"),
@@ -45,9 +36,7 @@
     newzealand: document.getElementById("newzealand")
   };
 
-  // -----------------------------
-  // COUNTDOWN TIMER
-  // -----------------------------
+  // --- COUNTDOWN TIMER ---
   const updateCountdown = () => {
     const now = new Date();
     const distance = targetDateUTC - now;
@@ -65,13 +54,10 @@
     countdownElements.minutes.textContent = minutes;
     countdownElements.seconds.textContent = seconds;
   };
-
   const countdownInterval = setInterval(updateCountdown, 1000);
   updateCountdown();
 
-  // -----------------------------
-  // CALENDAR GENERATION
-  // -----------------------------
+  // --- CALENDAR GENERATION ---
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
@@ -102,6 +88,11 @@
         } else {
           const cellDiv = document.createElement("div");
           cellDiv.textContent = date;
+          cellDiv.style.width = "100%";
+          cellDiv.style.height = "100%";
+          cellDiv.style.display = "flex";
+          cellDiv.style.alignItems = "center";
+          cellDiv.style.justifyContent = "center";
 
           // Highlight target date cell
           if (
@@ -111,7 +102,6 @@
           ) {
             cell.classList.add("target");
           }
-
           // Determine cell classes
           if (
             year === today.getFullYear() &&
@@ -138,10 +128,8 @@
     }
   };
 
-  // Initialize calendar
   generateCalendar(currentMonth, currentYear);
 
-  // Navigation event listeners
   calendarElements.prev.addEventListener("click", () => {
     if (currentMonth === 0) {
       currentMonth = 11;
@@ -162,13 +150,10 @@
     generateCalendar(currentMonth, currentYear);
   });
 
-  // -----------------------------
-  // REAL-TIME CLOCKS
-  // -----------------------------
+  // --- REAL-TIME CLOCKS ---
   const updateTime = () => {
     const now = new Date();
 
-    // Time in India (Asia/Kolkata)
     const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     timeElements.india.textContent = indiaTime.toLocaleTimeString("en-US", {
       hour: "2-digit",
@@ -177,7 +162,6 @@
       hour12: true
     });
 
-    // Time in New Zealand (Pacific/Auckland)
     const nzTime = new Date(now.toLocaleString("en-US", { timeZone: "Pacific/Auckland" }));
     timeElements.newzealand.textContent = nzTime.toLocaleTimeString("en-US", {
       hour: "2-digit",
