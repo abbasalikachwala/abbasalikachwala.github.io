@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Countdown Timer</title>
-<link rel="stylesheet" type="text/css" href="style.css">
+  <title>Countdown Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="./style.css">
 </head>
 <body>
-  <h1>Countdown to 18th June 2025, 6:50 PM</h1>
+  <h1 id="countdown-title"></h1>
   <p id="countdown">
     <span id="days"></span>d
     <span id="hours"></span>h
     <span id="minutes"></span>m
     <span id="seconds"></span>s
   </p>
-<table id="calendar-header">
-  <tr>
-  <td class="prev-button-cell"><button id="prev">Prev</button></td>
-  <td class="month-name-cell"><header id="monthAndYear"></header></td>
-  <td class="next-button-cell"><button id="next">Next</button></td>
-  </tr>
-</table>
+  <table id="calendar-header">
+    <tr>
+      <td class="prev-button-cell"><button id="prev">Prev</button></td>
+      <td class="month-name-cell"><header id="monthAndYear"></header></td>
+      <td class="next-button-cell"><button id="next">Next</button></td>
+    </tr>
+  </table>
   <table id="calendar">
     <thead>
       <tr>
@@ -34,10 +35,9 @@
     <tbody id="calendar-body">
     </tbody>
   </table>
-  </div>
   <h1>Current Time</h1>
   <h1 id="time-india">Time in India: <span id="india"></span></h1>
   <h1 id="time-nz">Time in NZ: <span id="newzealand"></span></h1>
-  <script src="script.js"></script>
+  <script src="./script.js"></script>
 </body>
 </html>
