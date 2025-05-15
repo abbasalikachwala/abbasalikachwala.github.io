@@ -1,7 +1,7 @@
 (() => {
-  // --- CONFIGURATION: CHANGE TARGET DATE & DETAILS HERE! ---
+  // --- CONFIGURATION ---
   const TARGET = {
-    date: new Date(2025, 5, 18, 18, 50, 0), // June is 5 (0-indexed); 6:50 PM local
+    date: new Date(2025, 5, 18, 18, 50, 0),
     display: "Countdown to 18th June 2025, 6:50 PM"
   };
 
@@ -67,6 +67,15 @@
   let currentMonth = today.getMonth();
   let currentYear = today.getFullYear();
 
+  function createCell(content, classes = []) {
+    const cell = document.createElement("td");
+    const cellDiv = document.createElement("div");
+    cellDiv.textContent = content || "";
+    classes.forEach(cls => cell.classList.add(cls));
+    cell.appendChild(cellDiv);
+    return cell;
+  }
+
   const generateCalendar = (month, year) => {
     const { calendarBody, monthAndYear } = calendarElements;
     calendarBody.innerHTML = "";
@@ -80,48 +89,31 @@
     for (let i = 0; i < 6; i++) {
       const row = document.createElement("tr");
       for (let j = 0; j < 7; j++) {
-        const cell = document.createElement("td");
         if (i === 0 && j < firstDay) {
-          cell.textContent = "";
+          row.appendChild(createCell(""));
         } else if (date > daysInMonth) {
-          break;
+          row.appendChild(createCell(""));
         } else {
-          const cellDiv = document.createElement("div");
-          cellDiv.textContent = date;
-          cellDiv.style.width = "100%";
-          cellDiv.style.height = "100%";
-          cellDiv.style.display = "flex";
-          cellDiv.style.alignItems = "center";
-          cellDiv.style.justifyContent = "center";
-
-          // Highlight target date cell
+          let classes = [];
           if (
             year === TARGET.date.getFullYear() &&
             month === TARGET.date.getMonth() &&
             date === TARGET.date.getDate()
-          ) {
-            cell.classList.add("target");
-          }
-          // Determine cell classes
+          ) classes.push("target");
           if (
             year === today.getFullYear() &&
             month === today.getMonth() &&
             date === today.getDate()
-          ) {
-            cell.classList.add("present");
-          } else if (
+          ) classes.push("present");
+          else if (
             year < today.getFullYear() ||
             (year === today.getFullYear() && month < today.getMonth()) ||
             (year === today.getFullYear() && month === today.getMonth() && date < today.getDate())
-          ) {
-            cell.classList.add("past");
-          } else {
-            cell.classList.add("future");
-          }
-          cell.appendChild(cellDiv);
+          ) classes.push("past");
+          else classes.push("future");
+          row.appendChild(createCell(date, classes));
           date++;
         }
-        row.appendChild(cell);
       }
       calendarBody.appendChild(row);
       if (date > daysInMonth) break;
@@ -153,7 +145,6 @@
   // --- REAL-TIME CLOCKS ---
   const updateTime = () => {
     const now = new Date();
-
     const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     timeElements.india.textContent = indiaTime.toLocaleTimeString("en-US", {
       hour: "2-digit",
@@ -170,7 +161,6 @@
       hour12: true
     });
   };
-
   setInterval(updateTime, 1000);
   updateTime();
 })();
