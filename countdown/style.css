@@ -12,60 +12,76 @@ body {
         background-size: cover;
     }
 }
+
+/* Main content wrapper with soft black overlay */
+#main-content {
+    background: rgba(0,0,0,0.30);
+    border-radius: 32px;
+    margin: 36px auto 0 auto;
+    padding: 36px 0 36px 0;
+    width: 97vw;
+    max-width: 1200px;
+    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.23);
+}
+
 h1#countdown-title {
-    font-size: 2.9rem;
+    font-size: 1.45rem;
     font-weight: bold;
-    margin-top: 70px; /* Increased top padding */
+    margin-top: 0;
     margin-bottom: 32px;
     color: #fff;
     text-shadow: 0 2px 16px rgba(0,0,0,0.38);
 }
 #countdown {
-    padding: 28px;
+    padding: 14px 28px;
     border-radius: 8px;
     display: inline-block;
-    margin-bottom: 50px;
-    background: rgba(0,0,0,0.28);
-    font-size: 2.5rem;
+    margin-bottom: 48px;
+    background: rgba(0,0,0,0.18);
+    font-size: 1.25rem;
     color: #fff;
     font-weight: bold;
 }
 #countdown span {
     color: #fff;
-    font-size: 2.5rem;
+    font-size: 1.25rem;
 }
+
+/* Calendar table */
 #calendar {
     margin: 24px auto 0 auto;
     width: 95vw;
-    border-radius: 0; /* No rounded edges */
+    border-radius: 0;
     box-shadow: 0 2px 10px 2px rgba(0,0,0,0.10);
     border-collapse: collapse;
-    background: rgba(0,0,0,0.18); /* Black overlay */
+    background: transparent;
     overflow: hidden;
     table-layout: fixed;
 }
+
+/* Controls row */
 #calendar thead tr.controls-row th {
     background: rgba(0,0,0,0.18);
     padding: 0;
     border: none;
-    height: 5.6em;
+    height: 3.3em;
 }
 #calendar-controls-inner {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     width: 100%;
-    gap: 1em;
+    gap: 0;
 }
 #calendar-controls-inner button {
     background: rgba(0,140,186,0.32);
     color: #fff;
     border: none;
-    padding: 1.2em 3.2em;
+    padding: 0.72em 2.0em;
     border-radius: 10px;
-    font-size: 2.44rem;
+    font-size: 1.22rem;
     font-weight: bold;
-    margin: 0 0.25em;
+    margin: 0;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
 }
@@ -73,20 +89,24 @@ h1#countdown-title {
     background: rgba(0,140,186,0.7);
 }
 #calendar-controls-inner #monthAndYear {
-    font-size: 2.7rem;
+    font-size: 1.33rem;
     font-weight: bold;
     color: #fff;
-    margin: 0 0.6em;
+    margin: 0;
     letter-spacing: 0.02em;
     text-shadow: 0 2px 8px rgba(0,0,0,0.22);
+    flex-grow: 1;
+    text-align: center;
 }
+
 #calendar th, #calendar td {
     border: 2px solid rgba(255,255,255,0.8);
     padding: 0;
     text-align: center;
-    font-size: 2.36rem;
+    font-size: 1.18rem;
     width: calc(100% / 7);
-    height: 7vw; /* Default for square cells on desktop */
+    height: 7vw;
+    min-height: 54px;
     background: transparent;
     color: #fff;
     box-sizing: border-box;
@@ -94,7 +114,7 @@ h1#countdown-title {
     vertical-align: middle;
 }
 #calendar th {
-    background: rgba(80,80,80,0.55); /* Changed header color for contrast */
+    background: rgba(80,80,80,0.55);
     color: #fff;
     font-weight: bold;
     letter-spacing: 0.05em;
@@ -105,6 +125,7 @@ h1#countdown-title {
     position: relative;
     font-weight: bold;
     height: 7vw;
+    min-height: 54px;
 }
 #calendar td > div {
     display: flex;
@@ -112,12 +133,14 @@ h1#countdown-title {
     align-items: center;
     height: 100%;
     min-height: 54px;
-    font-size: 2.36rem;
+    font-size: 1.18rem;
     color: #fff;
     width: 100%;
 }
+
+/* Target (green) and present (blue) with same transparency */
 .target {
-    background: #27c942 !important; /* Green background for target date */
+    background: rgba(39,201,66,0.52) !important;
 }
 .target > div {
     background: none !important;
@@ -128,7 +151,7 @@ h1#countdown-title {
     margin: 0;
 }
 .present {
-    background: rgba(0,140,186,0.52) !important; /* Distinct color for today */
+    background: rgba(0,140,186,0.52) !important;
 }
 .present > div {
     background: none !important;
@@ -143,36 +166,76 @@ h1#countdown-title {
     background: none;
 }
 
-/* Make calendar cells square on mobile too */
 @media (max-width: 600px) {
+    #main-content {
+        padding: 16px 0 16px 0;
+        margin: 16px auto 0 auto;
+        border-radius: 18px;
+    }
     h1#countdown-title {
-        font-size: 1.55rem;
-        margin-top: 40px;
+        font-size: 1.05rem;
+        margin-bottom: 18px;
     }
     #countdown {
-        font-size: 1.25rem;
-        padding: 14px;
+        font-size: 0.82rem;
+        padding: 9px 16px;
+        margin-bottom: 22px;
     }
     #countdown span {
-        font-size: 1.25rem;
+        font-size: 0.82rem;
     }
     #calendar-controls-inner button {
-        font-size: 1.22rem;
-        padding: 0.65em 1.5em;
+        font-size: 0.82rem;
+        padding: 0.35em 0.85em;
     }
     #calendar-controls-inner #monthAndYear {
-        font-size: 1.35rem;
+        font-size: 0.93rem;
     }
     #calendar th, #calendar td {
-        font-size: 1.18rem;
+        font-size: 0.82rem;
         height: 14vw;
-        min-height: 44px;
+        min-height: 32px;
     }
     #calendar th {
         height: 14vw;
     }
     #calendar td > div {
-        font-size: 1.18rem;
-        min-height: 44px;
+        font-size: 0.82rem;
+        min-height: 32px;
+    }
+}
+
+/* Current Time Section */
+#current-time-section {
+    width: 97vw;
+    max-width: 1200px;
+    margin: 36px auto 0 auto;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    text-align: center;
+}
+#current-time-section h1 {
+    color: #fff;
+    font-size: 1.45rem;
+    margin: 32px 0 18px 0;
+    font-weight: bold;
+    text-shadow: 0 1px 7px rgba(30, 41, 59, 0.19);
+}
+#time-india, #time-nz {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0.14em 0;
+    text-shadow: none;
+}
+@media (max-width: 600px) {
+    #current-time-section h1 {
+        font-size: 1.05rem;
+        margin: 18px 0 10px 0;
+    }
+    #time-india, #time-nz {
+        font-size: 0.82rem;
     }
 }
