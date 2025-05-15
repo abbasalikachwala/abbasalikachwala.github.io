@@ -69,10 +69,12 @@
 
   function createCell(content, classes = []) {
     const cell = document.createElement("td");
-    const cellDiv = document.createElement("div");
-    cellDiv.textContent = content || "";
-    classes.forEach(cls => cell.classList.add(cls));
-    cell.appendChild(cellDiv);
+    if (content !== "") {
+      const cellDiv = document.createElement("div");
+      cellDiv.textContent = content;
+      classes.forEach(cls => cell.classList.add(cls));
+      cell.appendChild(cellDiv);
+    }
     return cell;
   }
 
