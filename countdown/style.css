@@ -1,13 +1,14 @@
 body {
-    text-align: center;
-    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     background: url("mobile-background.jpg") no-repeat center center fixed;
     background-size: cover;
-    color: #222;
     margin: 0;
     min-height: 100vh;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
-
 @media (min-width: 800px) {
     body {
         background: url("desktop-background.jpeg") no-repeat center center fixed;
@@ -15,197 +16,179 @@ body {
     }
 }
 
-/* Headings and timer */
 h1, #countdown {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     font-weight: 600;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     color: #fff;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    letter-spacing: 0.03em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.18);
 }
 
 #countdown {
-    font-size: 1.15rem;
-    background: rgba(30, 41, 59, 0.35);
-    border-radius: 0.75rem;
-    padding: 0.65em 1.2em;
+    font-size: 1.1rem;
+    background: rgba(30, 41, 59, 0.18);
+    border-radius: 0.8em;
+    padding: 0.4em 0.9em;
     display: inline-block;
-    margin-top: 0.3em;
-    margin-bottom: 1.5em;
-    box-shadow: 0 2px 10px 0 rgba(0,0,0,0.13);
+    margin-top: 0.2em;
+    margin-bottom: 1.3em;
+    box-shadow: 0 1px 6px 0 rgba(0,0,0,0.11);
 }
 
 #countdown span {
+    background: rgba(255,255,255,0.17);
+    border-radius: 7px;
+    margin: 0 0.10em;
+    padding: 0.10em 0.25em;
+    min-width: 1.7em;
     display: inline-block;
-    border-radius: 8px;
-    margin: 0 0.15em;
-    background: rgba(255,255,255,0.12);
-    color: #fff;
     font-size: 1em;
-    min-width: 2.1em;
-    padding: 0.15em 0.3em;
+    color: #fff;
 }
 
-/* Calendar styling */
 #calendar {
-    width: 95%;
-    max-width: 420px;
-    margin: 1.5em auto 0 auto;
-    background: rgba(255,255,255,0.11);
-    border-radius: 1.5em;
-    box-shadow: 0 2px 14px 2px rgba(0,0,0,0.10);
+    margin: 1em auto 0 auto;
+    background: rgba(255,255,255,0.97);
+    border-radius: 1.3em;
+    box-shadow: 0 2px 16px 2px rgba(0,0,0,0.10);
     overflow: hidden;
+    width: 94vw;
+    max-width: 370px;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 #calendar-header {
     width: 100%;
-    background: transparent;
     border: none;
-    margin-bottom: 0.35em;
-}
-
-#calendar th, #calendar td {
-    font-size: 1.03rem;
-    padding: 0.4em 0;
-    width: 14.3%;
-    text-align: center;
-    border: none;
+    margin-bottom: 0.2em;
+    background: none;
 }
 
 #calendar th {
-    color: #fff;
-    background: rgba(60,60,60,0.13);
-    font-weight: 600;
+    font-size: 0.92rem;
+    color: #555;
+    font-weight: 500;
+    background: none;
+    border: none;
+    padding: 0.35em 0;
     letter-spacing: 0.04em;
 }
 
 #calendar-body td {
-    position: relative;
-    font-weight: 450;
-    color: #fafafa;
-    background: transparent;
-    border-radius: 0.9em;
-    height: 2.2em;
-    transition: background 0.12s;
-    cursor: default;
-}
-
-/* Target date cell */
-.target {
-    background: linear-gradient(135deg, #49e376 85%, #13c35a 100%);
-    color: #fff !important;
-    font-weight: 600;
-    border-radius: 1.5em !important;
+    background: none;
     border: none;
-    box-shadow: 0 2px 8px 0 rgba(55, 190, 85, 0.14);
+    padding: 0;
+    height: 2.25em;
+    width: 1em;
 }
 
-/* Today */
-.present {
-    background: linear-gradient(135deg, #60a5fa 70%, #2563eb 100%);
-    color: #fff !important;
-    font-weight: 600;
-    border-radius: 1em !important;
-    border: none;
-    box-shadow: 0 1px 4px 0 rgba(30, 64, 175, 0.16);
-}
-
-/* Past cells */
-.past {
-    opacity: 0.62;
-}
-.past div {
-    position: relative;
+#calendar-body td > div {
+    width: 2.15em;
+    height: 2.15em;
+    margin: 0.12em auto;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1rem;
+    border-radius: 50%;
+    transition: background 0.13s;
+    position: relative;
 }
-.past div::before, .past div::after {
+
+/* Target (pill) */
+.target > div {
+    background: linear-gradient(135deg, #38d78a 75%, #14b85a 100%);
+    color: #fff !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px 0 rgba(55, 190, 85, 0.12);
+    border-radius: 2em;
+}
+
+/* Today */
+.present > div {
+    background: linear-gradient(135deg, #3b82f6 70%, #1d4ed8 100%);
+    color: #fff !important;
+    font-weight: 600;
+    border-radius: 2em;
+}
+
+/* Past: faded & cross */
+.past > div {
+    color: #c7c7c7;
+    opacity: 1;
+}
+.past > div::before, .past > div::after {
     content: "";
     position: absolute;
     left: 50%; top: 50%;
-    width: 70%;
-    height: 0.18em;
+    width: 1.25em;
+    height: 0.17em;
     background: #e32c2c;
-    border-radius: 3px;
-    opacity: 0.93;
+    border-radius: 2px;
+    opacity: 0.88;
+    transform-origin: center;
     pointer-events: none;
 }
-.past div::before {
-    transform: translate(-50%, -50%) rotate(45deg);
+.past > div::before {
+    transform: translate(-50%,-50%) rotate(45deg);
 }
-.past div::after {
-    transform: translate(-50%, -50%) rotate(-45deg);
-}
-
-/* Future */
-.future {
-    color: #fff;
-    background: transparent;
+.past > div::after {
+    transform: translate(-50%,-50%) rotate(-45deg);
 }
 
-/* Remove extra spacing in calendar */
-#calendar tr {
-    height: 2.1em;
+/* Future: subtle */
+.future > div {
+    color: #333;
+    background: none;
 }
 
 #monthAndYear {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: #fff;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    letter-spacing: 0.03em;
-    margin: 0.3em 0;
+    color: #333;
+    margin: 0.5em 0 0.3em 0;
     padding: 0.2em 0;
+    background: none;
+    text-shadow: none;
+    letter-spacing: 0.03em;
 }
 
 /* Calendar nav buttons */
 #prev, #next {
-    background: linear-gradient(135deg, #2563eb 70%, #60a5fa 100%);
-    color: #fff;
+    background: #f1f5f9;
+    color: #2563eb;
     border: none;
-    border-radius: 1.5em;
-    font-size: 1.01rem;
+    border-radius: 2em;
+    font-size: 0.93rem;
     font-weight: 500;
-    padding: 0.4em 1.3em;
-    margin: 0.2em 0.18em;
-    box-shadow: 0 1px 4px 0 rgba(30, 64, 175, 0.11);
-    transition: background 0.13s, box-shadow 0.13s, transform 0.1s;
+    padding: 0.37em 1.1em;
+    margin: 0.19em 0.18em;
+    box-shadow: 0 1px 2px 0 rgba(30, 64, 175, 0.06);
+    transition: background 0.14s, color 0.14s;
     cursor: pointer;
     outline: none;
 }
 #prev:hover, #next:hover {
-    background: linear-gradient(135deg, #1d4ed8 70%, #60a5fa 100%);
-    box-shadow: 0 2px 12px 0 rgba(30, 64, 175, 0.13);
-    transform: translateY(-2px) scale(1.04);
+    background: #c7d5fa;
+    color: #1e40af;
 }
 
-/* Responsive tweaks */
 @media (max-width: 600px) {
     h1, #countdown {
-        font-size: 1.04rem;
+        font-size: 1.02rem;
     }
-    #calendar th, #calendar td {
-        font-size: 0.98rem;
-        padding: 0.23em 0;
+    #calendar th, #calendar-body td > div {
+        font-size: 0.97rem;
+    }
+    #calendar {
+        max-width: 99vw;
     }
     #monthAndYear {
-        font-size: 1.03rem;
+        font-size: 0.97rem;
     }
     #prev, #next {
-        font-size: 0.98rem;
-        padding: 0.29em 0.8em;
-    }
-    #calendar {
-        border-radius: 1em;
-        max-width: 97vw;
-    }
-}
-
-@media (max-width: 420px) {
-    #calendar {
-        border-radius: 0.7em;
-        max-width: 99vw;
+        font-size: 0.93rem;
+        padding: 0.30em 0.8em;
     }
 }
