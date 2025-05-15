@@ -13,15 +13,17 @@
     <span id="minutes"></span>m
     <span id="seconds"></span>s
   </p>
-  <table id="calendar-header">
-    <tr>
-      <td class="prev-button-cell"><button id="prev">Prev</button></td>
-      <td class="month-name-cell"><header id="monthAndYear"></header></td>
-      <td class="next-button-cell"><button id="next">Next</button></td>
-    </tr>
-  </table>
   <table id="calendar">
     <thead>
+      <tr class="controls-row">
+        <th colspan="7" style="padding:0;">
+          <div id="calendar-controls-inner">
+            <button id="prev">Prev</button>
+            <span id="monthAndYear"></span>
+            <button id="next">Next</button>
+          </div>
+        </th>
+      </tr>
       <tr>
         <th>Mon</th>
         <th>Tue</th>
