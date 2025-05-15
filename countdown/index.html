@@ -1,51 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>Countdown Timer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="./style.css">
 </head>
 <body>
-  <main>
-    <section id="countdown-section">
-      <h1 id="countdown-title" aria-live="polite"></h1>
-      <p id="countdown" aria-label="Countdown Timer">
-        <span id="days"></span>d
-        <span id="hours"></span>h
-        <span id="minutes"></span>m
-        <span id="seconds"></span>s
-      </p>
-    </section>
-
-    <section id="calendar-section">
-      <div id="calendar-controls">
-        <button id="prev" aria-label="Previous Month">Prev</button>
-        <span id="monthAndYear" aria-live="polite"></span>
-        <button id="next" aria-label="Next Month">Next</button>
-      </div>
-      <table id="calendar" aria-label="Interactive calendar">
-        <thead>
-          <tr>
-            <th scope="col">Mon</th>
-            <th scope="col">Tue</th>
-            <th scope="col">Wed</th>
-            <th scope="col">Thu</th>
-            <th scope="col">Fri</th>
-            <th scope="col">Sat</th>
-            <th scope="col">Sun</th>
-          </tr>
-        </thead>
-        <tbody id="calendar-body"></tbody>
-      </table>
-    </section>
-
-    <section id="current-time-section">
-      <h2>Current Time</h2>
-      <div id="time-india">Time in India: <span id="india"></span></div>
-      <div id="time-nz">Time in NZ: <span id="newzealand"></span></div>
-    </section>
-  </main>
+  <h1 id="countdown-title">Countdown to 18th June 2025, 6:50 PM</h1>
+  <p id="countdown">
+    <span id="days"></span>d
+    <span id="hours"></span>h
+    <span id="minutes"></span>m
+    <span id="seconds"></span>s
+  </p>
+  <table id="calendar-header">
+    <tr>
+      <td class="prev-button-cell"><button id="prev">Prev</button></td>
+      <td class="month-name-cell"><header id="monthAndYear"></header></td>
+      <td class="next-button-cell"><button id="next">Next</button></td>
+    </tr>
+  </table>
+  <table id="calendar">
+    <thead>
+      <tr>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+        <th>Sat</th>
+        <th>Sun</th>
+      </tr>
+    </thead>
+    <tbody id="calendar-body"></tbody>
+  </table>
+  <h1>Current Time</h1>
+  <h1 id="time-india">Time in India: <span id="india"></span></h1>
+  <h1 id="time-nz">Time in NZ: <span id="newzealand"></span></h1>
   <script src="./script.js"></script>
 </body>
 </html>
