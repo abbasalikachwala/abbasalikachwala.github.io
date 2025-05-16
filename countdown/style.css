@@ -191,7 +191,7 @@ h1#countdown-title {
 
 .countdown-date {
   font-weight: bold;
-  color: #00e6e6;
+  color: rgba(39,201,66);
 }
 
 /* --- MOBILE --- */
@@ -212,7 +212,7 @@ h1#countdown-title {
     }
     .countdown-date {
         font-weight: bold;
-        color: #00e6e6;
+        color: rgba(39,201,66);
     }
     #countdown span {
         font-size: 2rem;
