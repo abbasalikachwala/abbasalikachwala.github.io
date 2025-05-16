@@ -70,11 +70,15 @@ h1#countdown-title {
     background: transparent;
     overflow: hidden;
     table-layout: fixed;
+    /* Uniform outer border: */
+    border: 5px solid white;
+    box-sizing: border-box;
 }
 
 #calendar thead tr.controls-row th {
     padding: 0;
-    border: none !important;
+    /* Remove border: none, to keep border uniform */
+    /* border: none !important; */
     height: 2.3em;
     background: transparent !important;
     box-shadow: none !important;
@@ -122,8 +126,7 @@ h1#countdown-title {
 }
 
 #calendar th, #calendar td {
-    border: 5px solid;
-    border-color: white;
+    border: 5px solid white;
     padding: 0;
     text-align: center;
     font-size: 1rem;
@@ -241,6 +244,8 @@ h1#countdown-title {
     #calendar {
         margin: 2px auto 0 auto;
         width: 80vw;
+        border: 2px solid white;
+        box-sizing: border-box;
     }
     #calendar thead tr.days-row th {
         font-size: 1rem !important;
@@ -252,8 +257,8 @@ h1#countdown-title {
         height: 2em;
         min-height: 1em;
         padding: 0 !important;
-        border: 2px solid;
-        border-color: white;
+        border: 2px solid white;
+        box-sizing: border-box;
     }
     #calendar th {
         height: 1.1em;
