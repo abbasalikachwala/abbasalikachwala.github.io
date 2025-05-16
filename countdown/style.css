@@ -78,9 +78,9 @@ h1#countdown-title {
     border: none;
     padding: 0.72em 2.0em;
     border-radius: 10px;
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: bold;
-    margin: 0;
+    margin-bottom: 15px;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
 }
