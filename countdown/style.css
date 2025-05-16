@@ -13,38 +13,38 @@ body {
     }
 }
 
-/* Main content wrapper with soft black overlay */
+/* Main content wrapper with soft black overlay and top padding */
 #main-content {
     background: rgba(0,0,0,0.30);
     border-radius: 32px;
-    margin: 36px auto 0 auto;
-    padding: 36px 0 36px 0;
+    margin: 56px auto 0 auto; /* extra top margin */
+    padding: 40px 0 36px 0;
     width: 97vw;
     max-width: 1200px;
     box-shadow: 0 8px 32px 0 rgba(0,0,0,0.23);
 }
 
 h1#countdown-title {
-    font-size: 1.45rem;
+    font-size: 2rem;
     font-weight: bold;
     margin-top: 0;
-    margin-bottom: 32px;
+    margin-bottom: 38px;
     color: #fff;
     text-shadow: 0 2px 16px rgba(0,0,0,0.38);
 }
 #countdown {
-    padding: 14px 28px;
+    padding: 16px 32px;
     border-radius: 8px;
     display: inline-block;
-    margin-bottom: 48px;
+    margin-bottom: 50px;
     background: rgba(0,0,0,0.18);
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     color: #fff;
     font-weight: bold;
 }
 #countdown span {
     color: #fff;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
 }
 
 /* Calendar table */
@@ -79,7 +79,7 @@ h1#countdown-title {
     border: none;
     padding: 0.72em 2.0em;
     border-radius: 10px;
-    font-size: 1.22rem;
+    font-size: 1.1rem;
     font-weight: bold;
     margin: 0;
     cursor: pointer;
@@ -89,7 +89,7 @@ h1#countdown-title {
     background: rgba(0,140,186,0.7);
 }
 #calendar-controls-inner #monthAndYear {
-    font-size: 1.33rem;
+    font-size: 1.2rem;
     font-weight: bold;
     color: #fff;
     margin: 0;
@@ -104,10 +104,10 @@ h1#countdown-title {
     border: 2px solid rgba(255,255,255,0.8);
     padding: 0;
     text-align: center;
-    font-size: 1rem; /* SMALLER calendar text */
+    font-size: 1rem; /* small calendar text */
     width: calc(100% / 7);
-    height: 2.7em;    /* Cell height scales with font size */
-    min-height: 2.7em;
+    height: 2.5em;    /* Cell height scales with font size */
+    min-height: 2.5em;
     background: transparent;
     color: #fff;
     box-sizing: border-box;
@@ -119,20 +119,20 @@ h1#countdown-title {
     color: #fff;
     font-weight: bold;
     letter-spacing: 0.05em;
-    height: 2.7em;
+    height: 2.5em;
 }
 #calendar td {
     background: transparent;
     position: relative;
     font-weight: bold;
-    height: 2.7em;
-    min-height: 2.7em;
+    height: 2.5em;
+    min-height: 2.5em;
 }
 #calendar td > div {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 2.7em;
+    height: 2.5em;
     font-size: 1rem;
     color: #fff;
     width: 100%;
@@ -166,46 +166,6 @@ h1#countdown-title {
     background: none;
 }
 
-@media (max-width: 600px) {
-    #main-content {
-        padding: 16px 0 16px 0;
-        margin: 16px auto 0 auto;
-        border-radius: 18px;
-    }
-    h1#countdown-title {
-        font-size: 1.05rem;
-        margin-bottom: 18px;
-    }
-    #countdown {
-        font-size: 0.82rem;
-        padding: 9px 16px;
-        margin-bottom: 22px;
-    }
-    #countdown span {
-        font-size: 0.82rem;
-    }
-    #calendar-controls-inner button {
-        font-size: 0.82rem;
-        padding: 0.35em 0.85em;
-    }
-    #calendar-controls-inner #monthAndYear {
-        font-size: 0.93rem;
-    }
-    #calendar th, #calendar td {
-        font-size: 0.72rem;
-        height: 2em;
-        min-height: 2em;
-    }
-    #calendar th {
-        height: 2em;
-    }
-    #calendar td > div {
-        font-size: 0.72rem;
-        height: 2em;
-        min-height: 2em;
-    }
-}
-
 /* Current Time Section */
 #current-time-section {
     width: 97vw;
@@ -219,24 +179,63 @@ h1#countdown-title {
 }
 #current-time-section h1 {
     color: #fff;
-    font-size: 1.45rem;
+    font-size: 2rem;
     margin: 32px 0 18px 0;
     font-weight: bold;
     text-shadow: 0 1px 7px rgba(30, 41, 59, 0.19);
 }
 #time-india, #time-nz {
     color: #fff;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: bold;
     margin: 0.14em 0;
     text-shadow: none;
 }
+
+/* --- MOBILE --- */
 @media (max-width: 600px) {
+    #main-content {
+        padding: 16px 0 16px 0;
+        margin: 16px auto 0 auto;
+        border-radius: 18px;
+    }
+    h1#countdown-title {
+        font-size: 1.2rem;
+        margin-bottom: 18px;
+    }
+    #countdown {
+        font-size: 1rem;
+        padding: 9px 16px;
+        margin-bottom: 22px;
+    }
+    #countdown span {
+        font-size: 1rem;
+    }
+    #calendar-controls-inner button {
+        font-size: 0.85rem;
+        padding: 0.34em 0.7em;
+    }
+    #calendar-controls-inner #monthAndYear {
+        font-size: 0.95rem;
+    }
+    #calendar th, #calendar td {
+        font-size: 0.72rem;
+        height: 1.7em;
+        min-height: 1.7em;
+    }
+    #calendar th {
+        height: 1.7em;
+    }
+    #calendar td > div {
+        font-size: 0.72rem;
+        height: 1.7em;
+        min-height: 1.7em;
+    }
     #current-time-section h1 {
-        font-size: 1.05rem;
+        font-size: 1.2rem;
         margin: 18px 0 10px 0;
     }
     #time-india, #time-nz {
-        font-size: 0.82rem;
+        font-size: 1rem;
     }
 }
