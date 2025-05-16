@@ -118,10 +118,10 @@ h1#countdown-title {
     font-size: 1.5rem;
     padding: 4px 0;
     height: 2.5em;
+    border: 2px solid;
 }
 
 #calendar th, #calendar td {
-/*     border: 2px solid white; */
     padding: 0;
     text-align: center;
     font-size: 1rem;
@@ -147,6 +147,7 @@ h1#countdown-title {
     font-weight: bold;
     height: 2em;
     min-height: 1.4em;
+    border: 2px white;
 }
 #calendar td > div {
     display: flex;
