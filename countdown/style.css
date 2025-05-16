@@ -63,6 +63,7 @@ h1#countdown-title {
     margin-bottom: 10px;
     border: none;
     height: 3.3em;
+    background: transparent !important;
 }
 #calendar-controls-inner {
     display: flex;
@@ -95,6 +96,12 @@ h1#countdown-title {
     text-shadow: 0 2px 8px rgba(0,0,0,0.22);
     flex-grow: 1;
     text-align: center;
+}
+
+/* Days Row */
+#calendar thead tr.days-row th {
+    background: #245fa5;
+    color: #fff;
 }
 
 /* --- CALENDAR FONT SIZES AND DYNAMIC CELL HEIGHT --- */
@@ -241,5 +248,5 @@ h1#countdown-title {
     }
     #time-india, #time-nz {
         font-size: 1.75rem;
-    }
+    }   
 }
