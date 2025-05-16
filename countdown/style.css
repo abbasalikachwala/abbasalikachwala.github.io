@@ -1,3 +1,10 @@
+html, body {
+    height: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
 body {
     text-align: center;
     font-family: Arial, sans-serif;
@@ -5,8 +12,8 @@ body {
     background-size: cover;
     background-repeat: no-repeat;
     color: #fff;
-    margin: 0;
     min-height: 100vh;
+    height: 100vh;
 }
 
 @media (min-width: 800px) {
@@ -21,10 +28,18 @@ body {
 #main-content {
     background: rgba(0,0,0,0.30);
     border-radius: 32px;
-    margin: 20px auto 0 auto;
-    padding: 24px 0 20px 0;
-    width: 95vw; /* Matches calendar width */
+    margin: 0 auto;
+    padding: 18px 0 12px 0;
+    width: 95vw;
     box-shadow: 0 8px 32px 0 rgba(0,0,0,0.23);
+    min-height: 100vh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 h1#countdown-title {
@@ -50,7 +65,6 @@ h1#countdown-title {
     font-size: 2rem;
 }
 
-/* Calendar table */
 #calendar {
     margin: 10px auto 0 auto;
     width: 90vw;
@@ -59,9 +73,9 @@ h1#countdown-title {
     background: transparent;
     overflow: hidden;
     table-layout: fixed;
+    max-width: 600px;
 }
 
-/* Controls row */
 #calendar thead tr.controls-row th {
     padding: 0;
     border: none !important;
@@ -103,7 +117,6 @@ h1#countdown-title {
     text-align: center;
 }
 
-/* Days Row */
 #calendar thead tr.days-row th {
     background: #245fa5;
     color: #fff;
@@ -112,7 +125,6 @@ h1#countdown-title {
     height: 2.5em;
 }
 
-/* --- CALENDAR FONT SIZES AND DYNAMIC CELL HEIGHT --- */
 #calendar th, #calendar td {
     border: 2px solid rgba(255,255,255,0.7);
     padding: 0;
@@ -151,7 +163,6 @@ h1#countdown-title {
     width: 100%;
 }
 
-/* Target (green) and present (blue) with same transparency */
 .target {
     background: rgba(39,201,66,0.52) !important;
 }
@@ -177,7 +188,6 @@ h1#countdown-title {
     background: none;
 }
 
-/* Current Time Section - now inside main-content */
 #current-time-section {
     width: 100%;
     margin: 20px auto 0 auto;
@@ -210,65 +220,68 @@ h1#countdown-title {
     #main-content {
         padding: 2px 0 2px 0;
         margin: 0 auto 0 auto;
-        border-radius: 10px;
-        width: 95vw;
+        border-radius: 14px;
+        width: 98vw;
+        min-width: 0;
+        min-height: 100vh;
+        height: 100vh;
     }
     h1#countdown-title {
-        font-size: 1rem;
-        margin-bottom: 0;
+        font-size: 1.1rem;
+        margin-bottom: 2px;
         margin-top: 0;
     }
     #countdown {
-        font-size: 0.95rem;
-        padding: 2px 4px;
-        margin-bottom: 2px;
+        font-size: 1rem;
+        padding: 4px 8px;
+        margin-bottom: 5px;
         border-radius: 6px;
     }
     #countdown span {
-        font-size: 0.95rem;
+        font-size: 1rem;
     }
     .countdown-date {
-        font-size: 0.95rem;
+        font-size: 1rem;
     }
     #calendar {
         margin: 2px auto 0 auto;
     }
     #calendar thead tr.days-row th {
-        font-size: 0.75rem !important;
+        font-size: 0.80rem !important;
         padding: 0 !important;
-        height: 1em !important;
+        height: 1.1em !important;
     }
     #calendar th, #calendar td {
-        font-size: 0.75rem;
-        height: 1em;
-        min-height: 0.9em;
+        font-size: 0.80rem;
+        height: 1.1em;
+        min-height: 1em;
         padding: 0 !important;
     }
     #calendar th {
-        height: 1em;
+        height: 1.1em;
     }
     #calendar td > div {
-        font-size: 0.75rem;
-        height: 0.9em;
-        min-height: 0.9em;
+        font-size: 0.80rem;
+        height: 1em;
+        min-height: 1em;
     }
     #calendar-controls-inner {
         margin-bottom: 2px;
     }
     #calendar-controls-inner button {
-        font-size: 0.60rem;
-        padding: 0.1em 0.4em;
+        font-size: 0.70rem;
+        padding: 0.16em 0.6em;
         margin-bottom: 0;
         border-radius: 7px;
     }
     #calendar-controls-inner #monthAndYear {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
     }
     #current-time-section h1 {
-        font-size: 0.85rem;
-        margin: 4px 0 1px 0;
+        font-size: 0.95rem;
+        margin: 8px 0 2px 0;
     }
     #time-india, #time-nz {
-        font-size: 0.85rem;
+        font-size: 0.95rem;
     }
 }
