@@ -189,6 +189,11 @@ h1#countdown-title {
     text-shadow: none;
 }
 
+.countdown-date {
+  font-weight: bold;
+  color: #00e6e6;
+}
+
 /* --- MOBILE --- */
 @media (max-width: 600px) {
     #main-content {
@@ -204,6 +209,10 @@ h1#countdown-title {
     #countdown {
         font-size: 2rem;
         padding: 9px 16px;
+    }
+    .countdown-date {
+        font-weight: bold;
+        color: #00e6e6;
     }
     #countdown span {
         font-size: 2rem;
