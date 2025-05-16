@@ -17,7 +17,7 @@ body {
 #main-content {
     background: rgba(0,0,0,0.30);
     border-radius: 32px;
-    margin: 56px auto 0 auto;
+    margin: 25px auto auto auto;
     padding: 40px 0 36px 0;
     width: 95vw; /* Matches calendar width */
     box-shadow: 0 8px 32px 0 rgba(0,0,0,0.23);
@@ -39,6 +39,7 @@ h1#countdown-title {
     font-size: 2rem;
     color: #fff;
     font-weight: bold;
+    margin: 0;
 }
 #countdown span {
     color: #fff;
@@ -141,7 +142,7 @@ h1#countdown-title {
     justify-content: center;
     align-items: center;
     height: 2.5em;
-    font-size: 1rem;
+    font-size: 1.5rem;
     color: #fff;
     width: 100%;
 }
