@@ -3,13 +3,17 @@ body {
     font-family: Arial, sans-serif;
     background: url("mobile-background.jpg") no-repeat center center fixed;
     background-size: cover;
+    background-repeat: no-repeat;
     color: #fff;
     margin: 0;
+    min-height: 100vh;
 }
+
 @media (min-width: 800px) {
     body {
         background: url("desktop-background.jpeg") no-repeat center center fixed;
         background-size: cover;
+        background-repeat: no-repeat;
     }
 }
 
@@ -17,8 +21,8 @@ body {
 #main-content {
     background: rgba(0,0,0,0.30);
     border-radius: 32px;
-    margin: 25px auto auto auto;
-    padding: 40px 0 36px 0;
+    margin: 20px auto 0 auto;
+    padding: 24px 0 20px 0;
     width: 95vw; /* Matches calendar width */
     box-shadow: 0 8px 32px 0 rgba(0,0,0,0.23);
 }
@@ -26,30 +30,31 @@ body {
 h1#countdown-title {
     font-size: 2rem;
     font-weight: bold;
-    margin-top: 0;
+    margin: 0 0 8px 0;
     color: #fff;
     text-shadow: 0 2px 16px rgba(0,0,0,0.38);
 }
 
 #countdown {
-    padding: 16px 32px;
+    padding: 10px 20px;
     border-radius: 8px;
     display: inline-block;
     background: rgba(0,0,0,0.18);
-    font-size: 2rem;
+    font-size: 1.6rem;
     color: #fff;
     font-weight: bold;
-    margin: 0;
+    margin: 0 0 12px 0;
 }
 #countdown span {
     color: #fff;
-    font-size: 2rem;
+    font-size: 1.6rem;
 }
 
 /* Calendar table */
 #calendar {
-    margin: 24px auto 0 auto;
+    margin: 10px auto 0 auto;
     width: 90vw;
+    max-width: 600px;
     border-radius: 0;
     box-shadow: 0 2px 10px 2px rgba(0,0,0,0.10);
     border-collapse: collapse;
@@ -61,11 +66,9 @@ h1#countdown-title {
 /* Controls row */
 #calendar thead tr.controls-row th {
     padding: 0;
-    margin-bottom: 10px;
-    border: none;
-    height: 3.3em;
-    background: transparent !important;
     border: none !important;
+    height: 2.3em;
+    background: transparent !important;
     box-shadow: none !important;
 }
 #calendar-controls-inner {
@@ -79,19 +82,19 @@ h1#countdown-title {
     background: rgba(0,140,186,0.32);
     color: #fff;
     border: none;
-    padding: 0.72em 2.0em;
+    padding: 0.5em 1.3em;
     border-radius: 10px;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: bold;
-    margin-bottom: 15px;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
+    margin: 0;
 }
 #calendar-controls-inner button:hover {
     background: rgba(0,140,186,0.7);
 }
 #calendar-controls-inner #monthAndYear {
-    font-size: 2rem;
+    font-size: 1.3rem;
     font-weight: bold;
     color: #fff;
     margin: 0;
@@ -105,18 +108,20 @@ h1#countdown-title {
 #calendar thead tr.days-row th {
     background: #245fa5;
     color: #fff;
-    font-size: 1.75rem;
+    font-size: 1.1rem;
+    padding: 4px 0;
+    height: 1.6em;
 }
 
 /* --- CALENDAR FONT SIZES AND DYNAMIC CELL HEIGHT --- */
 #calendar th, #calendar td {
-    border: 2px solid rgba(255,255,255,0.8);
+    border: 2px solid rgba(255,255,255,0.7);
     padding: 0;
     text-align: center;
-    font-size: 1rem; /* small calendar text */
+    font-size: 1rem;
     width: calc(100% / 7);
-    height: 2.5em;
-    min-height: 2.5em;
+    height: 2.2em;
+    min-height: 1.5em;
     background: transparent;
     color: #fff;
     box-sizing: border-box;
@@ -128,21 +133,21 @@ h1#countdown-title {
     color: #fff;
     font-weight: bold;
     letter-spacing: 0.05em;
-    height: 2.5em;
+    height: 2em;
 }
 #calendar td {
     background: transparent;
     position: relative;
     font-weight: bold;
-    height: 2.5em;
-    min-height: 2.5em;
+    height: 2em;
+    min-height: 1.4em;
 }
 #calendar td > div {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 2.5em;
-    font-size: 1.5rem;
+    height: 1.4em;
+    font-size: 1.1rem;
     color: #fff;
     width: 100%;
 }
@@ -155,8 +160,6 @@ h1#countdown-title {
     background: none !important;
     color: #fff !important;
     font-weight: bold;
-    justify-content: center;
-    align-items: center;
     margin: 0;
 }
 .present {
@@ -178,7 +181,7 @@ h1#countdown-title {
 /* Current Time Section - now inside main-content */
 #current-time-section {
     width: 100%;
-    margin: 36px auto 0 auto;
+    margin: 20px auto 0 auto;
     background: none;
     border-radius: 0;
     box-shadow: none;
@@ -187,72 +190,84 @@ h1#countdown-title {
 }
 #current-time-section h1 {
     color: #fff;
-    font-size: 2rem;
-    margin: 32px 0 18px 0;
+    font-size: 1.2rem;
+    margin: 16px 0 6px 0;
     font-weight: bold;
     text-shadow: 0 1px 7px rgba(30, 41, 59, 0.19);
 }
 #time-india, #time-nz {
     color: #fff;
-    font-size: 2rem;
+    font-size: 1.2rem;
     font-weight: bold;
-    margin: 0.14em 0;
+    margin: 0.10em 0;
     text-shadow: none;
 }
 .countdown-date {
-  font-weight: bold;
+    font-weight: bold;
 }
 #calendar-body {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
 }
 
 /* --- MOBILE --- */
 @media (max-width: 600px) {
     #main-content {
-        padding: 12px 0 12px 0;
-        margin: 8px auto 0 auto;
-        border-radius: 18px;
+        padding: 4px 0 4px 0;
+        margin: 2px auto 0 auto;
+        border-radius: 16px;
         width: 99vw;
         min-width: 0;
     }
     h1#countdown-title {
-        font-size: 1.5rem;
+        font-size: 1.1rem;
+        margin-bottom: 2px;
     }
     #countdown {
-        font-size: 2rem;
-        padding: 9px 16px;
+        font-size: 1rem;
+        padding: 4px 8px;
+        margin-bottom: 5px;
     }
     .countdown-date {
         font-weight: bold;
     }
     #countdown span {
-        font-size: 2rem;
+        font-size: 1rem;
     }
-    #calendar-controls-inner button {
-        font-size: 0.85rem;
-        padding: 0.34em 0.7em;
+    #calendar {
+        margin: 3px auto 0 auto;
     }
-    #calendar-controls-inner #monthAndYear {
-        font-size: 1.5rem;
+    #calendar thead tr.days-row th {
+        font-size: 0.80rem !important;
+        padding: 1px 0 !important;
+        height: 1.1em !important;
     }
     #calendar th, #calendar td {
-        font-size: 1rem;
-        height: 2.5em;
-        min-height: 1.7em;
+        font-size: 0.80rem;
+        height: 1.1em;
+        min-height: 1em;
+        padding: 0 !important;
     }
     #calendar th {
-        height: 2.5em;
+        height: 1.1em;
     }
     #calendar td > div {
-        font-size: 1rem;
-        height: 1.7em;
-        min-height: 1.7em;
+        font-size: 0.80rem;
+        height: 1em;
+        min-height: 1em;
+    }
+    #calendar-controls-inner button {
+        font-size: 0.70rem;
+        padding: 0.16em 0.6em;
+        margin-bottom: 0;
+    }
+    #calendar-controls-inner #monthAndYear {
+        font-size: 0.85rem;
     }
     #current-time-section h1 {
-        font-size: 2rem;
-        margin: 18px 0 10px 0;
+        font-size: 0.95rem;
+        margin: 8px 0 2px 0;
     }
     #time-india, #time-nz {
-        font-size: 1.75rem;
-    }   
+        font-size: 0.95rem;
+    }
 }
