@@ -1,10 +1,10 @@
 (() => {
-  const TARGET = {
-    date: new Date(2025, 5, 18, 18, 50, 0),
-    display: "Countdown to 18th June 2025, 6:50 PM"
-  };
-
-  document.getElementById("countdown-title").textContent = TARGET.display;
+const TARGET = {
+  date: new Date(2025, 5, 18, 18, 50, 0),
+  label: "Countdown to",
+  datetime: "<span class='countdown-date'>18th June 2025, 6:50 PM</span>"
+};
+document.getElementById("countdown-title").innerHTML = `${TARGET.label}<br>${TARGET.datetime}`;
 
   const targetDateUTC = new Date(Date.UTC(
     TARGET.date.getFullYear(),
