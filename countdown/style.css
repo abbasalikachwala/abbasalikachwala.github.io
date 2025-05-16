@@ -227,13 +227,13 @@ h1#countdown-title {
         margin-top: 0;
     }
     #countdown {
-        font-size: 1.25rem;
+        font-size: 2rem;
         padding: 4px 8px;
         margin-bottom: 5px;
         border-radius: 6px;
     }
     #countdown span {
-        font-size: 1.25rem;
+        font-size: 2rem;
     }
     .countdown-date {
         font-size: 1.5rem;
