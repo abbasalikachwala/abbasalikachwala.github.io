@@ -102,6 +102,7 @@ h1#countdown-title {
 #calendar thead tr.days-row th {
     background: #245fa5;
     color: #fff;
+    font-size: 1.75rem;
 }
 
 /* --- CALENDAR FONT SIZES AND DYNAMIC CELL HEIGHT --- */
@@ -195,9 +196,11 @@ h1#countdown-title {
     margin: 0.14em 0;
     text-shadow: none;
 }
-
 .countdown-date {
   font-weight: bold;
+}
+.calendar-body {
+    font-size: 1.5rem;
 }
 
 /* --- MOBILE --- */
