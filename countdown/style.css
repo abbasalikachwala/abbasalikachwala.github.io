@@ -64,6 +64,8 @@ h1#countdown-title {
     border: none;
     height: 3.3em;
     background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 #calendar-controls-inner {
     display: flex;
