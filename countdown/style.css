@@ -228,7 +228,7 @@ h1#countdown-title {
     #countdown {
         font-size: 2rem;
         padding: 4px 8px;
-        margin-bottom: 5px;
+        margin-bottom: 25px;
         border-radius: 6px;
     }
     #countdown span {
@@ -239,11 +239,12 @@ h1#countdown-title {
     }
     #calendar {
         margin: 2px auto 0 auto;
+        width: 80vw;
     }
     #calendar thead tr.days-row th {
-        font-size: 0.80rem !important;
+        font-size: 1rem !important;
         padding: 0 !important;
-        height: 2em !important;
+        height: 3em !important;
     }
     #calendar th, #calendar td {
         font-size: 1rem;
@@ -255,27 +256,27 @@ h1#countdown-title {
         height: 1.1em;
     }
     #calendar td > div {
-        font-size: 0.80rem;
-        height: 1em;
+        font-size: 1.25rem;
+        height: 3em;
         min-height: 1em;
     }
     #calendar-controls-inner {
-        margin-bottom: 2px;
+        margin-bottom: 10px;
     }
     #calendar-controls-inner button {
-        font-size: 0.70rem;
-        padding: 0.16em 0.6em;
+        font-size: 1rem;
+        padding: 0.5em 0.75em;
         margin-bottom: 0;
         border-radius: 7px;
     }
     #calendar-controls-inner #monthAndYear {
-        font-size: 0.85rem;
+        font-size: 1.25rem;
     }
     #current-time-section h1 {
-        font-size: 0.95rem;
+        font-size: 1.5rem;
         margin: 8px 0 2px 0;
     }
     #time-india, #time-nz {
-        font-size: 0.95rem;
+        font-size: 1.5rem;
     }
 }
