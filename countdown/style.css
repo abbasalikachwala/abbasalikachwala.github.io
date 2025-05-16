@@ -59,7 +59,6 @@ h1#countdown-title {
 
 /* Controls row */
 #calendar thead tr.controls-row th {
-    background: rgba(0,0,0,0.18);
     padding: 0;
     border: none;
     height: 3.3em;
