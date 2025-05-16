@@ -17,11 +17,13 @@ body {
 #main-content {
     background: rgba(0,0,0,0.30);
     border-radius: 32px;
-    margin: 56px auto 0 auto; /* extra top margin */
+    margin: 56px auto 0 auto;
     padding: 40px 0 36px 0;
-    width: 97vw;
-    max-width: 1200px;
+    width: 95vw; /* Matches calendar width */
+    /* Removed max-width */
     box-shadow: 0 8px 32px 0 rgba(0,0,0,0.23);
+    /* Use min-width for very tiny screens, if needed */
+    min-width: 220px;
 }
 
 h1#countdown-title {
@@ -32,13 +34,14 @@ h1#countdown-title {
     color: #fff;
     text-shadow: 0 2px 16px rgba(0,0,0,0.38);
 }
+
 #countdown {
     padding: 16px 32px;
     border-radius: 8px;
     display: inline-block;
     margin-bottom: 50px;
     background: rgba(0,0,0,0.18);
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* Increased as requested */
     color: #fff;
     font-weight: bold;
 }
@@ -106,7 +109,7 @@ h1#countdown-title {
     text-align: center;
     font-size: 1rem; /* small calendar text */
     width: calc(100% / 7);
-    height: 2.5em;    /* Cell height scales with font size */
+    height: 2.5em;
     min-height: 2.5em;
     background: transparent;
     color: #fff;
@@ -166,10 +169,9 @@ h1#countdown-title {
     background: none;
 }
 
-/* Current Time Section */
+/* Current Time Section - now inside main-content */
 #current-time-section {
-    width: 97vw;
-    max-width: 1200px;
+    width: 100%;
     margin: 36px auto 0 auto;
     background: none;
     border-radius: 0;
@@ -195,9 +197,11 @@ h1#countdown-title {
 /* --- MOBILE --- */
 @media (max-width: 600px) {
     #main-content {
-        padding: 16px 0 16px 0;
-        margin: 16px auto 0 auto;
+        padding: 12px 0 12px 0;
+        margin: 8px auto 0 auto;
         border-radius: 18px;
+        width: 99vw;
+        min-width: 0;
     }
     h1#countdown-title {
         font-size: 1.2rem;
