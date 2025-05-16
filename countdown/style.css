@@ -20,16 +20,13 @@ body {
     margin: 56px auto 0 auto;
     padding: 40px 0 36px 0;
     width: 95vw; /* Matches calendar width */
-    /* Removed max-width */
     box-shadow: 0 8px 32px 0 rgba(0,0,0,0.23);
-    /* Use min-width for very tiny screens, if needed */
-    min-width: 220px;
 }
 
 h1#countdown-title {
     font-size: 2rem;
     font-weight: bold;
-    margin-top: 0;`
+    margin-top: 0;
     color: #fff;
     text-shadow: 0 2px 16px rgba(0,0,0,0.38);
 }
