@@ -160,20 +160,28 @@ h1#countdown-title {
 }
 
 .past > div {
-    color: #fff !important;      /* Bright red for past dates */
+    color: #fff;
     position: relative;  /* Cross out past dates */
 }
 
+.past > div::before,
 .past > div::after {
     content: "";
     position: absolute;
-    left: 15%;
-    top: 50%;
-    width: 70%;
+    width: 40%;
     height: 2px;
     background: rgba(255, 60, 60, 0.75); 
-    transform: rotate(-25deg);
+    top: 50%;
+    left: 30%;
     pointer-events: none;
+}
+
+.past > div::before {
+    transform: rotate(-25deg);
+}
+
+.past > div::after {
+    transform: rotate(25deg);
 }
 
 .target {
