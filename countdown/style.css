@@ -304,4 +304,12 @@ h1#countdown-title {
     #time-india, #time-nz {
         font-size: 1.5rem;
     }
+
+    .past > div::before,
+  .past > div::after {
+    width: 70%;
+    height: 0.2em;
+    left: 15%;
+    top: 55%;
+  }
 }
