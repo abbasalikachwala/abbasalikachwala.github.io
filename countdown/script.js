@@ -53,7 +53,7 @@ const distance = targetDateUTC - nowNZ;
     countdownElements.hours.textContent = hours;
     countdownElements.minutes.textContent = minutes;
     countdownElements.seconds.textContent = seconds;
-  };
+  }
   const countdownInterval = setInterval(updateCountdown, 1000);
   updateCountdown();
 
