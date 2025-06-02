@@ -37,25 +37,37 @@ document.getElementById("countdown-title").innerHTML = `${TARGET.label}<br>${TAR
 
   // --- COUNTDOWN TIMER ---
  // Get current time in New Zealand time zone
-const nowNZ = new Date(new Date().toLocaleString("en-US", { timeZone: "Pacific/Auckland" }));
-const distance = targetDateUTC - nowNZ;
-  
-    if (distance < 0) {
-      clearInterval(countdownInterval);
-      countdownElements.countdown.textContent = "EXPIRED";
-      return;
-    }
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    countdownElements.days.textContent = days;
-    countdownElements.hours.textContent = hours;
-    countdownElements.minutes.textContent = minutes;
-    countdownElements.seconds.textContent = seconds;
+const getNowInNZMillis = () => {
+  // Get the current time in New Zealand time zone as a timestamp (ms)
+  const now = new Date();
+  // Format it as a string in NZ time zone, parse back to date in local
+  const nzString = now.toLocaleString("en-US", { timeZone: "Pacific/Auckland" });
+  return new Date(nzString).getTime();
+};
+
+const updateCountdown = () => {
+  // Get current time in NZ as milliseconds since epoch
+  const nowNZMillis = getNowInNZMillis();
+  const targetMillis = targetDateUTC.getTime(); // This should be in UTC
+
+  const distance = targetMillis - nowNZMillis;
+
+  if (distance < 0) {
+    clearInterval(countdownInterval);
+    countdownElements.countdown.textContent = "EXPIRED";
+    return;
   }
-  const countdownInterval = setInterval(updateCountdown, 1000);
-  updateCountdown();
+  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  countdownElements.days.textContent = days;
+  countdownElements.hours.textContent = hours;
+  countdownElements.minutes.textContent = minutes;
+  countdownElements.seconds.textContent = seconds;
+};
+const countdownInterval = setInterval(updateCountdown, 1000);
+updateCountdown();
 
   // --- CALENDAR GENERATION ---
   const months = [
