@@ -1,20 +1,34 @@
 (() => {
-const TARGET = {
-  date: new Date(2025, 5, 18, 18, 50, 0),
-  label: "Countdown to",
-  datetime: "<span class='countdown-date'>18th June 2025, 6:50 PM</span>"
-};
-document.getElementById("countdown-title").innerHTML = `${TARGET.label}<br>${TARGET.datetime}`;
+  // --- TARGET DATE SETUP (NZ TIME) ---
+  const TARGET = {
+    year: 2025,
+    monthIndex: 5, // June (0-based, so 5 = June)
+    day: 18,
+    hour: 18,
+    minute: 50,
+    second: 0,
+    label: "Countdown to",
+    datetime: "<span class='countdown-date'>18th June 2025, 6:50 PM</span>"
+  };
+  document.getElementById("countdown-title").innerHTML = `${TARGET.label}<br>${TARGET.datetime}`;
 
-  const targetDateUTC = new Date(Date.UTC(
-    TARGET.date.getFullYear(),
-    TARGET.date.getMonth(),
-    TARGET.date.getDate(),
-    TARGET.date.getHours(),
-    TARGET.date.getMinutes(),
-    TARGET.date.getSeconds()
-  ));
+  // --- HELPERS ---
+  // Get ms since epoch for now in NZ timezone
+  function getNowInNZMillis() {
+    const now = new Date();
+    const nzString = now.toLocaleString("en-US", { timeZone: "Pacific/Auckland" });
+    return new Date(nzString).getTime();
+  }
+  // Get ms since epoch for TARGET in NZ timezone (interpreted as local NZ time)
+  function getNZTargetMillis(year, monthIndex, day, hour, minute, second) {
+    // Format as YYYY-MM-DDTHH:mm:ss
+    const t = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
+    // Parse as if in NZ
+    return Date.parse(new Date(t).toLocaleString("en-US", { timeZone: "Pacific/Auckland" }));
+  }
+  const targetNZMillis = getNZTargetMillis(TARGET.year, TARGET.monthIndex, TARGET.day, TARGET.hour, TARGET.minute, TARGET.second);
 
+  // --- COUNTDOWN TIMER ---
   const countdownElements = {
     days: document.getElementById("days"),
     hours: document.getElementById("hours"),
@@ -23,51 +37,26 @@ document.getElementById("countdown-title").innerHTML = `${TARGET.label}<br>${TAR
     countdown: document.getElementById("countdown")
   };
 
-  const calendarElements = {
-    calendarBody: document.getElementById("calendar-body"),
-    monthAndYear: document.getElementById("monthAndYear"),
-    prev: document.getElementById("prev"),
-    next: document.getElementById("next")
-  };
+  function updateCountdown() {
+    const nowNZMillis = getNowInNZMillis();
+    const distance = targetNZMillis - nowNZMillis;
 
-  const timeElements = {
-    india: document.getElementById("india"),
-    newzealand: document.getElementById("newzealand")
-  };
-
-  // --- COUNTDOWN TIMER ---
- // Get current time in New Zealand time zone
-const getNowInNZMillis = () => {
-  // Get the current time in New Zealand time zone as a timestamp (ms)
-  const now = new Date();
-  // Format it as a string in NZ time zone, parse back to date in local
-  const nzString = now.toLocaleString("en-US", { timeZone: "Pacific/Auckland" });
-  return new Date(nzString).getTime();
-};
-
-const updateCountdown = () => {
-  // Get current time in NZ as milliseconds since epoch
-  const nowNZMillis = getNowInNZMillis();
-  const targetMillis = targetDateUTC.getTime(); // This should be in UTC
-
-  const distance = targetMillis - nowNZMillis;
-
-  if (distance < 0) {
-    clearInterval(countdownInterval);
-    countdownElements.countdown.textContent = "EXPIRED";
-    return;
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      countdownElements.countdown.textContent = "EXPIRED";
+      return;
+    }
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    countdownElements.days.textContent = days;
+    countdownElements.hours.textContent = hours;
+    countdownElements.minutes.textContent = minutes;
+    countdownElements.seconds.textContent = seconds;
   }
-  const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-  countdownElements.days.textContent = days;
-  countdownElements.hours.textContent = hours;
-  countdownElements.minutes.textContent = minutes;
-  countdownElements.seconds.textContent = seconds;
-};
-const countdownInterval = setInterval(updateCountdown, 1000);
-updateCountdown();
+  const countdownInterval = setInterval(updateCountdown, 1000);
+  updateCountdown();
 
   // --- CALENDAR GENERATION ---
   const months = [
@@ -78,6 +67,13 @@ updateCountdown();
   let today = new Date();
   let currentMonth = today.getMonth();
   let currentYear = today.getFullYear();
+
+  const calendarElements = {
+    calendarBody: document.getElementById("calendar-body"),
+    monthAndYear: document.getElementById("monthAndYear"),
+    prev: document.getElementById("prev"),
+    next: document.getElementById("next")
+  };
 
   function createCell(content, classes = []) {
     const cell = document.createElement("td");
@@ -90,13 +86,13 @@ updateCountdown();
     return cell;
   }
 
-  const generateCalendar = (month, year) => {
+  function generateCalendar(month, year) {
     const { calendarBody, monthAndYear } = calendarElements;
     calendarBody.innerHTML = "";
     monthAndYear.textContent = `${months[month]} ${year}`;
 
     let firstDay = new Date(year, month, 1).getDay();
-    firstDay = (firstDay === 0) ? 6 : firstDay - 1;
+    firstDay = (firstDay === 0) ? 6 : firstDay - 1; // Make Monday = 0
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     let date = 1;
@@ -110,21 +106,27 @@ updateCountdown();
         } else {
           let classes = [];
           if (
-            year === TARGET.date.getFullYear() &&
-            month === TARGET.date.getMonth() &&
-            date === TARGET.date.getDate()
+            year === TARGET.year &&
+            month === TARGET.monthIndex &&
+            date === TARGET.day
           ) classes.push("target");
+          const todayLocal = new Date();
           if (
-            year === today.getFullYear() &&
-            month === today.getMonth() &&
-            date === today.getDate()
-          ) classes.push("present");
+            year === todayLocal.getFullYear() &&
+            month === todayLocal.getMonth() &&
+            date === todayLocal.getDate()
+          ) {
+            classes.push("present");
+          }
           else if (
-            year < today.getFullYear() ||
-            (year === today.getFullYear() && month < today.getMonth()) ||
-            (year === today.getFullYear() && month === today.getMonth() && date < today.getDate())
-          ) classes.push("past");
-          else classes.push("future");
+            year < todayLocal.getFullYear() ||
+            (year === todayLocal.getFullYear() && month < todayLocal.getMonth()) ||
+            (year === todayLocal.getFullYear() && month === todayLocal.getMonth() && date < todayLocal.getDate())
+          ) {
+            classes.push("past");
+          } else {
+            classes.push("future");
+          }
           row.appendChild(createCell(date, classes));
           date++;
         }
@@ -132,7 +134,7 @@ updateCountdown();
       calendarBody.appendChild(row);
       if (date > daysInMonth) break;
     }
-  };
+  }
 
   generateCalendar(currentMonth, currentYear);
 
@@ -157,7 +159,12 @@ updateCountdown();
   });
 
   // --- REAL-TIME CLOCKS ---
-  const updateTime = () => {
+  const timeElements = {
+    india: document.getElementById("india"),
+    newzealand: document.getElementById("newzealand")
+  };
+
+  function updateTime() {
     const now = new Date();
     const indiaTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
     timeElements.india.textContent = indiaTime.toLocaleTimeString("en-US", {
@@ -173,7 +180,7 @@ updateCountdown();
       second: "2-digit",
       hour12: true
     });
-  };
+  }
   setInterval(updateTime, 1000);
   updateTime();
 })();
