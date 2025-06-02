@@ -13,7 +13,7 @@ body {
     background-repeat: no-repeat;
     color: #fff;
     min-height: 100vh;
-    height: 100vh;
+    overflow: hidden;
 }
 
 @media (min-width: 800px) {
