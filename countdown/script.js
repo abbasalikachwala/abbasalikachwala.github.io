@@ -36,9 +36,10 @@ document.getElementById("countdown-title").innerHTML = `${TARGET.label}<br>${TAR
   };
 
   // --- COUNTDOWN TIMER ---
-  const updateCountdown = () => {
-    const now = new Date();
-    const distance = targetDateUTC - now;
+ // Get current time in New Zealand time zone
+const nowNZ = new Date(new Date().toLocaleString("en-US", { timeZone: "Pacific/Auckland" }));
+const distance = targetDateUTC - nowNZ;
+  
     if (distance < 0) {
       clearInterval(countdownInterval);
       countdownElements.countdown.textContent = "EXPIRED";
