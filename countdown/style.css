@@ -308,8 +308,6 @@ h1#countdown-title {
     .past > div::before,
   .past > div::after {
     width: 70%;
-    height: 0.2em;
     left: 15%;
-    top: 55%;
   }
 }
