@@ -159,6 +159,11 @@ h1#countdown-title {
     width: 100%;
 }
 
+.past > div {
+    color: #ff4444 !important;      /* Bright red for past dates */
+    text-decoration: line-through;  /* Cross out past dates */
+}
+
 .target {
     background: rgba(39,201,66,0.52) !important;
 }
@@ -176,9 +181,7 @@ h1#countdown-title {
     color: #fff !important;
     font-weight: bold;
 }
-.past > div {
-    color: #bbb;
-}
+
 .future > div {
     color: #fff;
     background: none;
