@@ -19,7 +19,7 @@
             <!-- LEFT COLUMN -->
             <div class="col">
                <!-- Controls -->
-               <section class="panel glass controls delay-1">
+               <section class="panel glass controls delay-1" id="panel-inputs">
                   <h2 class="section-title"><span>Inputs</span></h2>
                   <div class="grid-controls">
                      <div class="field">
@@ -64,11 +64,12 @@
                      <div class="field">
                         <label>Oil in dough (g)</label>
                         <input id="oil" type="number" min="0" step="1" placeholder="auto" />
+                        <small>Auto ≈ 5 g per 15 chapatis.</small>
                      </div>
                   </div>
                </section>
                <!-- Totals -->
-               <section class="panel glass totals delay-2">
+               <section class="panel glass totals delay-2" id="panel-totals">
                   <h2 class="section-title"><span>Totals</span></h2>
                   <div class="kv">
                      <div>Flour</div>
@@ -83,7 +84,7 @@
                   <div class="totals-foot muted">Approx. hydration: <span id="hydration">—</span></div>
                </section>
                <!-- Timer -->
-               <section class="panel glass timer center fill delay-3">
+               <section class="panel glass timer center fill delay-3" id="panel-timer">
                   <h2 class="section-title"><span>Timer</span></h2>
                   <div class="timer-face" id="timer">08:30</div>
                   <div class="row">
@@ -96,7 +97,7 @@
             <!-- RIGHT COLUMN -->
             <div class="col">
                <!-- Stand mixer + Tangzhong -->
-               <section class="panel glass duo delay-1">
+               <section class="panel glass duo delay-1" id="panel-duo">
                   <div class="duo-head">
                      <h2 class="section-title"><span>Stand mixer</span></h2>
                      <h2 class="section-title"><span>Tangzhong</span></h2>
@@ -124,7 +125,7 @@
                   </div>
                </section>
                <!-- Per-chapati KPIs -->
-               <section class="panel glass kpis pretty delay-2">
+               <section class="panel glass kpis pretty delay-2" id="panel-kpis">
                   <h2 class="section-title"><span>Per chapati</span></h2>
                   <div class="stats">
                      <div class="stat">
@@ -139,7 +140,7 @@
                   </div>
                </section>
                <!-- Meal totals -->
-               <section class="panel glass mealcard delay-3">
+               <section class="panel glass mealcard delay-3" id="panel-meal">
                   <h2 class="section-title"><span>This meal</span></h2>
                   <div class="meal-row">
                      <button id="mealMinus" type="button" class="step" aria-label="Minus one">–</button>
