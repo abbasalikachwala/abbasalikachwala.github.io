@@ -2,87 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Tangzhong Chapati Calculator</title>
+  <title>Chapati Recipe Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="wrap">
     <header class="hero">
-      <h1>Tangzhong Chapati Calculator</h1>
-      <p>Scales by dough weight so you always get the exact number of chapatis you select. Uses your ratios (flour: yoghurt: milk = <b>190:90:120</b>), sends <b>5%</b> of flour to tangzhong, and sets <b>milk for TZ = 5× TZ flour</b>.</p>
+      <h1>Chapati Recipe Calculator</h1>
     </header>
 
+    <!-- Controls -->
     <section class="panel controls">
-      <div class="grid g-5">
+      <div class="grid g-6">
         <div class="field">
-          <label for="n">How many chapatis?</label>
+          <label>How many chapatis?</label>
           <div class="row">
-            <button id="minus" class="btn pill" type="button">−</button>
-            <input id="n" type="number" min="1" step="1" value="20" />
-            <button id="plus" class="btn pill" type="button">+</button>
+            <button id="preset8"  class="chip" type="button">8</button>
+            <button id="preset14" class="chip" type="button">14</button>
+            <button id="preset16" class="chip" type="button">16</button>
+            <button id="preset20" class="chip" type="button">20</button>
           </div>
+          <input id="n" type="number" min="1" step="1" placeholder="e.g. 16" />
         </div>
 
         <div class="field">
-          <label for="dough">Dough per chapati (g)</label>
-          <input id="dough" type="number" min="20" step="1" value="35" />
-          <small>Used for total dough target (N × g) and salt (~1% of total dough).</small>
+          <label>Dough per chapati (g)</label>
+          <input id="dough" type="number" min="20" step="1" placeholder="e.g. 35" />
+          <small>Used for total dough target (N × g). Salt ≈ 1% of total dough.</small>
         </div>
 
         <div class="field">
-          <label for="rounding">Rounding</label>
-          <select id="rounding">
-            <option value="up10" selected>Round UP to nearest 10 (recommended)</option>
-            <option value="exact">Exact (no round-up)</option>
+          <label>Yoghurt:</label>
+          <select id="yogBrand">
+            <option value="yoplait" selected>Yoplait Max Protein Plain (78.87kcal, 10g protein per 100g)</option>
+            <option value="gopala">Gopala Full Cream (64.53kcal, 3.2g protein per 100g)</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="dust">Dusting flour used (g)</label>
-          <input id="dust" type="number" min="0" step="1" value="0" />
-          <small>Affects nutrition only. Bowl/TZ weights stay the same.</small>
+          <label>Trim Milk:</label>
+          <select id="milkBrand">
+            <option value="value" selected>Value Trim Milk (39.19kcal, 3.8g protein per 100ml)</option>
+            <option value="dairydale">Dairy Dale Trim Milk (37.28kcal, 4.0g protein per 100ml)</option>
+          </select>
+          <small id="milkNote" class="muted"></small>
         </div>
 
         <div class="field">
-          <label for="oil">Oil in dough (g)</label>
-          <input id="oil" type="number" min="0" step="1" value="0" />
-          <small>Included in calories. (Extra rolling/stacking oil isn’t counted.)</small>
+          <label>Dusting flour used (g, optional)</label>
+          <input id="dust" type="number" min="0" step="1" placeholder="e.g. 20" />
+          <small>Nutrition only. Bowl/TZ weights don’t change.</small>
         </div>
 
-        <div class="actions">
-          <button id="printBtn" class="btn">🖨️ Print</button>
-          <button id="copyBtn"  class="btn outline">📋 Copy</button>
-          <button id="shareBtn" class="btn outline">🔗 Share</button>
-          <button id="resetBtn" class="btn ghost">↺ Reset</button>
+        <div class="field">
+          <label>Oil in dough (g)</label>
+          <input id="oil" type="number" min="0" step="1" placeholder="auto" />
+          <small>Auto: ~5 g per 15 chapatis (≈0.33 g each).</small>
         </div>
       </div>
     </section>
 
-    <section class="panel kpis">
+    <!-- KPI row -->
+    <section class="kpis">
       <div class="kpi">
-        <div class="kpi-label">Protein / chapati</div>
+        <div class="kpi-label">Protein/chapati</div>
         <div class="kpi-value" id="proteinPer">—</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">Calories / chapati</div>
+        <div class="kpi-label">Calories/chapati</div>
         <div class="kpi-value" id="kcalPer">—</div>
       </div>
       <div class="kpi kpi-small">
-        <div class="kpi-sub">Includes dust: <span id="dustEcho">0</span> g &nbsp;•&nbsp; Oil in dough: <span id="oilEcho">0</span> g</div>
+        <div class="kpi-sub">Dust: <span id="dustEcho">0</span> g • Oil in dough: <span id="oilEcho">0</span> g</div>
       </div>
     </section>
 
-    <section class="grid g-4">
+    <!-- Results grid -->
+    <section class="grid g-3">
       <article class="panel">
         <h2>Stand mixer bowl</h2>
         <div class="kv">
           <div>Flour</div><div id="flourBowl" class="num">—</div>
-          <div>Milk</div><div id="milkBowl"  class="num">—</div>
+          <div>Milk</div><div  id="milkBowl"  class="num">—</div>
           <div>Yoghurt</div><div id="yogBowl"  class="num">—</div>
-          <div>Salt</div><div id="salt"       class="num">—</div>
-          <div>Oil</div><div id="oilBowl"     class="num">—</div>
+          <div>Salt</div><div   id="salt"      class="num">—</div>
+          <div>Oil</div><div    id="oilBowl"   class="num">—</div>
         </div>
       </article>
 
@@ -92,11 +100,10 @@
           <div>Flour</div><div id="flourTZ" class="num">—</div>
           <div>Milk</div><div  id="milkTZ"  class="num">—</div>
         </div>
-        <p class="hint">Microwave 20–25 s, stir; then 10–15 s bursts to a thick paste. Cool 2–3 min (warm, not hot) before adding.</p>
       </article>
 
       <article class="panel">
-        <h2>Totals (rounded policy)</h2>
+        <h2>Totals</h2>
         <div class="kv">
           <div>Flour total</div><div id="flourTotal" class="num">—</div>
           <div>Milk total</div><div  id="milkTotal"  class="num">—</div>
@@ -104,19 +111,21 @@
           <div>Target dough</div><div id="targetDough" class="num">—</div>
         </div>
       </article>
+    </section>
 
-      <article class="panel">
-        <h2>Quick method</h2>
-        <ol class="steps">
-          <li>Make TZ with the “TZ flour + milk” above; cool 2–3 min.</li>
-          <li>Bowl: flour (bowl) + salt + yoghurt + milk (bowl) + oil + TZ. Mix ~7–8 min (low).</li>
-          <li>Divide and roll; dust as you like; clap/brush off excess before the tava.</li>
-        </ol>
-      </article>
+    <!-- Timer -->
+    <section class="panel timer">
+      <h2>Main mix timer</h2>
+      <div class="timer-face" id="timer">08:30</div>
+      <div class="row">
+        <button id="startTimer" class="btn">Start</button>
+        <button id="pauseTimer" class="btn outline">Pause</button>
+        <button id="resetTimer" class="btn ghost">Reset</button>
+      </div>
     </section>
 
     <footer class="foot">
-      Protein labels: flour 4 g / 30 g; yoghurt 10 g / 100 g; trim milk 3.8 g / 100 ml. Calories: flour 100 kcal / 30 g; yoghurt 143 kcal / 180 g; milk 164 kJ / 100 ml ≈ 39.2 kcal / 100 ml; oil 9 kcal / g.
+      <small class="muted" id="footnote">Choose yoghurt & milk above to compute accurate protein & kcal.</small>
     </footer>
   </main>
 
