@@ -49,11 +49,6 @@ const nearest10 = (x) => Math.round(x / 10) * 10;
 const roundHalf = (x) => Math.round(x * 2) / 2;
 const fmtInt = (x) => Number.isFinite(x) ? `${Math.round(x)}` : "—";
 
-// Attach titles to the two kv blocks for mobile subtitle pills
-document.querySelectorAll("#panel-duo .duo-grid .kv").forEach((el, i) => {
-  el.setAttribute("data-title", i === 0 ? "Stand mixer" : "Tangzhong");
-});
-
 function pulse(id) {
    const el = document.getElementById(id);
    if (!el) return;
@@ -240,6 +235,14 @@ function render() {
    }
 }
 
+/* ===== Duo mobile subtitle pills =====
+   Attach labels to each kv block (used by CSS ::before) */
+function setupDuoTitles() {
+   document.querySelectorAll("#panel-duo .duo-grid .kv").forEach((el, i) => {
+      el.setAttribute("data-title", i === 0 ? "Stand mixer" : "Tangzhong");
+   });
+}
+
 // ===== Timer (8:30) =====
 let tHandle = null;
 let remaining = 8 * 60 + 30;
@@ -288,7 +291,7 @@ if (oilEl) oilEl.addEventListener("input", () => {
    render();
 });
 
-// Meal input + direct stepper listeners
+// Meal stepper
 const mealBox = document.getElementById("mealCount");
 const mealMinus = document.getElementById("mealMinus");
 const mealPlus = document.getElementById("mealPlus");
@@ -306,7 +309,7 @@ function stepMeal(delta) {
 if (mealMinus) mealMinus.addEventListener("click", () => stepMeal(-1));
 if (mealPlus) mealPlus.addEventListener("click", () => stepMeal(+1));
 
-// Preset buttons
+// Presets
 [
    ["preset8", 8],
    ["preset14", 14],
@@ -335,11 +338,12 @@ document.querySelectorAll(".doughPreset").forEach(btn => {
    });
 });
 
-// Timer buttons
+// Timer controls
 document.getElementById("startTimer")?.addEventListener("click", startTimer);
 document.getElementById("pauseTimer")?.addEventListener("click", pauseTimer);
 document.getElementById("resetTimer")?.addEventListener("click", resetTimer);
 
 // Init
+setupDuoTitles();
 displayTimer();
 render();
