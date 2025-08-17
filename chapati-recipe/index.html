@@ -5,7 +5,7 @@
   <title>Chapati Recipe Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light" />
-  <!-- Optional fallback if local Georgia is missing -->
+  <!-- Fallback display font if local Georgia isn’t present -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
@@ -17,10 +17,12 @@
     </header>
 
     <section class="layout">
-      <!-- LEFT COLUMN: Controls + Totals + Timer -->
+      <!-- LEFT COLUMN -->
       <div class="col">
+
         <!-- Controls -->
         <section class="panel glass controls delay-1">
+          <h2 class="section-title"><span>Inputs</span></h2>
           <div class="grid-controls">
             <div class="field">
               <label>How many chapatis?</label>
@@ -76,7 +78,7 @@
 
         <!-- Totals -->
         <section class="panel glass totals delay-2">
-          <h2>Totals</h2>
+          <h2 class="section-title"><span>Totals</span></h2>
           <div class="kv">
             <div>Flour</div><div id="flourTotal" class="num">—</div>
             <div>Milk</div><div  id="milkTotal"  class="num">—</div>
@@ -88,7 +90,7 @@
 
         <!-- Timer -->
         <section class="panel glass timer center fill delay-3">
-          <h2>Timer</h2>
+          <h2 class="section-title"><span>Timer</span></h2>
           <div class="timer-face" id="timer">08:30</div>
           <div class="row">
             <button id="startTimer" class="btn">Start</button>
@@ -98,13 +100,14 @@
         </section>
       </div>
 
-      <!-- RIGHT COLUMN: Stand Mixer + TZ + KPIs + Meal card -->
+      <!-- RIGHT COLUMN -->
       <div class="col">
-        <!-- Stand Mixer + Tangzhong -->
+
+        <!-- Stand mixer + Tangzhong -->
         <section class="panel glass duo delay-1">
           <div class="duo-head">
-            <h2>Stand mixer</h2>
-            <h2>Tangzhong</h2>
+            <h2 class="section-title"><span>Stand mixer</span></h2>
+            <h2 class="section-title"><span>Tangzhong</span></h2>
           </div>
           <div class="duo-grid">
             <div class="kv">
@@ -124,37 +127,36 @@
 
         <!-- Per-chapati KPIs -->
         <section class="panel glass kpis pretty delay-2">
+          <h2 class="section-title"><span>Per chapati</span></h2>
           <div class="stats">
             <div class="stat">
-              <div class="stat-label">Protein / chapati</div>
+              <div class="stat-label">Protein</div>
               <div class="stat-value" id="proteinPer">—</div>
             </div>
             <div class="vsep" aria-hidden="true"></div>
             <div class="stat">
-              <div class="stat-label">Calories / chapati</div>
+              <div class="stat-label">Calories</div>
               <div class="stat-value" id="kcalPer">—</div>
             </div>
           </div>
         </section>
 
-        <!-- NEW: Meal totals in its own card -->
+        <!-- Meal totals -->
         <section class="panel glass mealcard delay-3">
-          <div class="meal-top">
-            <label for="mealCount" class="meal-label">This meal</label>
-            <div class="meal-row">
-              <button id="mealMinus" type="button" class="step" aria-label="Minus one">–</button>
-              <input id="mealCount" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 3" />
-              <button id="mealPlus" type="button" class="step" aria-label="Plus one">+</button>
-            </div>
+          <h2 class="section-title"><span>This meal</span></h2>
+          <div class="meal-row">
+            <button id="mealMinus" type="button" class="step" aria-label="Minus one">–</button>
+            <input id="mealCount" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 3" />
+            <button id="mealPlus" type="button" class="step" aria-label="Plus one">+</button>
           </div>
           <div class="stats">
             <div class="stat">
-              <div class="stat-label">Protein (meal)</div>
+              <div class="stat-label">Protein</div>
               <div class="stat-value" id="mealProtein">—</div>
             </div>
             <div class="vsep" aria-hidden="true"></div>
             <div class="stat">
-              <div class="stat-label">Calories (meal)</div>
+              <div class="stat-label">Calories</div>
               <div class="stat-value" id="mealKcal">—</div>
             </div>
           </div>
