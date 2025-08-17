@@ -49,6 +49,11 @@ const nearest10 = (x) => Math.round(x / 10) * 10;
 const roundHalf = (x) => Math.round(x * 2) / 2;
 const fmtInt = (x) => Number.isFinite(x) ? `${Math.round(x)}` : "—";
 
+// Attach titles to the two kv blocks for mobile subtitle pills
+document.querySelectorAll("#panel-duo .duo-grid .kv").forEach((el, i) => {
+  el.setAttribute("data-title", i === 0 ? "Stand mixer" : "Tangzhong");
+});
+
 function pulse(id) {
    const el = document.getElementById(id);
    if (!el) return;
