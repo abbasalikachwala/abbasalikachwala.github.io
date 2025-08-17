@@ -8,8 +8,8 @@ const BRANDS = {
     gopala:  { name: 'Gopala Full Cream',          kJ100: 270, protein100: 3.2,  kcal100: 270/4.184 },
   },
   milk: {
-    value:     { name: 'Value Trim Milk',     kJ100: 164, protein100: 3.8, kcal100: 164/4.184 },
-    dairydale: { name: 'Dairy Dale Trim Milk',kJ100: 156, protein100: 4.0, kcal100: 156/4.184, approx: true },
+    value:     { name: 'Value Trim Milk',      kJ100: 164, protein100: 3.8, kcal100: 164/4.184 },
+    dairydale: { name: 'Dairy Dale Trim Milk', kJ100: 156, protein100: 4.0, kcal100: 156/4.184, approx: true },
   }
 };
 
@@ -27,7 +27,8 @@ const fmtInt = x => Number.isFinite(x) ? `${Math.round(x)}` : '—';
 let userTouchedOil = false; // don't overwrite manual oil edits
 
 function computePlan({ n, dough, dust, oil, yogBrand, milkBrand }){
-  if(!n || !dough){ return null; }
+  // guard: need both N and dough
+  if (!Number.isFinite(n) || !Number.isFinite(dough) || n <= 0 || dough <= 0) return null;
 
   // Target dough mass (before salt)
   const target = n * dough;
@@ -37,12 +38,12 @@ function computePlan({ n, dough, dust, oil, yogBrand, milkBrand }){
   let yogTotal   = target * (R.YOG   / R.SUM);
   let milkTotal  = target * (R.MILK  / R.SUM);
 
-  // Rounding policy: nearest 10 g/ml
+  // Rounding policy: nearest 10 g/ml (salt & oil excluded)
   flourTotal = nearest10(flourTotal);
   yogTotal   = nearest10(yogTotal);
   milkTotal  = nearest10(milkTotal);
 
-  // Tangzhong: 5% of total flour
+  // Tangzhong: 5% of total flour (rounded to nearest 10; minimum 10 g)
   let flourTZ = Math.max(10, nearest10(flourTotal * 0.05));
   let flourBowl = flourTotal - flourTZ;
 
@@ -56,24 +57,25 @@ function computePlan({ n, dough, dust, oil, yogBrand, milkBrand }){
 
   // Oil in dough (auto ~0.33 g per chapati; ≈5 g per 15)
   const autoOil = Math.round(n * (5/15));
-  const oilBowl = (oil ?? 0) > 0 ? Math.round(oil) : autoOil;
+  const oilBowl = (Number.isFinite(oil) && oil > 0) ? Math.round(oil) : autoOil;
 
   // Nutrition with selected brands (+ optional dust flour)
   const Y = BRANDS.yoghurt[yogBrand];
   const M = BRANDS.milk[milkBrand];
+  const dustG = Number.isFinite(dust) ? Math.max(0, dust) : 0;
 
   const proteinBatch =
       flourTotal * P_FLOUR_PER_G
     + yogTotal   * (Y.protein100/100)
     + milkTotal  * (M.protein100/100)
-    + (dust||0)  * P_FLOUR_PER_G;
+    + dustG      * P_FLOUR_PER_G;
 
   const kcalBatch =
       flourTotal * K_FLOUR_PER_G
     + yogTotal   * (Y.kcal100/100)
     + milkTotal  * (M.kcal100/100)
     + oilBowl    * K_OIL_PER_G
-    + (dust||0)  * K_FLOUR_PER_G;
+    + dustG      * K_FLOUR_PER_G;
 
   const proteinPer = +(proteinBatch / n).toFixed(2);
   const kcalPer    = +(kcalBatch / n).toFixed(0);
@@ -86,13 +88,30 @@ function computePlan({ n, dough, dust, oil, yogBrand, milkBrand }){
 }
 
 function read(){
-  const n         = parseInt($('#n').value, 10);
-  const dough     = parseInt($('#dough').value, 10);
-  const dust      = parseInt($('#dust').value, 10) || 0;
-  const oilInput  = parseInt($('#oil').value, 10);
-  const yogBrand  = $('#yogBrand').value;
-  const milkBrand = $('#milkBrand').value;
-  return { n, dough, dust, oil: userTouchedOil ? oilInput : undefined, yogBrand, milkBrand };
+  const nRaw     = $('#n')?.value?.trim();
+  const doughRaw = $('#dough')?.value?.trim();
+  const dustRaw  = $('#dust')?.value?.trim();
+  const oilRaw   = $('#oil')?.value?.trim();
+
+  const n     = nRaw ? parseInt(nRaw, 10) : NaN;
+  const dough = doughRaw ? parseInt(doughRaw, 10) : NaN;
+  const dust  = dustRaw ? parseInt(dustRaw, 10) : 0;
+  const oil   = oilRaw ? parseInt(oilRaw, 10) : undefined;
+
+  const yogBrand  = $('#yogBrand')?.value || 'yoplait';
+  const milkBrand = $('#milkBrand')?.value || 'value';
+
+  return { n, dough, dust, oil, yogBrand, milkBrand };
+}
+
+function clearOutputs(){
+  [
+    'flourBowl','milkBowl','yogBowl','salt','oilBowl',
+    'flourTZ','milkTZ','flourTotal','milkTotal','yogTotal',
+    'targetDough','proteinPer','kcalPer'
+  ].forEach(id => { const el = $('#'+id); if (el) el.textContent='—'; });
+  if ($('#dustEcho')) $('#dustEcho').textContent = $('#dust')?.value || 0;
+  if ($('#oilEcho'))  $('#oilEcho').textContent  = $('#oil')?.value  || 0;
 }
 
 function render(){
@@ -100,18 +119,14 @@ function render(){
 
   // Show note if Dairy Dale is approximate
   const milk = BRANDS.milk[milkBrand];
-  $('#milkNote').textContent = milk.approx
+  const note = milk?.approx
     ? 'Using typical NZ trim values for Dairy Dale until a label is provided (156 kJ & 4.0 g protein per 100 ml).'
     : '';
+  if ($('#milkNote')) $('#milkNote').textContent = note;
 
   const p = computePlan({ n, dough, dust, oil, yogBrand, milkBrand });
-  if(!p){
-    // Clear outputs when inputs are blank
-    ['flourBowl','milkBowl','yogBowl','salt','oilBowl',
-     'flourTZ','milkTZ','flourTotal','milkTotal','yogTotal',
-     'targetDough','proteinPer','kcalPer'].forEach(id => { $('#'+id).textContent='—'; });
-    $('#dustEcho').textContent = dust||0;
-    $('#oilEcho').textContent  = $('#oil').value || 0;
+  if (!p){
+    clearOutputs();
     return;
   }
 
@@ -132,43 +147,65 @@ function render(){
   $('#targetDough').textContent= fmtInt(p.target)     + ' g';
 
   $('#proteinPer').textContent = p.proteinPer + ' g';
-  $('#kcalPer').textContent    = p.kcalPer + ' kcal';
-  $('#dustEcho').textContent   = dust||0;
+  $('#kcalPer').textContent    = p.kcalPer    + ' kcal';
+  $('#dustEcho').textContent   = $('#dust')?.value || 0;
   $('#oilEcho').textContent    = fmtInt(p.oilBowl);
 
   // If user hasn't touched oil, auto-fill the field so they can see it
-  if(!userTouchedOil && n && dough){ $('#oil').value = p.oilBowl; }
+  if (!userTouchedOil && Number.isFinite(n) && Number.isFinite(dough)) {
+    $('#oil').value = p.oilBowl;
+  }
 }
 
-// Timer logic (8:30)
+// ------- Timer (8:30) -------
 let tHandle = null;
 let remaining = 8*60 + 30;
 function displayTimer(){
   const m = Math.floor(remaining/60).toString().padStart(2,'0');
   const s = Math.floor(remaining%60).toString().padStart(2,'0');
-  $('#timer').textContent = `${m}:${s}`;
+  const el = $('#timer'); if (el) el.textContent = `${m}:${s}`;
 }
 function startTimer(){ if(tHandle) return; tHandle = setInterval(()=>{ if(remaining>0){ remaining--; displayTimer(); } else { clearInterval(tHandle); tHandle=null; } }, 1000); }
 function pauseTimer(){ if(tHandle){ clearInterval(tHandle); tHandle=null; } }
 function resetTimer(){ pauseTimer(); remaining = 8*60 + 30; displayTimer(); }
 
-// Events
+// ------- Events -------
 ['n','dough','dust','yogBrand','milkBrand'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', render);
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', render);
 });
-document.getElementById('oil').addEventListener('input', ()=>{ userTouchedOil = true; render(); });
+const oilEl = document.getElementById('oil');
+if (oilEl) oilEl.addEventListener('input', ()=>{ userTouchedOil = true; render(); });
 
-document.getElementById('preset8') .addEventListener('click', ()=>{ $('#n').value=8;  render(); });
-document.getElementById('preset14').addEventListener('click', ()=>{ $('#n').value=14; render(); });
-document.getElementById('preset16').addEventListener('click', ()=>{ $('#n').value=16; render(); });
-document.getElementById('preset20').addEventListener('click', ()=>{ $('#n').value=20; render(); });
+// Number-of-chapatis presets
+const presets = [
+  ['preset8', 8], ['preset14',14], ['preset16',16], ['preset20',20]
+];
+presets.forEach(([id, val])=>{
+  const btn = document.getElementById(id);
+  if (btn) btn.addEventListener('click', ()=>{ const nEl = $('#n'); if (nEl){ nEl.value = val; render(); } });
+});
+
+// Dough presets (25/30/35/40) — buttons should have class "doughPreset" and data-dough="XX"
+document.querySelectorAll('.doughPreset').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const grams = parseInt(btn.dataset.dough, 10);
+    const dEl = $('#dough'); if (dEl){ dEl.value = grams; }
+    // Optional: visual active state (if you add .active in CSS)
+    document.querySelectorAll('.doughPreset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  });
+});
 
 // Timer buttons
-$('#startTimer').addEventListener('click', startTimer);
-$('#pauseTimer').addEventListener('click', pauseTimer);
-$('#resetTimer').addEventListener('click', resetTimer);
+const startBtn = document.getElementById('startTimer');
+const pauseBtn = document.getElementById('pauseTimer');
+const resetBtn = document.getElementById('resetTimer');
+if (startBtn) startBtn.addEventListener('click', startTimer);
+if (pauseBtn) pauseBtn.addEventListener('click', pauseTimer);
+if (resetBtn) resetBtn.addEventListener('click', resetTimer);
 
-// Init
-document.getElementById('dough').value = 35;  // default dough per chapati
+// ------- Init -------
 displayTimer();
 render();
