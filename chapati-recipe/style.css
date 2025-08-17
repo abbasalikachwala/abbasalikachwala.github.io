@@ -70,6 +70,10 @@ body{
 /* Totals strip */
 .totals{margin-top:var(--sp-2)}
 .totals h2{margin:.1rem 0 var(--sp-2);font-size:1.05rem;color:#0a4dc0}
+.totals-foot{
+  margin-top: var(--sp-1);
+  font-size: .95rem;
+}
 
 /* Key-value table */
 .kv{
