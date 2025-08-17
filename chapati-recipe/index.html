@@ -5,7 +5,7 @@
   <title>Chapati Recipe Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light" />
-  <!-- Pretty headings fallback if local Georgia is missing -->
+  <!-- Optional fallback font if local Georgia is missing -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
@@ -21,7 +21,7 @@
       <div class="col">
 
         <!-- Controls -->
-        <section class="panel glass controls" style="--delay:60ms">
+        <section class="panel glass controls delay-1">
           <div class="grid-controls">
             <div class="field">
               <label>How many chapatis?</label>
@@ -75,8 +75,8 @@
           </div>
         </section>
 
-        <!-- Totals (with hydration) -->
-        <section class="panel glass totals" style="--delay:110ms">
+        <!-- Totals -->
+        <section class="panel glass totals delay-2">
           <h2>Totals</h2>
           <div class="kv">
             <div>Flour</div><div id="flourTotal" class="num">—</div>
@@ -87,8 +87,8 @@
           <div class="totals-foot muted">Approx. hydration: <span id="hydration">—</span></div>
         </section>
 
-        <!-- Timer (fills column width) -->
-        <section class="panel glass timer center fill" style="--delay:160ms">
+        <!-- Timer -->
+        <section class="panel glass timer center fill delay-3">
           <h2>Timer</h2>
           <div class="timer-face" id="timer">08:30</div>
           <div class="row">
@@ -99,11 +99,10 @@
         </section>
       </div>
 
-      <!-- RIGHT COLUMN: Stand Mixer + TZ, KPIs -->
+      <!-- RIGHT COLUMN: Stand Mixer + TZ + KPIs -->
       <div class="col">
 
-        <!-- Stand Mixer + Tangzhong with clear divider -->
-        <section class="panel glass duo" style="--delay:60ms">
+        <section class="panel glass duo delay-1">
           <div class="duo-head">
             <h2>Stand mixer</h2>
             <h2>Tangzhong</h2>
@@ -124,8 +123,8 @@
           </div>
         </section>
 
-        <!-- KPIs (pretty) -->
-        <section class="panel glass kpis pretty" style="--delay:110ms">
+        <!-- KPIs -->
+        <section class="panel glass kpis pretty delay-2">
           <div class="stats">
             <div class="stat">
               <div class="stat-label">Protein / chapati</div>
@@ -144,18 +143,25 @@
               <button id="mealMinus" type="button" class="step" aria-label="Minus one">–</button>
               <input id="mealCount" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 3" />
               <button id="mealPlus" type="button" class="step" aria-label="Plus one">+</button>
-              <div class="meal-nums">
-                <span id="mealProtein">—</span> g • <span id="mealKcal">—</span> kcal
+            </div>
+
+            <!-- Meal totals styled the same as per-chapati -->
+            <div class="meal-stats">
+              <div class="stat">
+                <div class="stat-label">Protein (meal)</div>
+                <div class="stat-value" id="mealProtein">—</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Calories (meal)</div>
+                <div class="stat-value" id="mealKcal">—</div>
               </div>
             </div>
-            <div class="kpi-foot muted">Dust: <span id="dustEcho">0</span> g • Oil: <span id="oilEcho">0</span> g</div>
           </div>
         </section>
 
       </div>
     </section>
   </main>
-
   <script src="script.js"></script>
 </body>
 </html>
