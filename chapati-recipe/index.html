@@ -5,6 +5,9 @@
   <title>Chapati Recipe Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light" />
+  <!-- Pretty headings fallback if Georgia missing -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -14,7 +17,7 @@
     </header>
 
     <section class="layout">
-      <!-- LEFT COLUMN -->
+      <!-- LEFT COLUMN: Controls + Totals -->
       <div class="col">
         <!-- Controls -->
         <section class="panel glass controls" style="--delay:60ms">
@@ -31,7 +34,7 @@
             </div>
 
             <div class="field">
-              <label>Dough per chapati (g):</label>
+              <label>Dough per chapati (g)</label>
               <div class="seg">
                 <button data-dough="25" type="button" class="seg-btn doughPreset">25</button>
                 <button data-dough="30" type="button" class="seg-btn doughPreset">30</button>
@@ -42,7 +45,7 @@
             </div>
 
             <div class="field">
-              <label>Yoghurt:</label>
+              <label>Yoghurt</label>
               <select id="yogBrand">
                 <option value="yoplait" selected>Yoplait Max Protein Plain</option>
                 <option value="gopala">Gopala Full Cream</option>
@@ -50,7 +53,7 @@
             </div>
 
             <div class="field">
-              <label>Milk:</label>
+              <label>Trim Milk</label>
               <select id="milkBrand">
                 <option value="value" selected>Value Trim Milk</option>
                 <option value="dairydale">Dairy Dale Trim Milk</option>
@@ -59,23 +62,38 @@
             </div>
 
             <div class="field">
-              <label>Dusting flour used (g:)</label>
+              <label>Dusting flour used (g)</label>
               <input id="dust" type="number" min="0" step="1" placeholder="e.g. 20" />
             </div>
 
             <div class="field">
-              <label>Oil in dough (g):</label>
+              <label>Oil in dough (g)</label>
               <input id="oil" type="number" min="0" step="1" placeholder="auto" />
               <small>Auto ≈ 5 g per 15 chapatis.</small>
             </div>
           </div>
         </section>
 
-        <!-- Bowl & Tangzhong in one card -->
-        <section class="panel glass duo" style="--delay:120ms">
+        <!-- Totals (with hydration) -->
+        <section class="panel glass totals" style="--delay:110ms">
+          <h2>Totals</h2>
+          <div class="kv">
+            <div>Flour</div><div id="flourTotal" class="num">—</div>
+            <div>Milk</div><div  id="milkTotal"  class="num">—</div>
+            <div>Yoghurt</div><div id="yogTotal" class="num">—</div>
+            <div>Target dough</div><div id="targetDough" class="num">—</div>
+          </div>
+          <div class="totals-foot muted">Approx. hydration: <span id="hydration">—</span></div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN: Stand Mixer + TZ, KPIs, Timer -->
+      <div class="col">
+        <!-- Stand Mixer + Tangzhong with clear divider -->
+        <section class="panel glass duo" style="--delay:60ms">
           <div class="duo-head">
-            <h2>Stand Mixer:</h2>
-            <h2>Tangzhong:</h2>
+            <h2>Stand mixer</h2>
+            <h2>Tangzhong</h2>
           </div>
           <div class="duo-grid">
             <div class="kv">
@@ -85,36 +103,22 @@
               <div>Yoghurt</div><div id="yogBowl"  class="num">—</div>
               <div>Oil</div><div    id="oilBowl"   class="num">—</div>
             </div>
+            <div class="split-line" aria-hidden="true"></div>
             <div class="kv">
               <div>Flour</div><div id="flourTZ" class="num">—</div>
               <div>Milk</div><div  id="milkTZ"  class="num">—</div>
             </div>
           </div>
         </section>
-      </div>
-
-      <!-- RIGHT COLUMN -->
-      <div class="col">
-        <!-- Totals (with hydration) -->
-        <section class="panel glass totals" style="--delay:90ms">
-          <h2>Totals</h2>
-          <div class="kv">
-            <div>Flour:</div><div id="flourTotal" class="num">—</div>
-            <div>Milk:</div><div  id="milkTotal"  class="num">—</div>
-            <div>Yoghurt:</div><div id="yogTotal" class="num">—</div>
-            <div>Target Dough:</div><div id="targetDough" class="num">—</div>
-          </div>
-          <div class="totals-foot muted">Approx. hydration: <span id="hydration">—</span></div>
-        </section>
 
         <!-- KPIs -->
-        <section class="panel glass kpis" style="--delay:150ms">
+        <section class="panel glass kpis" style="--delay:110ms">
           <div class="kpi">
-            <div class="kpi-label">Protein/Chapati</div>
+            <div class="kpi-label">Protein / chapati</div>
             <div class="kpi-value" id="proteinPer">—</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label">Calories/Chapati</div>
+            <div class="kpi-label">Calories / chapati</div>
             <div class="kpi-value" id="kcalPer">—</div>
           </div>
           <div class="kpi kpi-small">
@@ -122,8 +126,8 @@
           </div>
         </section>
 
-        <!-- Centered timer -->
-        <section class="panel glass timer center" style="--delay:210ms">
+        <!-- Timer (full column width) -->
+        <section class="panel glass timer center fill" style="--delay:160ms">
           <h2>Main mix timer</h2>
           <div class="timer-face" id="timer">08:30</div>
           <div class="row">
@@ -135,6 +139,7 @@
       </div>
     </section>
   </main>
+
   <script src="script.js"></script>
 </body>
 </html>
