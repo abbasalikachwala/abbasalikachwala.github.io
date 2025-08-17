@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Tangzhong Chapati Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <h1>Tangzhong Chapati Calculator</h1>
+      <p class="sub">
+        Uses your exact proportions (baseline from your 16-piece batch:
+        <strong>flour 190 g</strong>, <strong>yoghurt 90 g</strong>,
+        <strong>milk 120 ml</strong> total). Rounds up to clean 10s by default,
+        splits <strong>5%</strong> of flour to tangzhong (TZ), and sets
+        <strong>milk for TZ = 5 × TZ flour</strong>.
+      </p>
+    </header>
+
+    <section class="controls card">
+      <div class="grid-3">
+        <label class="field">
+          <span>How many chapatis?</span>
+          <input id="n" type="number" min="1" step="1" value="10" />
+        </label>
+
+        <label class="field">
+          <span>Dusting flour (g, optional)</span>
+          <input id="dust" type="number" min="0" step="1" value="0" />
+          <small>Only affects protein math; doesn’t change bowl/TZ weights.</small>
+        </label>
+
+        <label class="field">
+          <span>Dough per chapati (g)</span>
+          <input id="dough" type="number" min="20" step="1" value="35" />
+          <small>Used for salt target (~1% of total dough).</small>
+        </label>
+      </div>
+
+      <div class="grid-3">
+        <label class="field">
+          <span>Rounding</span>
+          <select id="rounding">
+            <option value="up10" selected>Round UP to nearest 10 (recommended)</option>
+            <option value="exact">Exact (no round-up)</option>
+          </select>
+          <small>“Exact” keeps everything unrounded (TZ flour still 5% of flour).</small>
+        </label>
+
+        <div class="buttons">
+          <button id="printBtn" class="btn">🖨️ Print</button>
+          <button id="copyBtn" class="btn outline">📋 Copy</button>
+          <button id="shareBtn" class="btn outline">🔗 Share</button>
+          <button id="resetBtn" class="btn ghost">↺ Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <article class="card">
+        <h2>Stand mixer bowl</h2>
+        <div class="kv">
+          <div>Flour</div><div id="flourBowl" class="num">—</div>
+          <div>Milk</div><div id="milkBowl" class="num">—</div>
+          <div>Yoghurt</div><div id="yogBowl" class="num">—</div>
+          <div>Salt</div><div id="salt" class="num">—</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Tangzhong (microwave mug)</h2>
+        <div class="kv">
+          <div>Flour</div><div id="flourTZ" class="num">—</div>
+          <div>Milk</div><div id="milkTZ" class="num">—</div>
+        </div>
+        <p class="hint">Microwave 20–25 s, stir; then 10–15 s bursts to a thick paste.
+          Cool 2–3 min (warm, not hot) before adding to the bowl.</p>
+      </article>
+    </section>
+
+    <section class="grid-3">
+      <article class="card">
+        <h2>Totals</h2>
+        <div class="kv">
+          <div>Flour total</div><div id="flourTotal" class="num">—</div>
+          <div>Milk total</div><div id="milkTotal" class="num">—</div>
+          <div>Yoghurt total</div><div id="yogTotal" class="num">—</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Protein per chapati</h2>
+        <div class="big-num" id="proteinPer">—</div>
+        <p class="tiny">Includes dust: <span id="dustEcho">0</span> g</p>
+      </article>
+
+      <article class="card">
+        <h2>Quick method</h2>
+        <ol class="steps">
+          <li>Make TZ with the “TZ flour + milk” above; cool 2–3 min.</li>
+          <li>Bowl: flour (bowl) + salt + yoghurt + milk (bowl) + TZ. Mix ~7–8 min (low).</li>
+          <li>Divide and roll; dust as you like; clap/brush off excess before the tava.</li>
+        </ol>
+      </article>
+    </section>
+
+    <footer class="footer">
+      <small>
+        Protein labels: flour 4 g / 30 g; yoghurt 10 g / 100 g; trim milk 3.8 g / 100 ml.
+        Baseline per-chapati multipliers derive from your 16-piece batch: flour 190 g, yoghurt 90 g, milk 120 ml.
+      </small>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

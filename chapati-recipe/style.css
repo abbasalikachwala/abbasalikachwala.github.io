@@ -1,0 +1,57 @@
+:root{
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --brand: #2563eb;
+  --line: #e2e8f0;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg: #0b1220;
+    --card: #0f172a;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --brand: #60a5fa;
+    --line: #1f2937;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial}
+.container{max-width:1100px;margin:auto;padding:24px}
+.header h1{margin:.2rem 0 0}
+.sub{color:var(--muted);max-width:68ch}
+.grid-2{display:grid;gap:16px;grid-template-columns:1fr 1fr;margin:16px 0}
+.grid-3{display:grid;gap:16px;grid-template-columns:repeat(3,1fr)}
+@media (max-width:900px){.grid-3{grid-template-columns:1fr}.grid-2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.card h2{margin:.2rem 0 .6rem;font-size:1.1rem}
+.kv{display:grid;grid-template-columns:1fr auto;gap:.5rem .75rem;align-items:center}
+.num{font-variant-numeric:tabular-nums;font-weight:600}
+.big-num{font-size:2.25rem;font-weight:700}
+.tiny{color:var(--muted);margin-top:.25rem}
+.hint{color:var(--muted);font-size:.9rem;margin-top:.5rem}
+.footer{margin-top:24px;color:var(--muted)}
+.controls .field{display:flex;flex-direction:column;gap:.35rem}
+.controls .field small{color:var(--muted)}
+input, select{
+  width:100%;padding:10px 12px;border:1px solid var(--line);
+  border-radius:10px;background:transparent;color:var(--text)
+}
+.btn{
+  background:var(--brand);color:white;border:none;border-radius:10px;
+  padding:10px 14px;cursor:pointer
+}
+.btn.outline{background:transparent;color:var(--brand);border:1px solid var(--brand)}
+.btn.ghost{background:transparent;color:var(--muted);border:1px dashed var(--line)}
+.buttons{display:flex;gap:10px;align-items:end;justify-content:flex-end}
+.steps{margin:.4rem 0 0 1rem}
+.header, .controls, .grid-2, .grid-3{margin-bottom:16px}
+
+/* Print */
+@media print{
+  body{background:white}
+  .buttons, .footer, .sub{display:none}
+  .container{max-width:100%;padding:0}
+  .card{box-shadow:none;border-color:#ddd}
+}
