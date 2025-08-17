@@ -1,4 +1,4 @@
-/* Blue glass + Georgia headings + centered section headers + tighter cards */
+/* Blue glass + Georgia headings + centered titles + mobile re-ordering */
 
 /* ===== Tokens ===== */
 :root {
@@ -117,14 +117,13 @@ body {
 	padding: var(--sp-3);
 }
 
-/* ===== Section titles (now centered) ===== */
+/* ===== Section titles (centered) ===== */
 .section-title {
 	margin: 0 0 var(--sp-2) 0;
 	font-family: var(--displayFont);
 	font-size: 1.06rem;
 	color: #0a4dc0;
 	text-align: center;
-	/* <— center all section headers */
 }
 
 .section-title span {
@@ -136,17 +135,15 @@ body {
 	box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 6px 12px rgba(10, 132, 255, .08);
 }
 
-/* ===== Remove excess space in first row ===== */
+/* ===== Trim extra space ===== */
 .controls {
 	min-height: auto;
 }
 
-/* let content define height */
 .duo {
 	min-height: auto;
 }
 
-/* trimmed empty area */
 .totals,
 .kpis.pretty {
 	min-height: 200px;
@@ -206,7 +203,6 @@ body {
 	display: flex;
 	gap: var(--sp-1);
 	flex-wrap: wrap;
-	justify-content: flex-start;
 }
 
 .seg-btn {
@@ -262,7 +258,7 @@ body {
 
 	.duo-grid {
 		grid-template-columns: 1fr;
-		gap: var(--sp-3);
+		gap: var(--sp-2);
 	}
 
 	.split-line {
@@ -323,19 +319,15 @@ body {
 	border-radius: 1px;
 }
 
-/* ===== Meal row (fully centered group) ===== */
+/* ===== Meal row (centered selector) ===== */
 .meal-row {
-	display: grid;
-	/* shrink to content width */
+	display: inline-grid;
 	grid-template-columns: auto 90px auto;
 	gap: 10px;
 	align-items: center;
 	justify-content: center;
-	/* center the 3 items as a group */
 	place-items: center;
-	/* center each cell */
 	margin: 0 auto var(--sp-2);
-	/* center the whole row in card */
 }
 
 .step {
@@ -436,6 +428,74 @@ body {
 	border: 1px solid #bcd7ff
 }
 
+/* ===== MOBILE: reorder so Duo appears right after Inputs ===== */
+@media (max-width: 900px) {
+	.layout {
+		display: grid;
+		grid-template-columns: 1fr;
+		grid-template-areas:
+			"inputs"
+			"duo"
+			/* Stand mixer + Tangzhong immediately under Inputs */
+			"totals"
+			"kpis"
+			"meal"
+			"timer";
+		gap: var(--sp-3);
+	}
+
+	.col {
+		display: contents;
+	}
+
+	/* treat children as direct grid items */
+
+	#panel-inputs {
+		grid-area: inputs;
+	}
+
+	#panel-duo {
+		grid-area: duo;
+	}
+
+	#panel-totals {
+		grid-area: totals;
+	}
+
+	#panel-kpis {
+		grid-area: kpis;
+	}
+
+	#panel-meal {
+		grid-area: meal;
+	}
+
+	#panel-timer {
+		grid-area: timer;
+	}
+}
+
+/* ===== MOBILE polish for Duo (stack + sub-cards) ===== */
+@media (max-width: 720px) {
+	#panel-duo .duo-grid {
+		grid-template-columns: 1fr;
+		gap: var(--sp-2);
+	}
+
+	#panel-duo .kv {
+		background: rgba(255, 255, 255, 0.9);
+		border: 1px solid #e2ecff;
+		border-radius: 14px;
+		padding: 12px 14px;
+		box-shadow: inset 0 4px 14px rgba(10, 132, 255, 0.06);
+		row-gap: 0.45rem;
+	}
+
+	#panel-duo .kv+.kv {
+		margin-top: 6px;
+	}
+}
+
 /* Utilities */
 .muted {
 	color: var(--muted);
@@ -449,7 +509,7 @@ body {
 	margin-bottom: 0;
 }
 
-/* Number pulse animation */
+/* Number pulse */
 .pulse {
 	animation: numPulse .35s ease
 }
