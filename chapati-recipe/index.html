@@ -9,122 +9,129 @@
 </head>
 <body>
   <main class="wrap">
-    <header class="hero glass">
+    <header class="hero">
       <h1>Chapati Recipe Calculator</h1>
     </header>
 
-    <!-- Controls -->
-    <section class="panel glass controls">
-      <div class="grid-controls">
-        <div class="field">
-          <label>How many chapatis?</label>
-          <div class="seg">
-            <button id="preset8"  type="button" class="seg-btn">8</button>
-            <button id="preset14" type="button" class="seg-btn">14</button>
-            <button id="preset16" type="button" class="seg-btn">16</button>
-            <button id="preset20" type="button" class="seg-btn">20</button>
+    <section class="layout">
+      <!-- LEFT COLUMN -->
+      <div class="col">
+        <!-- Controls -->
+        <section class="panel glass controls" style="--delay:60ms">
+          <div class="grid-controls">
+            <div class="field">
+              <label>How many chapatis?</label>
+              <div class="seg">
+                <button id="preset8"  type="button" class="seg-btn">8</button>
+                <button id="preset14" type="button" class="seg-btn">14</button>
+                <button id="preset16" type="button" class="seg-btn">16</button>
+                <button id="preset20" type="button" class="seg-btn">20</button>
+              </div>
+              <input id="n" type="number" min="1" step="1" placeholder="e.g. 16" />
+            </div>
+
+            <div class="field">
+              <label>Dough per chapati (g):</label>
+              <div class="seg">
+                <button data-dough="25" type="button" class="seg-btn doughPreset">25</button>
+                <button data-dough="30" type="button" class="seg-btn doughPreset">30</button>
+                <button data-dough="35" type="button" class="seg-btn doughPreset">35</button>
+                <button data-dough="40" type="button" class="seg-btn doughPreset">40</button>
+              </div>
+              <input id="dough" type="number" min="20" step="1" placeholder="e.g. 35" />
+            </div>
+
+            <div class="field">
+              <label>Yoghurt:</label>
+              <select id="yogBrand">
+                <option value="yoplait" selected>Yoplait Max Protein Plain</option>
+                <option value="gopala">Gopala Full Cream</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Milk:</label>
+              <select id="milkBrand">
+                <option value="value" selected>Value Trim Milk</option>
+                <option value="dairydale">Dairy Dale Trim Milk</option>
+              </select>
+              <small id="milkNote" class="muted"></small>
+            </div>
+
+            <div class="field">
+              <label>Dusting flour used (g:)</label>
+              <input id="dust" type="number" min="0" step="1" placeholder="e.g. 20" />
+            </div>
+
+            <div class="field">
+              <label>Oil in dough (g):</label>
+              <input id="oil" type="number" min="0" step="1" placeholder="auto" />
+              <small>Auto ≈ 5 g per 15 chapatis.</small>
+            </div>
           </div>
-          <input id="n" type="number" min="1" step="1" placeholder="e.g. 16" />
-        </div>
+        </section>
 
-        <div class="field">
-          <label>Dough per chapati (g)</label>
-          <div class="seg">
-            <button data-dough="25" type="button" class="seg-btn doughPreset">25</button>
-            <button data-dough="30" type="button" class="seg-btn doughPreset">30</button>
-            <button data-dough="35" type="button" class="seg-btn doughPreset">35</button>
-            <button data-dough="40" type="button" class="seg-btn doughPreset">40</button>
+        <!-- Bowl & Tangzhong in one card -->
+        <section class="panel glass duo" style="--delay:120ms">
+          <div class="duo-head">
+            <h2>Stand Mixer:</h2>
+            <h2>Tangzhong:</h2>
           </div>
-          <input id="dough" type="number" min="20" step="1" placeholder="e.g. 35" />
-        </div>
-
-        <div class="field">
-          <label>Yoghurt:</label>
-          <select id="yogBrand">
-            <option value="yoplait" selected>Yoplait Max Protein Plain</option>
-            <option value="gopala">Gopala Full Cream</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Trim Milk:</label>
-          <select id="milkBrand">
-            <option value="value" selected>Value Trim Milk</option>
-            <option value="dairydale">Dairy Dale Trim Milk</option>
-          </select>
-          <small id="milkNote" class="muted"></small>
-        </div>
-
-        <div class="field">
-          <label>Dusting flour used (g)</label>
-          <input id="dust" type="number" min="0" step="1" placeholder="e.g. 20" />
-        </div>
-
-        <div class="field">
-          <label>Oil in dough (g)</label>
-          <input id="oil" type="number" min="0" step="1" placeholder="auto" />
-          <small>Auto ≈ 5 g per 15 chapatis.</small>
-        </div>
+          <div class="duo-grid">
+            <div class="kv">
+              <div>Flour</div><div id="flourBowl" class="num">—</div>
+              <div>Salt</div><div   id="salt"      class="num">—</div>
+              <div>Milk</div><div  id="milkBowl"  class="num">—</div>
+              <div>Yoghurt</div><div id="yogBowl"  class="num">—</div>
+              <div>Oil</div><div    id="oilBowl"   class="num">—</div>
+            </div>
+            <div class="kv">
+              <div>Flour</div><div id="flourTZ" class="num">—</div>
+              <div>Milk</div><div  id="milkTZ"  class="num">—</div>
+            </div>
+          </div>
+        </section>
       </div>
-    </section>
 
-    <!-- Bowl + Tangzhong (now ABOVE Totals) -->
-    <section class="grid-two">
-      <article class="panel glass">
-        <h2>Stand Mixer:</h2>
-        <div class="kv">
-          <div>Flour</div><div id="flourBowl" class="num">—</div>
-          <div>Salt</div><div   id="salt"      class="num">—</div>
-          <div>Milk</div><div  id="milkBowl"  class="num">—</div>
-          <div>Yoghurt</div><div id="yogBowl"  class="num">—</div>
-          <div>Oil</div><div    id="oilBowl"   class="num">—</div>
-        </div>
-      </article>
+      <!-- RIGHT COLUMN -->
+      <div class="col">
+        <!-- Totals (with hydration) -->
+        <section class="panel glass totals" style="--delay:90ms">
+          <h2>Totals</h2>
+          <div class="kv">
+            <div>Flour:</div><div id="flourTotal" class="num">—</div>
+            <div>Milk:</div><div  id="milkTotal"  class="num">—</div>
+            <div>Yoghurt:</div><div id="yogTotal" class="num">—</div>
+            <div>Target Dough:</div><div id="targetDough" class="num">—</div>
+          </div>
+          <div class="totals-foot muted">Approx. hydration: <span id="hydration">—</span></div>
+        </section>
 
-      <article class="panel glass">
-        <h2>Tangzhong:</h2>
-        <div class="kv">
-          <div>Flour</div><div id="flourTZ" class="num">—</div>
-          <div>Milk</div><div  id="milkTZ"  class="num">—</div>
-        </div>
-      </article>
-    </section>
+        <!-- KPIs -->
+        <section class="panel glass kpis" style="--delay:150ms">
+          <div class="kpi">
+            <div class="kpi-label">Protein/Chapati</div>
+            <div class="kpi-value" id="proteinPer">—</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Calories/Chapati</div>
+            <div class="kpi-value" id="kcalPer">—</div>
+          </div>
+          <div class="kpi kpi-small">
+            <div class="kpi-sub">Dust: <span id="dustEcho">0</span> g • Oil: <span id="oilEcho">0</span> g</div>
+          </div>
+        </section>
 
-    <!-- Totals (moved below Bowl/TZ) -->
-    <section class="panel glass totals">
-      <h2>Totals</h2>
-      <div class="kv">
-        <div>Flour total</div><div id="flourTotal" class="num">—</div>
-        <div>Milk total</div><div  id="milkTotal"  class="num">—</div>
-        <div>Yoghurt total</div><div id="yogTotal" class="num">—</div>
-        <div>Target dough</div><div id="targetDough" class="num">—</div>
-      </div>
-      <div class="totals-foot muted">Approx. hydration: <span id="hydration">—</span></div>
-    </section>
-
-    <!-- KPIs -->
-    <section class="kpis glass">
-      <div class="kpi">
-        <div class="kpi-label">Protein/Chapati</div>
-        <div class="kpi-value" id="proteinPer">—</div>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">Calories/Chapati</div>
-        <div class="kpi-value" id="kcalPer">—</div>
-      </div>
-      <div class="kpi kpi-small">
-        <div class="kpi-sub">Dust: <span id="dustEcho">0</span> g • Oil: <span id="oilEcho">0</span> g</div>
-      </div>
-    </section>
-
-    <!-- Centered timer -->
-    <section class="panel glass timer center">
-      <h2>Main mix timer</h2>
-      <div class="timer-face" id="timer">08:30</div>
-      <div class="row">
-        <button id="startTimer" class="btn">Start</button>
-        <button id="pauseTimer" class="btn ghost">Pause</button>
-        <button id="resetTimer" class="btn ghost">Reset</button>
+        <!-- Centered timer -->
+        <section class="panel glass timer center" style="--delay:210ms">
+          <h2>Main mix timer</h2>
+          <div class="timer-face" id="timer">08:30</div>
+          <div class="row">
+            <button id="startTimer" class="btn">Start</button>
+            <button id="pauseTimer" class="btn ghost">Pause</button>
+            <button id="resetTimer" class="btn ghost">Reset</button>
+          </div>
+        </section>
       </div>
     </section>
   </main>
