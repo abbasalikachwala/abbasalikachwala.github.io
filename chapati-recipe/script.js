@@ -3,12 +3,12 @@ const R = { FLOUR: 190, YOG: 90, MILK: 120, SUM: 400 };
 
 const BRANDS = {
   yoghurt: {
-    yoplait: { name: 'Yoplait Max Protein Plain',  kJ100: 330, protein100: 10.0, kcal100: 330/4.184 },
-    gopala:  { name: 'Gopala Full Cream',          kJ100: 270, protein100: 3.2,  kcal100: 270/4.184 },
+    yoplait: { kJ100: 330, protein100: 10.0, kcal100: 330/4.184 },
+    gopala:  { kJ100: 270, protein100: 3.2,  kcal100: 270/4.184 },
   },
   milk: {
-    value:     { name: 'Value Trim Milk',     kJ100: 164, protein100: 3.8, kcal100: 164/4.184 },
-    dairydale: { name: 'Dairy Dale Trim Milk',kJ100: 156, protein100: 4.0, kcal100: 156/4.184, approx: true },
+    value:     { kJ100: 164, protein100: 3.8, kcal100: 164/4.184 },
+    dairydale: { kJ100: 156, protein100: 4.0, kcal100: 156/4.184, approx: true },
   }
 };
 
@@ -17,7 +17,7 @@ const P_FLOUR_PER_G = 4/30;    // g protein per g flour
 const K_FLOUR_PER_G = 100/30;  // kcal per g flour
 const K_OIL_PER_G   = 9;       // kcal per g oil
 
-// Hydration assumptions (approx.)
+// Hydration assumptions
 const WATER_YOG  = 0.80; // yoghurt ≈ 80% water
 const WATER_MILK = 0.90; // trim milk ≈ 90% water
 
@@ -27,15 +27,10 @@ const nearest10 = (x) => Math.round(x/10)*10;
 const roundHalf = (x) => Math.round(x*2)/2;
 const fmtInt = (x) => Number.isFinite(x) ? `${Math.round(x)}` : '—';
 
-// Pulse animation on number change
 function pulse(id){
   const el = $('#'+id); if (!el) return;
-  el.classList.remove('pulse'); // reset
-  // force reflow
-  void el.offsetWidth;
-  el.classList.add('pulse');
+  el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
 }
-
 let userTouchedOil = false;
 
 // ---------- Core calc ----------
@@ -128,7 +123,6 @@ function clearOutputs(){
 function render(){
   const { n, dough, dust, oil, yogBrand, milkBrand } = read();
 
-  // milk note
   $('#milkNote').textContent = BRANDS.milk[milkBrand]?.approx
     ? 'Approx. values until label confirmed.'
     : '';
@@ -185,11 +179,12 @@ function resetTimer(){ pauseTimer(); remaining = 8*60 + 30; displayTimer(); }
 const oilEl = document.getElementById('oil');
 if (oilEl) oilEl.addEventListener('input', ()=>{ userTouchedOil = true; render(); });
 
-// piece presets
+// piece count presets
 [['preset8',8],['preset14',14],['preset16',16],['preset20',20]].forEach(([id,val])=>{
   const btn = document.getElementById(id);
   if (btn) btn.addEventListener('click', ()=>{
-    $('#n').value = val;
+    const nEl = $('#n');
+    if (nEl){ nEl.value = val; }
     document.querySelectorAll('#preset8,#preset14,#preset16,#preset20').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     render();
@@ -200,7 +195,7 @@ if (oilEl) oilEl.addEventListener('input', ()=>{ userTouchedOil = true; render()
 document.querySelectorAll('.doughPreset').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const grams = parseInt(btn.dataset.dough,10);
-    $('#dough').value = grams;
+    const dEl = $('#dough'); if (dEl){ dEl.value = grams; }
     document.querySelectorAll('.doughPreset').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     render();
@@ -216,7 +211,7 @@ $('#resetTimer').addEventListener('click', resetTimer);
 displayTimer();
 render();
 
-/* --- number pulse animation (tiny) --- */
+/* Number pulse micro-animation */
 const style = document.createElement('style');
 style.textContent = `
   .pulse{ animation: numPulse .35s ease }
