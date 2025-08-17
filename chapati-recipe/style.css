@@ -325,7 +325,7 @@ body {
 
 /* ===== Meal row (fully centered group) ===== */
 .meal-row {
-	display: inline-grid;
+	display: grid;
 	/* shrink to content width */
 	grid-template-columns: auto 90px auto;
 	gap: 10px;
