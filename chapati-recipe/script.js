@@ -27,6 +27,7 @@ const nearest10 = (x) => Math.round(x/10)*10;
 const roundHalf = (x) => Math.round(x*2)/2;
 const fmtInt = (x) => Number.isFinite(x) ? `${Math.round(x)}` : '—';
 
+// tiny highlight when numbers change
 function pulse(id){
   const el = $('#'+id); if (!el) return;
   el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
@@ -99,38 +100,48 @@ function computePlan({ n, dough, dust, oil, yogBrand, milkBrand }){
 
 // ---------- IO ----------
 function read(){
-  const n     = parseInt($('#n')?.value ?? '', 10);
-  const dough = parseInt($('#dough')?.value ?? '', 10);
-  const dust  = parseInt($('#dust')?.value ?? '', 10);
-  const oilIn = parseInt($('#oil')?.value  ?? '', 10);
-  const yogBrand  = $('#yogBrand')?.value || 'yoplait';
-  const milkBrand = $('#milkBrand')?.value || 'value';
-  const oil  = userTouchedOil ? oilIn : undefined;
+  const nEl = $('#n'), doughEl = $('#dough'), dustEl = $('#dust'), oilEl = $('#oil');
+  const n     = nEl    ? parseInt(nEl.value, 10)    : NaN;
+  const dough = doughEl? parseInt(doughEl.value,10) : NaN;
+  const dust  = dustEl ? parseInt(dustEl.value, 10) : 0;
+  const oil   = userTouchedOil && oilEl ? parseInt(oilEl.value,10) : undefined;
+
+  const yogBrand  = ($('#yogBrand')  && $('#yogBrand').value)  || 'yoplait';
+  const milkBrand = ($('#milkBrand') && $('#milkBrand').value) || 'value';
   return { n, dough, dust, oil, yogBrand, milkBrand };
 }
 
 function clearOutputs(){
-  [
+  const ids = [
     'flourBowl','milkBowl','yogBowl','salt','oilBowl',
     'flourTZ','milkTZ','flourTotal','milkTotal','yogTotal',
     'targetDough','proteinPer','kcalPer','hydration'
-  ].forEach(id => { const el = $('#'+id); if (el) el.textContent='—'; });
-  $('#dustEcho')?.textContent = $('#dust')?.value || 0;
-  $('#oilEcho') ?.textContent = $('#oil') ?.value || 0;
-  $('#milkNote').textContent = '';
+  ];
+  ids.forEach(id => { const el = $('#'+id); if (el) el.textContent='—'; });
+
+  const dustEcho = $('#dustEcho');
+  const oilEcho  = $('#oilEcho');
+  const dustIn   = $('#dust');
+  const oilIn    = $('#oil');
+  if (dustEcho) dustEcho.textContent = dustIn ? (dustIn.value || 0) : 0;
+  if (oilEcho)  oilEcho.textContent  = oilIn  ? (oilIn.value  || 0) : 0;
+
+  const milkNote = $('#milkNote');
+  if (milkNote) milkNote.textContent = '';
 }
 
 function render(){
   const { n, dough, dust, oil, yogBrand, milkBrand } = read();
 
-  $('#milkNote').textContent = BRANDS.milk[milkBrand]?.approx
+  const milkNote = $('#milkNote');
+  if (milkNote) milkNote.textContent = BRANDS.milk[milkBrand]?.approx
     ? 'Approx. values until label confirmed.'
     : '';
 
   const p = computePlan({ n, dough, dust, oil, yogBrand, milkBrand });
   if (!p){ clearOutputs(); return; }
 
-  const set = (id, val) => { $('#'+id).textContent = val; pulse(id); };
+  const set = (id, val) => { const el = $('#'+id); if (el){ el.textContent = val; pulse(id); } };
 
   // bowl & tz
   set('flourBowl', fmtInt(p.flourBowl) + ' g');
@@ -151,11 +162,15 @@ function render(){
   set('proteinPer', p.proteinPer + ' g');
   set('kcalPer',    p.kcalPer    + ' kcal');
   set('hydration',  p.hydration  + '%');
-  $('#dustEcho').textContent = $('#dust')?.value || 0;
-  $('#oilEcho').textContent  = fmtInt(p.oilBowl);
+
+  const dustEcho = $('#dustEcho');
+  const oilEcho  = $('#oilEcho');
+  const dustIn   = $('#dust');
+  if (dustEcho) dustEcho.textContent = dustIn ? (dustIn.value || 0) : 0;
+  if (oilEcho)  oilEcho.textContent  = fmtInt(p.oilBowl);
 
   if (!userTouchedOil && Number.isFinite(n) && Number.isFinite(dough)) {
-    $('#oil').value = p.oilBowl;
+    const oilEl = $('#oil'); if (oilEl) oilEl.value = p.oilBowl;
   }
 }
 
@@ -165,7 +180,7 @@ let remaining = 8*60 + 30;
 function displayTimer(){
   const m = Math.floor(remaining/60).toString().padStart(2,'0');
   const s = Math.floor(remaining%60).toString().padStart(2,'0');
-  $('#timer').textContent = `${m}:${s}`;
+  const t = $('#timer'); if (t) t.textContent = `${m}:${s}`;
 }
 function startTimer(){ if(tHandle) return; tHandle = setInterval(()=>{ if(remaining>0){ remaining--; displayTimer(); } else { clearInterval(tHandle); tHandle=null; } }, 1000); }
 function pauseTimer(){ if(tHandle){ clearInterval(tHandle); tHandle=null; } }
@@ -183,8 +198,7 @@ if (oilEl) oilEl.addEventListener('input', ()=>{ userTouchedOil = true; render()
 [['preset8',8],['preset14',14],['preset16',16],['preset20',20]].forEach(([id,val])=>{
   const btn = document.getElementById(id);
   if (btn) btn.addEventListener('click', ()=>{
-    const nEl = $('#n');
-    if (nEl){ nEl.value = val; }
+    const nEl = $('#n'); if (nEl) nEl.value = val;
     document.querySelectorAll('#preset8,#preset14,#preset16,#preset20').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     render();
@@ -195,7 +209,7 @@ if (oilEl) oilEl.addEventListener('input', ()=>{ userTouchedOil = true; render()
 document.querySelectorAll('.doughPreset').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     const grams = parseInt(btn.dataset.dough,10);
-    const dEl = $('#dough'); if (dEl){ dEl.value = grams; }
+    const dEl = $('#dough'); if (dEl) dEl.value = grams;
     document.querySelectorAll('.doughPreset').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     render();
@@ -203,9 +217,12 @@ document.querySelectorAll('.doughPreset').forEach(btn=>{
 });
 
 // Timer buttons
-$('#startTimer').addEventListener('click', startTimer);
-$('#pauseTimer').addEventListener('click', pauseTimer);
-$('#resetTimer').addEventListener('click', resetTimer);
+const startBtn = document.getElementById('startTimer');
+const pauseBtn = document.getElementById('pauseTimer');
+const resetBtn = document.getElementById('resetTimer');
+if (startBtn) startBtn.addEventListener('click', startTimer);
+if (pauseBtn) pauseBtn.addEventListener('click', pauseTimer);
+if (resetBtn) resetBtn.addEventListener('click', resetTimer);
 
 // Init
 displayTimer();
