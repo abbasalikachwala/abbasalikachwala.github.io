@@ -112,19 +112,31 @@
         </section>
 
         <!-- KPIs -->
-        <section class="panel glass kpis" style="--delay:110ms">
-          <div class="kpi">
-            <div class="kpi-label">Protein/Chapati</div>
-            <div class="kpi-value" id="proteinPer">—</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Calories/Chapati</div>
-            <div class="kpi-value" id="kcalPer">—</div>
-          </div>
-          <div class="kpi kpi-small">
-            <div class="kpi-sub">Dust: <span id="dustEcho">0</span> g • Oil: <span id="oilEcho">0</span> g</div>
-          </div>
-        </section>
+<section class="panel glass kpis" style="--delay:110ms">
+  <div class="kpi">
+    <div class="kpi-label">Protein / chapati</div>
+    <div class="kpi-value" id="proteinPer">—</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Calories / chapati</div>
+    <div class="kpi-value" id="kcalPer">—</div>
+  </div>
+  <div class="kpi kpi-small">
+    <div class="kpi-sub">Dust: <span id="dustEcho">0</span> g • Oil: <span id="oilEcho">0</span> g</div>
+  </div>
+
+  <!-- NEW: meal totals -->
+  <div class="kpi kpi-meal">
+    <label class="kpi-label" for="mealCount">This meal</label>
+    <div class="meal-row">
+      <input id="mealCount" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 3" />
+      <div class="meal-nums">
+        <span id="mealProtein">—</span> g • <span id="mealKcal">—</span> kcal
+      </div>
+    </div>
+    <small class="muted">Totals for entered chapatis.</small>
+  </div>
+</section>
 
         <!-- Timer (full column width) -->
         <section class="panel glass timer center fill" style="--delay:160ms">
