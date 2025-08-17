@@ -1,139 +1,191 @@
-// --- constants from your proportions (per chapati, derived from 16-piece batch) ---
-const PER_CAP_FLOUR = 190 / 16; // g
-const PER_CAP_YOG   =  90 / 16; // g
-const PER_CAP_MILK  = 120 / 16; // ml
+// ---- Proportions & labels ----
+// Keep the flour:yoghurt:milk ratio from your 16-piece batch
+const R_FLOUR = 190;
+const R_YOG   = 90;
+const R_MILK  = 120;
+const R_SUM   = R_FLOUR + R_YOG + R_MILK; // 400
 
-// protein labels
-const PROTEIN_FLOUR_PER_G = 4 / 30;  // g per gram flour
-const PROTEIN_YOG_PER_G   = 0.10;    // g per gram yoghurt
-const PROTEIN_MILK_PER_ML = 0.038;   // g per ml milk
+// Protein labels (user-provided)
+const P_FLOUR_PER_G = 4 / 30;   // g protein per g flour
+const P_YOG_PER_G   = 0.10;     // g/g
+const P_MILK_PER_ML = 0.038;    // g/ml
 
-// helpers
-const roundUp10  = x => Math.ceil(x / 10) * 10;
-const roundHalf  = x => Math.round(x * 2) / 2;
-const fmtInt     = x => `${Math.round(x)}`;
+// Calories (user-provided packs)
+// Flour: 100 kcal per 30 g => 3.333... kcal/g
+// Yoghurt: 143 kcal per 180 g => 0.7944 kcal/g
+// Trim milk: 164 kJ / 100 ml => 39.2 kcal/100 ml => 0.392 kcal/ml
+// Oil: 9 kcal / g
+const K_FLOUR_PER_G = 100 / 30;
+const K_YOG_PER_G   = 143 / 180;
+const K_MILK_PER_ML = 39.2 / 100;
+const K_OIL_PER_G   = 9;
+
+// Helpers
 const q = sel => document.querySelector(sel);
+const roundUp10 = x => Math.ceil(x / 10) * 10;
+const roundHalf = x => Math.round(x * 2) / 2;
+const fmtInt = x => `${Math.round(x)}`;
 
-// compute plan
-function computePlan(nChapatis, dustGrams, doughPerChapati, roundingMode){
-  // raw totals
-  let flourTotal = PER_CAP_FLOUR * nChapatis;
-  let milkTotal  = PER_CAP_MILK  * nChapatis;
-  let yogTotal   = PER_CAP_YOG   * nChapatis;
+function computePlan({
+  nChapatis,
+  doughPerChapati,      // g
+  dustGrams,            // g, nutrition only
+  oilInDough,           // g, goes in BOWL
+  roundingMode          // 'up10' | 'exact'
+}){
+  // Target dough mass (before salt), enforce this so counts match reality
+  const target = nChapatis * doughPerChapati;
 
+  // Split target by ratio (190:90:120)
+  let flourTotal = target * (R_FLOUR / R_SUM);
+  let yogTotal   = target * (R_YOG   / R_SUM);
+  let milkTotal  = target * (R_MILK  / R_SUM);
+
+  // Rounding policy
   if (roundingMode === 'up10'){
     flourTotal = roundUp10(flourTotal);
-    milkTotal  = roundUp10(milkTotal);
     yogTotal   = roundUp10(yogTotal);
+    milkTotal  = roundUp10(milkTotal);
   } else {
-    // exact: round to 1 g/ml for display sanity
     flourTotal = Math.round(flourTotal);
-    milkTotal  = Math.round(milkTotal);
     yogTotal   = Math.round(yogTotal);
+    milkTotal  = Math.round(milkTotal);
   }
 
-  // tangzhong split
-  let flourTZ = (roundingMode === 'up10')
-    ? roundUp10(flourTotal * 0.05)
-    : Math.round(flourTotal * 0.05); // exact mode
+  // Tangzhong: 5% of total flour to TZ
+  let flourTZ = (roundingMode === 'up10') ? Math.max(10, roundUp10(flourTotal * 0.05))
+                                          : Math.round(flourTotal * 0.05);
   let flourBowl = flourTotal - flourTZ;
 
-  // milk for TZ = 5 × flourTZ (ml)
+  // Milk for TZ = 5 × flourTZ
   let milkTZ = 5 * flourTZ;
-  let milkTotalAdjusted = Math.max(milkTotal, milkTZ); // ensure enough for TZ
-  let milkBowl = milkTotalAdjusted - milkTZ;
-  if (milkBowl < 0) milkBowl = 0; // guard
+  if (milkTotal < milkTZ) milkTotal = milkTZ; // guarantee enough for TZ
+  let milkBowl = milkTotal - milkTZ;
 
-  // salt ≈ 1% of total dough mass, rounded to 0.5 g
+  // Salt ≈ 1% of total dough mass, rounded to 0.5 g
   const salt = roundHalf(0.01 * nChapatis * doughPerChapati);
 
-  // protein (dust only affects protein math)
+  // Oil goes in bowl (for display) and counts in calories
+  const oilBowl = Math.max(0, Math.round(oilInDough));
+
+  // Nutrition (batch)
   const proteinBatch =
-      flourTotal * PROTEIN_FLOUR_PER_G
-    + yogTotal   * PROTEIN_YOG_PER_G
-    + milkTotalAdjusted * PROTEIN_MILK_PER_ML
-    + dustGrams  * PROTEIN_FLOUR_PER_G;
+      flourTotal * P_FLOUR_PER_G
+    + yogTotal   * P_YOG_PER_G
+    + milkTotal  * P_MILK_PER_ML
+    + dustGrams  * P_FLOUR_PER_G;
+
+  const kcalBatch =
+      flourTotal * K_FLOUR_PER_G
+    + yogTotal   * K_YOG_PER_G
+    + milkTotal  * K_MILK_PER_ML
+    + oilBowl    * K_OIL_PER_G
+    + dustGrams  * K_FLOUR_PER_G;
+
   const proteinPer = +(proteinBatch / nChapatis).toFixed(2);
+  const kcalPer    = +(kcalBatch / nChapatis).toFixed(0);
 
   return {
-    flourBowl, flourTZ, milkBowl, milkTZ, yogTotal,
-    flourTotal, milkTotal: milkTotalAdjusted, salt, proteinPer
+    // bowl / tz splits
+    flourBowl, flourTZ,
+    milkBowl,  milkTZ,
+    yogTotal,
+    oilBowl,
+    salt,
+
+    // totals
+    flourTotal, milkTotal, target,
+
+    // KPIs
+    proteinPer, kcalPer
   };
 }
 
-// UI bindings
-function readInputs(){
-  const n = Math.max(1, parseInt(q('#n').value || '1', 10));
-  const dust = Math.max(0, parseInt(q('#dust').value || '0', 10));
-  const dough = Math.max(1, parseInt(q('#dough').value || '35', 10));
-  const mode = q('#rounding').value;
-  return { n, dust, dough, mode };
+// Read inputs
+function read(){
+  const n      = Math.max(1, parseInt(q('#n').value || '1', 10));
+  const dough  = Math.max(20, parseInt(q('#dough').value || '35', 10));
+  const dust   = Math.max(0, parseInt(q('#dust').value  || '0', 10));
+  const oil    = Math.max(0, parseInt(q('#oil').value   || '0', 10));
+  const mode   = q('#rounding').value;
+  return { n, dough, dust, oil, mode };
 }
 
+// Render
 function render(){
-  const { n, dust, dough, mode } = readInputs();
-  const plan = computePlan(n, dust, dough, mode);
+  const { n, dough, dust, oil, mode } = read();
+  const p = computePlan({
+    nChapatis: n,
+    doughPerChapati: dough,
+    dustGrams: dust,
+    oilInDough: oil,
+    roundingMode: mode
+  });
 
-  q('#flourBowl').textContent = fmtInt(plan.flourBowl) + ' g';
-  q('#milkBowl').textContent  = fmtInt(plan.milkBowl)  + ' ml';
-  q('#yogBowl').textContent   = fmtInt(plan.yogTotal)  + ' g';
-  q('#salt').textContent      = (plan.salt % 1 ? plan.salt.toFixed(1) : fmtInt(plan.salt)) + ' g';
+  q('#flourBowl').textContent = fmtInt(p.flourBowl) + ' g';
+  q('#milkBowl').textContent  = fmtInt(p.milkBowl)  + ' ml';
+  q('#yogBowl').textContent   = fmtInt(p.yogTotal)  + ' g';
+  q('#salt').textContent      = (p.salt % 1 ? p.salt.toFixed(1) : fmtInt(p.salt)) + ' g';
+  q('#oilBowl').textContent   = fmtInt(p.oilBowl) + ' g';
 
-  q('#flourTZ').textContent   = fmtInt(plan.flourTZ) + ' g';
-  q('#milkTZ').textContent    = fmtInt(plan.milkTZ)  + ' ml';
+  q('#flourTZ').textContent   = fmtInt(p.flourTZ) + ' g';
+  q('#milkTZ').textContent    = fmtInt(p.milkTZ)  + ' ml';
 
-  q('#flourTotal').textContent = fmtInt(plan.flourTotal) + ' g';
-  q('#milkTotal').textContent  = fmtInt(plan.milkTotal)  + ' ml';
-  q('#yogTotal').textContent   = fmtInt(plan.yogTotal)   + ' g';
+  q('#flourTotal').textContent = fmtInt(p.flourTotal) + ' g';
+  q('#milkTotal').textContent  = fmtInt(p.milkTotal)  + ' ml';
+  q('#yogTotal').textContent   = fmtInt(p.yogTotal)   + ' g';
+  q('#targetDough').textContent= fmtInt(p.target)     + ' g';
 
-  q('#proteinPer').textContent = plan.proteinPer + ' g';
+  q('#proteinPer').textContent = p.proteinPer + ' g';
+  q('#kcalPer').textContent    = p.kcalPer    + ' kcal';
   q('#dustEcho').textContent   = dust;
+  q('#oilEcho').textContent    = oil;
 }
 
-// share via URL
+// URL helpers
 function updateURL(){
-  const { n, dust, dough, mode } = readInputs();
-  const params = new URLSearchParams({ n, dust, dough, mode });
+  const { n, dough, dust, oil, mode } = read();
+  const params = new URLSearchParams({ n, dough, dust, oil, mode });
   history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
 }
-
 function initFromURL(){
   const p = new URLSearchParams(location.search);
-  if (p.has('n'))     q('#n').value = p.get('n');
-  if (p.has('dust'))  q('#dust').value = p.get('dust');
-  if (p.has('dough')) q('#dough').value = p.get('dough');
-  if (p.has('mode'))  q('#rounding').value = p.get('mode');
+  if (p.has('n'))      q('#n').value = p.get('n');
+  if (p.has('dough'))  q('#dough').value = p.get('dough');
+  if (p.has('dust'))   q('#dust').value = p.get('dust');
+  if (p.has('oil'))    q('#oil').value = p.get('oil');
+  if (p.has('mode'))   q('#rounding').value = p.get('mode');
 }
 
-// events
-['n','dust','dough','rounding'].forEach(id=>{
+// Buttons & inputs
+['n','dough','dust','oil','rounding'].forEach(id=>{
   q('#'+id).addEventListener('input', ()=>{ render(); updateURL(); });
 });
+q('#minus').addEventListener('click', ()=>{ q('#n').value = Math.max(1, parseInt(q('#n').value,10)-1); render(); updateURL(); });
+q('#plus').addEventListener('click', ()=>{ q('#n').value = parseInt(q('#n').value,10)+1; render(); updateURL(); });
 
 q('#printBtn').addEventListener('click', ()=> window.print());
 q('#copyBtn').addEventListener('click', ()=>{
-  const { n } = readInputs();
+  const { n } = read();
   const t = [
     `Tangzhong Chapati Plan (x${n})`,
-    `BOWL: Flour ${q('#flourBowl').textContent}, Milk ${q('#milkBowl').textContent}, Yoghurt ${q('#yogBowl').textContent}, Salt ${q('#salt').textContent}`,
+    `BOWL: Flour ${q('#flourBowl').textContent}, Milk ${q('#milkBowl').textContent}, Yoghurt ${q('#yogBowl').textContent}, Salt ${q('#salt').textContent}, Oil ${q('#oilBowl').textContent}`,
     `TZ: Flour ${q('#flourTZ').textContent}, Milk ${q('#milkTZ').textContent}`,
-    `TOTALS: Flour ${q('#flourTotal').textContent}, Milk ${q('#milkTotal').textContent}, Yoghurt ${q('#yogTotal').textContent}`,
-    `Protein per chapati: ${q('#proteinPer').textContent} (includes dust: ${q('#dustEcho').textContent} g)`
+    `TOTALS: Flour ${q('#flourTotal').textContent}, Milk ${q('#milkTotal').textContent}, Yoghurt ${q('#yogTotal').textContent}, Target dough ${q('#targetDough').textContent}`,
+    `Protein / chapati: ${q('#proteinPer').textContent} • Calories / chapati: ${q('#kcalPer').textContent}`
   ].join('\n');
   navigator.clipboard?.writeText(t);
 });
-q('#shareBtn').addEventListener('click', ()=>{
-  updateURL();
-  navigator.clipboard?.writeText(location.href);
-});
+q('#shareBtn').addEventListener('click', ()=>{ updateURL(); navigator.clipboard?.writeText(location.href); });
 q('#resetBtn').addEventListener('click', ()=>{
-  q('#n').value = 10;
-  q('#dust').value = 0;
+  q('#n').value = 20;
   q('#dough').value = 35;
+  q('#dust').value = 0;
+  q('#oil').value = 0;
   q('#rounding').value = 'up10';
   render(); updateURL();
 });
 
-// init
+// Init
 initFromURL();
 render();
