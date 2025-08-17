@@ -1,27 +1,30 @@
-/* Blue glass + Georgia headings + centered titles + mobile re-ordering */
+/* ===========================
+   Chapati Calculator — Styles
+   Performance-first “glass”
+   =========================== */
 
-/* ===== Tokens ===== */
+/* -------- Tokens -------- */
 :root {
 	--sp-1: clamp(6px, 0.6vw, 10px);
 	--sp-2: clamp(10px, 0.9vw, 14px);
 	--sp-3: clamp(14px, 1.2vw, 18px);
 	--sp-4: clamp(18px, 1.6vw, 24px);
 
-	--bg0: #e6f0ff;
+	--bg0: #eaf2ff;
 	--bg1: #f8fbff;
 	--ink: #0b1220;
 	--muted: #5b6b81;
 	--accent: #0a84ff;
 
-	--glass: rgba(255, 255, 255, .55);
-	--glass-b: rgba(255, 255, 255, .30);
-	--line: rgba(0, 0, 0, .06);
-	--shadow: 0 10px 30px rgba(10, 132, 255, .12);
+	/* “Glass” without real blur */
+	--card-bg: linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 255, 255, .90));
+	--card-br: rgba(193, 210, 255, .55);
+	--card-shadow: 0 8px 22px rgba(10, 132, 255, .12);
 
 	--displayFont: Georgia, "Cormorant Garamond", "Times New Roman", serif;
 }
 
-/* ===== Base ===== */
+/* -------- Base -------- */
 * {
 	box-sizing: border-box;
 }
@@ -33,10 +36,7 @@ body {
 }
 
 body {
-	background:
-		radial-gradient(900px 520px at -12% -10%, #d7e7ff 0%, transparent 55%),
-		radial-gradient(850px 480px at 112% -18%, #e9f2ff 0%, transparent 55%),
-		linear-gradient(180deg, var(--bg0), var(--bg1));
+	background: linear-gradient(180deg, var(--bg0), var(--bg1));
 	color: var(--ink);
 	font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, system-ui, sans-serif;
 }
@@ -61,7 +61,7 @@ body {
 	letter-spacing: .2px;
 }
 
-/* ===== Layout ===== */
+/* -------- Layout -------- */
 .layout {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -81,35 +81,24 @@ body {
 	gap: var(--sp-3);
 }
 
-/* ===== Panels (glass) ===== */
+/* -------- Panels (fast “glass”) -------- */
 .glass {
-	background: var(--glass);
-	border: 1px solid var(--glass-b);
-	backdrop-filter: saturate(180%) blur(16px);
-	-webkit-backdrop-filter: saturate(180%) blur(16px);
-	box-shadow: var(--shadow);
+	background: var(--card-bg);
+	border: 1px solid var(--card-br);
+	box-shadow: var(--card-shadow);
 	border-radius: 18px;
+
+	/* perf: limit repaint to card */
+	contain: paint;
+
+	/* gentle fade-in without transform (cheaper) */
 	opacity: 0;
-	transform: translateY(10px);
-	animation: fadeSlideUp .55s cubic-bezier(.2, .6, .2, 1) forwards;
+	animation: fadeIn .35s ease forwards;
 }
 
-.delay-1 {
-	animation-delay: 60ms;
-}
-
-.delay-2 {
-	animation-delay: 120ms;
-}
-
-.delay-3 {
-	animation-delay: 180ms;
-}
-
-@keyframes fadeSlideUp {
+@keyframes fadeIn {
 	to {
 		opacity: 1;
-		transform: translateY(0);
 	}
 }
 
@@ -117,13 +106,13 @@ body {
 	padding: var(--sp-3);
 }
 
-/* ===== Section titles (centered) ===== */
+/* -------- Section titles (centered pill) -------- */
 .section-title {
 	margin: 0 0 var(--sp-2) 0;
+	text-align: center;
 	font-family: var(--displayFont);
 	font-size: 1.06rem;
 	color: #0a4dc0;
-	text-align: center;
 }
 
 .section-title span {
@@ -135,26 +124,7 @@ body {
 	box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 6px 12px rgba(10, 132, 255, .08);
 }
 
-/* ===== Trim extra space ===== */
-.controls {
-	min-height: auto;
-}
-
-.duo {
-	min-height: auto;
-}
-
-.totals,
-.kpis.pretty {
-	min-height: 200px;
-}
-
-.timer.fill,
-.mealcard {
-	min-height: 220px;
-}
-
-/* ===== Controls ===== */
+/* -------- Controls -------- */
 .grid-controls {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(260px, 1fr));
@@ -183,9 +153,9 @@ body {
 .controls input,
 .controls select {
 	padding: 12px 14px;
-	border: 1px solid var(--line);
+	border: 1px solid rgba(0, 0, 0, .06);
 	border-radius: 14px;
-	background: rgba(255, 255, 255, .96);
+	background: rgba(255, 255, 255, .98);
 	font: inherit;
 	min-width: 0;
 	transition: border-color .2s ease, box-shadow .2s ease;
@@ -207,14 +177,14 @@ body {
 
 .seg-btn {
 	appearance: none;
-	border: 1px solid var(--glass-b);
-	background: rgba(255, 255, 255, .9);
+	border: 1px solid rgba(193, 210, 255, .6);
+	background: #ffffff;
 	padding: 8px 12px;
 	border-radius: 999px;
 	color: #0a4dc0;
 	cursor: pointer;
 	box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
-	transition: transform .15s ease, background .2s ease;
+	transition: transform .15s ease, background .2s ease, box-shadow .2s ease;
 }
 
 .seg-btn:hover {
@@ -229,44 +199,7 @@ body {
 	box-shadow: 0 0 0 4px rgba(10, 132, 255, .12);
 }
 
-/* ===== Duo (Stand mixer + TZ) ===== */
-.duo-head {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: var(--sp-2);
-	margin-bottom: var(--sp-1);
-}
-
-.duo-grid {
-	display: grid;
-	grid-template-columns: 1fr 1px 1fr;
-	gap: var(--sp-2);
-	align-items: start;
-}
-
-.split-line {
-	width: 1px;
-	height: 100%;
-	background: linear-gradient(180deg, transparent, rgba(10, 77, 192, .28), transparent);
-	border-radius: 1px;
-}
-
-@media (max-width: 720px) {
-	.duo-head {
-		grid-template-columns: 1fr;
-	}
-
-	.duo-grid {
-		grid-template-columns: 1fr;
-		gap: var(--sp-2);
-	}
-
-	.split-line {
-		display: none;
-	}
-}
-
-/* Key-value list */
+/* -------- Key–value lists -------- */
 .kv {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
@@ -279,7 +212,18 @@ body {
 	font-weight: 700;
 }
 
-/* ===== KPIs (per-chapati & meal) ===== */
+/* -------- Totals / KPIs -------- */
+.totals,
+.kpis.pretty {
+	min-height: 200px;
+}
+
+.timer.fill,
+.mealcard {
+	min-height: 220px;
+}
+
+/* KPI pill grid shared */
 .kpis.pretty .stats,
 .mealcard .stats {
 	display: grid;
@@ -294,10 +238,10 @@ body {
 	justify-content: center;
 	align-items: center;
 	padding: 16px;
-	background: linear-gradient(180deg, rgba(234, 243, 255, .9), rgba(255, 255, 255, .85));
+	background: linear-gradient(180deg, rgba(234, 243, 255, .95), rgba(255, 255, 255, .90));
 	border: 1px solid #cfe3ff;
 	border-radius: 14px;
-	box-shadow: inset 0 6px 18px rgba(10, 132, 255, .10);
+	box-shadow: inset 0 6px 16px rgba(10, 132, 255, .08);
 }
 
 .stat-label {
@@ -319,7 +263,82 @@ body {
 	border-radius: 1px;
 }
 
-/* ===== Meal row (centered selector) ===== */
+/* -------- Timer & Buttons -------- */
+.timer {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-2);
+}
+
+.timer.center {
+	align-items: center;
+	text-align: center;
+}
+
+.timer .row {
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+	flex-wrap: wrap;
+	width: 100%;
+}
+
+.timer-face {
+	font-size: clamp(1.4rem, 4vw, 2.2rem);
+	font-weight: 800;
+	background: #fff;
+	border: 1px solid rgba(0, 0, 0, .06);
+	border-radius: 14px;
+	padding: 10px 16px;
+	width: 100%;
+	text-align: center;
+}
+
+.btn {
+	background: var(--accent);
+	color: #fff;
+	border: none;
+	border-radius: 12px;
+	padding: 10px 14px;
+	cursor: pointer;
+	box-shadow: 0 4px 12px rgba(10, 132, 255, .18);
+	transition: transform .15s ease, box-shadow .2s ease;
+}
+
+.btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 6px 16px rgba(10, 132, 255, .22);
+}
+
+.btn.ghost {
+	background: transparent;
+	color: #0a66d6;
+	border: 1px solid #bcd7ff;
+}
+
+/* -------- Duo (Stand mixer + Tangzhong) -------- */
+.duo-head {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--sp-2);
+	margin-bottom: var(--sp-1);
+}
+
+.duo-grid {
+	display: grid;
+	grid-template-columns: 1fr 1px 1fr;
+	gap: var(--sp-2);
+	align-items: start;
+}
+
+.split-line {
+	width: 1px;
+	height: 100%;
+	background: linear-gradient(180deg, transparent, rgba(10, 77, 192, .28), transparent);
+	border-radius: 1px;
+}
+
+/* -------- Meal selector (centered) -------- */
 .meal-row {
 	display: inline-grid;
 	grid-template-columns: auto 90px auto;
@@ -347,88 +366,13 @@ body {
 	width: 90px;
 	text-align: center;
 	padding: 8px 10px;
-	border: 1px solid var(--line);
+	border: 1px solid rgba(0, 0, 0, .06);
 	border-radius: 10px;
-	background: rgba(255, 255, 255, .96);
+	background: #fff;
 	font: inherit;
 }
 
-/* ===== Totals ===== */
-.totals h2 {
-	margin-bottom: var(--sp-2);
-}
-
-/* ===== Timer & Buttons ===== */
-.timer {
-	display: flex;
-	flex-direction: column;
-	gap: var(--sp-2);
-}
-
-.timer.center {
-	align-items: center;
-	text-align: center;
-}
-
-.timer.fill {
-	width: 100%;
-}
-
-.timer .row {
-	display: flex;
-	gap: 10px;
-	justify-content: center;
-	flex-wrap: wrap;
-	width: 100%;
-}
-
-.timer-face {
-	font-size: clamp(1.4rem, 4vw, 2.2rem);
-	font-weight: 800;
-	background: rgba(255, 255, 255, .96);
-	border: 1px solid var(--glass-b);
-	border-radius: 14px;
-	padding: 10px 16px;
-	width: 100%;
-	text-align: center;
-	animation: popIn .5s ease both;
-}
-
-@keyframes popIn {
-	from {
-		transform: scale(.98);
-		opacity: 0
-	}
-
-	to {
-		transform: scale(1);
-		opacity: 1
-	}
-}
-
-.btn {
-	background: var(--accent);
-	color: #fff;
-	border: none;
-	border-radius: 12px;
-	padding: 10px 14px;
-	cursor: pointer;
-	box-shadow: 0 4px 12px rgba(10, 132, 255, .18);
-	transition: transform .15s ease, box-shadow .2s ease;
-}
-
-.btn:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 6px 16px rgba(10, 132, 255, .22)
-}
-
-.btn.ghost {
-	background: transparent;
-	color: #0a66d6;
-	border: 1px solid #bcd7ff
-}
-
-/* ===== MOBILE: reorder so Duo appears right after Inputs ===== */
+/* -------- MOBILE re-ordering (put Duo under Inputs) -------- */
 @media (max-width: 900px) {
 	.layout {
 		display: grid;
@@ -436,7 +380,6 @@ body {
 		grid-template-areas:
 			"inputs"
 			"duo"
-			/* Stand mixer + Tangzhong immediately under Inputs */
 			"totals"
 			"kpis"
 			"meal"
@@ -475,28 +418,59 @@ body {
 	}
 }
 
-/* ===== MOBILE polish for Duo (stack + sub-cards) ===== */
+/* -------- MOBILE polish for Duo (stack + titles on each sub-card) -------- */
 @media (max-width: 720px) {
+
+	/* Hide the two floating titles row */
+	.duo-head {
+		display: none;
+	}
+
+	/* Stack the two sides */
 	#panel-duo .duo-grid {
 		grid-template-columns: 1fr;
 		gap: var(--sp-2);
 	}
 
+	.split-line {
+		display: none;
+	}
+
+	/* Give each side its own “sub-card” with its own title pill */
 	#panel-duo .kv {
-		background: rgba(255, 255, 255, 0.9);
+		background: #fff;
 		border: 1px solid #e2ecff;
 		border-radius: 14px;
 		padding: 12px 14px;
-		box-shadow: inset 0 4px 14px rgba(10, 132, 255, 0.06);
+		box-shadow: inset 0 4px 14px rgba(10, 132, 255, .06);
 		row-gap: 0.45rem;
+		position: relative;
 	}
 
-	#panel-duo .kv+.kv {
-		margin-top: 6px;
+	/* Title pills placed ABOVE each sub-card */
+	#panel-duo .kv:first-child::before,
+	#panel-duo .kv:last-child::before {
+		content: attr(data-title);
+		position: absolute;
+		top: -28px;
+		left: 50%;
+		transform: translateX(-50%);
+		font-family: var(--displayFont);
+		font-weight: 700;
+		color: #0a4dc0;
+		padding: 6px 12px;
+		border-radius: 999px;
+		background: linear-gradient(180deg, #eaf3ff, #ffffff);
+		border: 1px solid #cfe3ff;
+		box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 6px 12px rgba(10, 132, 255, .08);
+		white-space: nowrap;
 	}
+
+	/* Attach readable titles to each side without changing HTML:
+     we use data attributes set from JS at startup (see note). */
 }
 
-/* Utilities */
+/* -------- Utilities -------- */
 .muted {
 	color: var(--muted);
 }
@@ -524,13 +498,9 @@ body {
 	}
 }
 
-/* Reduced motion */
+/* Reduced motion / transparency */
 @media (prefers-reduced-motion: reduce) {
-
-	.glass,
-	.timer-face,
-	.btn {
+	.glass {
 		animation: none;
-		transition: none;
 	}
 }
