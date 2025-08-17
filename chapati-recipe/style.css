@@ -1,6 +1,6 @@
 /* ===========================
    Chapati Calculator — Styles
-   Performance-first “glass”
+   Fast "glass" + mobile polish
    =========================== */
 
 /* -------- Tokens -------- */
@@ -16,7 +16,7 @@
 	--muted: #5b6b81;
 	--accent: #0a84ff;
 
-	/* “Glass” without real blur */
+	/* “Glass” without heavy blur */
 	--card-bg: linear-gradient(180deg, rgba(255, 255, 255, .96), rgba(255, 255, 255, .90));
 	--card-br: rgba(193, 210, 255, .55);
 	--card-shadow: 0 8px 22px rgba(10, 132, 255, .12);
@@ -88,10 +88,10 @@ body {
 	box-shadow: var(--card-shadow);
 	border-radius: 18px;
 
-	/* perf: limit repaint to card */
+	/* perf */
 	contain: paint;
 
-	/* gentle fade-in without transform (cheaper) */
+	/* gentle fade-in */
 	opacity: 0;
 	animation: fadeIn .35s ease forwards;
 }
@@ -104,6 +104,12 @@ body {
 
 .panel {
 	padding: var(--sp-3);
+}
+
+/* big perf win on long pages (Edge/Chrome) */
+.panel {
+	content-visibility: auto;
+	contain-intrinsic-size: 320px;
 }
 
 /* -------- Section titles (centered pill) -------- */
@@ -223,7 +229,6 @@ body {
 	min-height: 220px;
 }
 
-/* KPI pill grid shared */
 .kpis.pretty .stats,
 .mealcard .stats {
 	display: grid;
@@ -316,7 +321,7 @@ body {
 	border: 1px solid #bcd7ff;
 }
 
-/* -------- Duo (Stand mixer + Tangzhong) -------- */
+/* -------- Duo (Stand mixer + Tangzhong) desktop -------- */
 .duo-head {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
@@ -372,7 +377,7 @@ body {
 	font: inherit;
 }
 
-/* -------- MOBILE re-ordering (put Duo under Inputs) -------- */
+/* ===== MOBILE: reorder so Duo appears right after Inputs ===== */
 @media (max-width: 900px) {
 	.layout {
 		display: grid;
@@ -418,41 +423,41 @@ body {
 	}
 }
 
-/* -------- MOBILE polish for Duo (stack + titles on each sub-card) -------- */
-@media (max-width: 720px) {
-
-	/* Hide the two floating titles row */
+/* ===== MOBILE Duo fix: stack + per-card titles INSIDE the sub-cards ===== */
+@media (max-width: 900px) {
 	.duo-head {
-		display: none;
+		display: none !important;
 	}
 
-	/* Stack the two sides */
+	/* hide floating titles */
+	.split-line {
+		display: none !important;
+	}
+
 	#panel-duo .duo-grid {
-		grid-template-columns: 1fr;
+		grid-template-columns: 1fr !important;
 		gap: var(--sp-2);
 	}
 
-	.split-line {
-		display: none;
-	}
-
-	/* Give each side its own “sub-card” with its own title pill */
 	#panel-duo .kv {
+		position: relative;
 		background: #fff;
 		border: 1px solid #e2ecff;
 		border-radius: 14px;
-		padding: 12px 14px;
+		padding: 56px 14px 14px;
+		/* room for pill */
 		box-shadow: inset 0 4px 14px rgba(10, 132, 255, .06);
 		row-gap: 0.45rem;
-		position: relative;
 	}
 
-	/* Title pills placed ABOVE each sub-card */
-	#panel-duo .kv:first-child::before,
-	#panel-duo .kv:last-child::before {
+	#panel-duo .kv+.kv {
+		margin-top: 12px;
+	}
+
+	#panel-duo .kv::before {
 		content: attr(data-title);
 		position: absolute;
-		top: -28px;
+		top: 12px;
 		left: 50%;
 		transform: translateX(-50%);
 		font-family: var(--displayFont);
@@ -464,10 +469,8 @@ body {
 		border: 1px solid #cfe3ff;
 		box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 6px 12px rgba(10, 132, 255, .08);
 		white-space: nowrap;
+		pointer-events: none;
 	}
-
-	/* Attach readable titles to each side without changing HTML:
-     we use data attributes set from JS at startup (see note). */
 }
 
 /* -------- Utilities -------- */
@@ -498,7 +501,7 @@ body {
 	}
 }
 
-/* Reduced motion / transparency */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
 	.glass {
 		animation: none;
