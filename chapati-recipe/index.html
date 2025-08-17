@@ -11,12 +11,11 @@
   <main class="wrap">
     <header class="hero glass">
       <h1>Chapati Recipe Calculator</h1>
-      <p>Exact pieces every time. Ratio 190:90:120 (flour:yoghurt:milk). 5% flour → TZ, milk for TZ = 5× TZ flour.</p>
     </header>
 
     <!-- Controls -->
     <section class="panel glass controls">
-      <div class="grid g-6">
+      <div class="grid-controls">
         <div class="field">
           <label>How many chapatis?</label>
           <div class="seg">
@@ -40,7 +39,7 @@
         </div>
 
         <div class="field">
-          <label>Yoghurt</label>
+          <label>Yoghurt:</label>
           <select id="yogBrand">
             <option value="yoplait" selected>Yoplait Max Protein Plain</option>
             <option value="gopala">Gopala Full Cream</option>
@@ -48,7 +47,7 @@
         </div>
 
         <div class="field">
-          <label>Trim Milk</label>
+          <label>Trim Milk:</label>
           <select id="milkBrand">
             <option value="value" selected>Value Trim Milk</option>
             <option value="dairydale">Dairy Dale Trim Milk</option>
@@ -69,7 +68,29 @@
       </div>
     </section>
 
-    <!-- Totals (moved above nutrition) -->
+    <!-- Bowl + Tangzhong (now ABOVE Totals) -->
+    <section class="grid-two">
+      <article class="panel glass">
+        <h2>Stand Mixer:</h2>
+        <div class="kv">
+          <div>Flour</div><div id="flourBowl" class="num">—</div>
+          <div>Salt</div><div   id="salt"      class="num">—</div>
+          <div>Milk</div><div  id="milkBowl"  class="num">—</div>
+          <div>Yoghurt</div><div id="yogBowl"  class="num">—</div>
+          <div>Oil</div><div    id="oilBowl"   class="num">—</div>
+        </div>
+      </article>
+
+      <article class="panel glass">
+        <h2>Tangzhong:</h2>
+        <div class="kv">
+          <div>Flour</div><div id="flourTZ" class="num">—</div>
+          <div>Milk</div><div  id="milkTZ"  class="num">—</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Totals (moved below Bowl/TZ) -->
     <section class="panel glass totals">
       <h2>Totals</h2>
       <div class="kv">
@@ -83,38 +104,16 @@
     <!-- KPIs -->
     <section class="kpis glass">
       <div class="kpi">
-        <div class="kpi-label">Protein / chapati</div>
+        <div class="kpi-label">Protein/Chapati</div>
         <div class="kpi-value" id="proteinPer">—</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">Calories / chapati</div>
+        <div class="kpi-label">Calories/Chapati</div>
         <div class="kpi-value" id="kcalPer">—</div>
       </div>
       <div class="kpi kpi-small">
-        <div class="kpi-sub">Dust: <span id="dustEcho">0</span> g • Oil in dough: <span id="oilEcho">0</span> g</div>
+        <div class="kpi-sub">Dust: <span id="dustEcho">0</span> g • Oil: <span id="oilEcho">0</span> g</div>
       </div>
-    </section>
-
-    <!-- Bowl + Tangzhong -->
-    <section class="grid g-2">
-      <article class="panel glass">
-        <h2>Stand mixer bowl</h2>
-        <div class="kv">
-          <div>Flour</div><div id="flourBowl" class="num">—</div>
-          <div>Milk</div><div  id="milkBowl"  class="num">—</div>
-          <div>Yoghurt</div><div id="yogBowl"  class="num">—</div>
-          <div>Salt</div><div   id="salt"      class="num">—</div>
-          <div>Oil</div><div    id="oilBowl"   class="num">—</div>
-        </div>
-      </article>
-
-      <article class="panel glass">
-        <h2>Tangzhong (mug)</h2>
-        <div class="kv">
-          <div>Flour</div><div id="flourTZ" class="num">—</div>
-          <div>Milk</div><div  id="milkTZ"  class="num">—</div>
-        </div>
-      </article>
     </section>
 
     <!-- Centered timer -->
@@ -127,12 +126,7 @@
         <button id="resetTimer" class="btn ghost">Reset</button>
       </div>
     </section>
-
-    <footer class="foot muted">
-      Choose yoghurt & milk above to compute protein & kcal. Dairy Dale uses typical NZ trim values until you confirm label data.
-    </footer>
   </main>
-
   <script src="script.js"></script>
 </body>
 </html>
