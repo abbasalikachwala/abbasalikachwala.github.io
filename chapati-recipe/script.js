@@ -12,7 +12,7 @@ const BRANDS = {
   }
 };
 
-// Flour label values and oil kcal
+// Flour & oil labels
 const P_FLOUR_PER_G = 4/30;   // g protein per g flour
 const K_FLOUR_PER_G = 100/30; // kcal per g flour
 const K_OIL_PER_G   = 9;      // kcal per g oil
@@ -184,7 +184,7 @@ document.querySelectorAll('.doughPreset').forEach(btn=>{
   });
 });
 
-// timer buttons
+// Timer buttons
 $('#startTimer').addEventListener('click', startTimer);
 $('#pauseTimer').addEventListener('click', pauseTimer);
 $('#resetTimer').addEventListener('click', resetTimer);
