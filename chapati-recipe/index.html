@@ -5,7 +5,7 @@
   <title>Chapati Recipe Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light" />
-  <!-- Pretty headings fallback if Georgia missing -->
+  <!-- Optional fallback font if Georgia not available -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
@@ -17,10 +17,10 @@
     </header>
 
     <section class="layout">
-      <!-- LEFT COLUMN: Controls + Totals -->
+      <!-- LEFT COLUMN: Controls + Totals + Timer -->
       <div class="col">
         <!-- Controls -->
-        <section class="panel glass controls" style="--delay:60ms">
+        <section class="panel glass controls delay-1">
           <div class="grid-controls">
             <div class="field">
               <label>How many chapatis?</label>
@@ -30,11 +30,11 @@
                 <button id="preset16" type="button" class="seg-btn">16</button>
                 <button id="preset20" type="button" class="seg-btn">20</button>
               </div>
-              <input id="n" type="number" min="1" step="1" placeholder="1 - ∞" />
+              <input id="n" type="number" min="1" step="1" placeholder="e.g. 16" />
             </div>
 
             <div class="field">
-              <label>Dough per chapati (g):</label>
+              <label>Dough per chapati (g)</label>
               <div class="seg">
                 <button data-dough="25" type="button" class="seg-btn doughPreset">25</button>
                 <button data-dough="30" type="button" class="seg-btn doughPreset">30</button>
@@ -45,7 +45,7 @@
             </div>
 
             <div class="field">
-              <label>Yoghurt:</label>
+              <label>Yoghurt</label>
               <select id="yogBrand">
                 <option value="yoplait" selected>Yoplait Max Protein Plain</option>
                 <option value="gopala">Gopala Full Cream</option>
@@ -53,7 +53,7 @@
             </div>
 
             <div class="field">
-              <label>Trim Milk:</label>
+              <label>Trim Milk</label>
               <select id="milkBrand">
                 <option value="value" selected>Value Trim Milk</option>
                 <option value="dairydale">Dairy Dale Trim Milk</option>
@@ -62,21 +62,21 @@
             </div>
 
             <div class="field">
-              <label>Dusting flour used (g):</label>
+              <label>Dusting flour used (g)</label>
               <input id="dust" type="number" min="0" step="1" placeholder="e.g. 20" />
             </div>
 
             <div class="field">
-              <label>Oil in dough (g):</label>
+              <label>Oil in dough (g)</label>
               <input id="oil" type="number" min="0" step="1" placeholder="auto" />
               <small>Auto ≈ 5 g per 15 chapatis.</small>
             </div>
           </div>
         </section>
 
-        <!-- Totals (with hydration) -->
-        <section class="panel glass totals" style="--delay:110ms">
-          <h2>Totals:</h2>
+        <!-- Totals -->
+        <section class="panel glass totals delay-2">
+          <h2>Totals</h2>
           <div class="kv">
             <div>Flour</div><div id="flourTotal" class="num">—</div>
             <div>Milk</div><div  id="milkTotal"  class="num">—</div>
@@ -85,12 +85,23 @@
           </div>
           <div class="totals-foot muted">Approx. hydration: <span id="hydration">—</span></div>
         </section>
+
+        <!-- Timer -->
+        <section class="panel glass timer center fill delay-3">
+          <h2>Timer</h2>
+          <div class="timer-face" id="timer">08:30</div>
+          <div class="row">
+            <button id="startTimer" class="btn">Start</button>
+            <button id="pauseTimer" class="btn ghost">Pause</button>
+            <button id="resetTimer" class="btn ghost">Reset</button>
+          </div>
+        </section>
       </div>
 
-      <!-- RIGHT COLUMN: Stand Mixer + TZ, KPIs, Timer -->
+      <!-- RIGHT COLUMN: Stand Mixer + TZ + KPIs -->
       <div class="col">
-        <!-- Stand Mixer + Tangzhong with clear divider -->
-        <section class="panel glass duo" style="--delay:60ms">
+        <!-- Stand Mixer + Tangzhong -->
+        <section class="panel glass duo delay-1">
           <div class="duo-head">
             <h2>Stand mixer</h2>
             <h2>Tangzhong</h2>
@@ -111,41 +122,31 @@
           </div>
         </section>
 
-        <!-- KPIs -->
-<section class="panel glass kpis" style="--delay:110ms">
-  <div class="kpi">
-    <div class="kpi-label">Protein / chapati</div>
-    <div class="kpi-value" id="proteinPer">—</div>
-  </div>
-  <div class="kpi">
-    <div class="kpi-label">Calories / chapati</div>
-    <div class="kpi-value" id="kcalPer">—</div>
-  </div>
-  <div class="kpi kpi-small">
-    <div class="kpi-sub">Dust: <span id="dustEcho">0</span> g • Oil: <span id="oilEcho">0</span> g</div>
-  </div>
+        <!-- KPIs (pretty) -->
+        <section class="panel glass kpis pretty delay-2">
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">Protein / chapati</div>
+              <div class="stat-value" id="proteinPer">—</div>
+            </div>
+            <div class="vsep" aria-hidden="true"></div>
+            <div class="stat">
+              <div class="stat-label">Calories / chapati</div>
+              <div class="stat-value" id="kcalPer">—</div>
+            </div>
+          </div>
 
-  <!-- NEW: meal totals -->
-  <div class="kpi kpi-meal">
-    <label class="kpi-label" for="mealCount">This meal</label>
-    <div class="meal-row">
-      <input id="mealCount" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 3" />
-      <div class="meal-nums">
-        <span id="mealProtein">—</span> g • <span id="mealKcal">—</span> kcal
-      </div>
-    </div>
-    <small class="muted">Totals for entered chapatis.</small>
-  </div>
-</section>
-
-        <!-- Timer (full column width) -->
-        <section class="panel glass timer center fill" style="--delay:160ms">
-          <h2>Timer</h2>
-          <div class="timer-face" id="timer">08:30</div>
-          <div class="row">
-            <button id="startTimer" class="btn">Start</button>
-            <button id="pauseTimer" class="btn ghost">Pause</button>
-            <button id="resetTimer" class="btn ghost">Reset</button>
+          <div class="meal">
+            <label for="mealCount" class="meal-label">This meal</label>
+            <div class="meal-row">
+              <button id="mealMinus" type="button" class="step" aria-label="Minus one">–</button>
+              <input id="mealCount" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 3" />
+              <button id="mealPlus" type="button" class="step" aria-label="Plus one">+</button>
+              <div class="meal-nums">
+                <span id="mealProtein">—</span> g • <span id="mealKcal">—</span> kcal
+              </div>
+            </div>
+            <div class="kpi-foot muted">Dust: <span id="dustEcho">0</span> g • Oil: <span id="oilEcho">0</span> g</div>
           </div>
         </section>
       </div>
