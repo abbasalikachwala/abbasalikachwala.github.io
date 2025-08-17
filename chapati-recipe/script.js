@@ -125,13 +125,6 @@ function clearOutputs() {
     if (el) el.textContent = "—";
   });
 
-  const dustEcho = document.getElementById("dustEcho");
-  const oilEcho  = document.getElementById("oilEcho");
-  const dustIn   = document.getElementById("dust");
-  const oilIn    = document.getElementById("oil");
-  if (dustEcho) dustEcho.textContent = dustIn ? (dustIn.value || 0) : 0;
-  if (oilEcho)  oilEcho.textContent  = oilIn  ? (oilIn.value  || 0) : 0;
-
   const milkNote = document.getElementById("milkNote");
   if (milkNote) milkNote.textContent = "";
 }
@@ -172,18 +165,7 @@ function render() {
   set("kcalPer",    p.kcalPer    + " kcal");
   set("hydration",  p.hydration  + "%");
 
-  const dustEcho = document.getElementById("dustEcho");
-  if (dustEcho) dustEcho.textContent = (document.getElementById("dust")?.value) || 0;
-
-  const oilEcho  = document.getElementById("oilEcho");
-  if (oilEcho)  oilEcho.textContent  = fmtInt(p.oilBowl);
-
-  if (!userTouchedOil && Number.isFinite(n) && Number.isFinite(dough)) {
-    const oilEl = document.getElementById("oil");
-    if (oilEl) oilEl.value = p.oilBowl;
-  }
-
-  // Meal totals
+  // Meal totals (styled as stat pills)
   const mealEl = document.getElementById("mealCount");
   const mealN  = mealEl ? parseInt(mealEl.value, 10) : 0;
   const mealProtein = (mealN && mealN > 0) ? +(p.proteinPer * mealN).toFixed(1) : null;
@@ -209,42 +191,46 @@ function displayTimer() {
 function startTimer() {
   if (tHandle) return;
   tHandle = setInterval(() => {
-    if (remaining > 0) {
-      remaining--;
-      displayTimer();
-    } else {
-      clearInterval(tHandle);
-      tHandle = null;
-    }
+    if (remaining > 0) { remaining--; displayTimer(); }
+    else { clearInterval(tHandle); tHandle = null; }
   }, 1000);
 }
 
-function pauseTimer() {
-  if (tHandle) {
-    clearInterval(tHandle);
-    tHandle = null;
-  }
-}
-
-function resetTimer() {
-  pauseTimer();
-  remaining = 8 * 60 + 30;
-  displayTimer();
-}
+function pauseTimer() { if (tHandle) { clearInterval(tHandle); tHandle = null; } }
+function resetTimer() { pauseTimer(); remaining = 8 * 60 + 30; displayTimer(); }
 
 // ---------- Events ----------
-["n", "dough", "dust", "yogBrand", "milkBrand"].forEach(id => {
+["n","dough","dust","yogBrand","milkBrand"].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener("input", render);
 });
-
 const oilEl = document.getElementById("oil");
 if (oilEl) oilEl.addEventListener("input", () => { userTouchedOil = true; render(); });
 
+// Meal input + robust stepper (event delegation)
 const mealBox = document.getElementById("mealCount");
 if (mealBox) mealBox.addEventListener("input", render);
+const mealRow = document.querySelector(".meal-row");
+function stepMeal(delta){
+  if (!mealBox) return;
+  let v = parseInt(mealBox.value, 10);
+  if (!Number.isFinite(v)) v = 0;
+  v += delta;
+  if (v < 1) v = 1;
+  mealBox.value = v;
+  render();
+}
+if (mealRow) {
+  mealRow.addEventListener("click", (e) => {
+    const btn = e.target.closest(".step");
+    if (!btn) return;
+    if (btn.id === "mealMinus") stepMeal(-1);
+    if (btn.id === "mealPlus")  stepMeal(+1);
+  });
+}
 
-[["preset8", 8], ["preset14", 14], ["preset16", 16], ["preset20", 20]].forEach(([id, val]) => {
+// Piece presets
+[["preset8",8],["preset14",14],["preset16",16],["preset20",20]].forEach(([id,val]) => {
   const btn = document.getElementById(id);
   if (btn) btn.addEventListener("click", () => {
     const nEl = document.getElementById("n");
@@ -255,6 +241,7 @@ if (mealBox) mealBox.addEventListener("input", render);
   });
 });
 
+// Dough presets
 document.querySelectorAll(".doughPreset").forEach(btn => {
   btn.addEventListener("click", () => {
     const grams = parseInt(btn.dataset.dough, 10);
@@ -266,23 +253,7 @@ document.querySelectorAll(".doughPreset").forEach(btn => {
   });
 });
 
-const mealMinus = document.getElementById("mealMinus");
-const mealPlus  = document.getElementById("mealPlus");
-if (mealMinus && mealBox) {
-  mealMinus.addEventListener("click", () => {
-    const v = parseInt(mealBox.value || "0", 10);
-    if (v > 1) mealBox.value = v - 1;
-    render();
-  });
-}
-if (mealPlus && mealBox) {
-  mealPlus.addEventListener("click", () => {
-    const v = parseInt(mealBox.value || "0", 10);
-    mealBox.value = (Number.isFinite(v) ? v : 0) + 1;
-    render();
-  });
-}
-
+// Timer buttons
 const startBtn = document.getElementById("startTimer");
 const pauseBtn = document.getElementById("pauseTimer");
 const resetBtn = document.getElementById("resetTimer");
