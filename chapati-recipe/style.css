@@ -1,4 +1,4 @@
-/* Apple-ish, blue glass, two-column layout, tight spacing + animations */
+/* Blue glass + Georgia headings + tight layout */
 :root{
   --sp-1: clamp(6px, 0.6vw, 10px);
   --sp-2: clamp(10px, 0.9vw, 14px);
@@ -13,6 +13,8 @@
   --glass-b: rgba(255,255,255,.30);
   --line: rgba(0,0,0,.06);
   --shadow: 0 10px 30px rgba(10,132,255,.12);
+
+  --displayFont: Georgia, "Cormorant Garamond", "Times New Roman", serif;
 }
 
 *{box-sizing:border-box}
@@ -28,21 +30,24 @@ body{
 
 .wrap{width:100%;max-width:1200px;margin:0 auto;padding:var(--sp-3)}
 .hero{margin-bottom:var(--sp-2)}
-.hero h1{margin:0 0 var(--sp-1) 0;font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:.2px}
-.hero p{margin:0;color:var(--muted)}
+.hero h1{
+  margin:0 0 var(--sp-1) 0;
+  font-family: var(--displayFont);
+  font-weight: 700;
+  font-size: clamp(1.7rem,3.2vw,2.3rem);
+  letter-spacing:.2px
+}
 
-/* Two-column layout that collapses gracefully */
+/* Two columns */
 .layout{
   display:grid;
   grid-template-columns: repeat(2, minmax(0,1fr));
   gap:var(--sp-3);
 }
-@media (max-width:900px){
-  .layout{ grid-template-columns:1fr }
-}
-
+@media (max-width:900px){ .layout{ grid-template-columns:1fr } }
 .col{display:flex;flex-direction:column;gap:var(--sp-3)}
 
+/* Glass panels */
 .glass{
   background:var(--glass);
   border:1px solid var(--glass-b);
@@ -51,15 +56,11 @@ body{
   box-shadow:var(--shadow);
   border-radius:18px;
 
-  /* Entrance animation */
   opacity:0; transform: translateY(10px);
-  animation: fadeSlideUp .6s cubic-bezier(.2,.6,.2,1) forwards;
+  animation: fadeSlideUp .55s cubic-bezier(.2,.6,.2,1) forwards;
   animation-delay: var(--delay, 0ms);
 }
-
-@keyframes fadeSlideUp{
-  to { opacity:1; transform:translateY(0) }
-}
+@keyframes fadeSlideUp{ to{opacity:1;transform:translateY(0)} }
 
 .panel{padding:var(--sp-3)}
 
@@ -69,16 +70,14 @@ body{
   grid-template-columns: repeat(2, minmax(260px, 1fr));
   gap:var(--sp-2);
 }
-@media (max-width:1100px){
-  .grid-controls{ grid-template-columns:1fr 1fr }
-}
-@media (max-width:720px){
-  .grid-controls{ grid-template-columns:1fr }
-}
+@media (max-width:1100px){ .grid-controls{ grid-template-columns:1fr 1fr } }
+@media (max-width:720px){  .grid-controls{ grid-template-columns:1fr } }
+
 .controls .field{display:flex;flex-direction:column;gap:var(--sp-1); min-width:0}
 .controls input,.controls select{
   padding:12px 14px;border:1px solid var(--line);
-  border-radius:14px;background:rgba(255,255,255,.95);font:inherit;min-width:0;
+  border-radius:14px;background:rgba(255,255,255,.96);
+  font:inherit;min-width:0;
   transition:border-color .2s ease, box-shadow .2s ease;
 }
 .controls input:focus,.controls select:focus{
@@ -96,34 +95,50 @@ body{
 .seg-btn:hover{ transform: translateY(-1px) }
 .seg-btn.active{background:linear-gradient(180deg,#e7f0ff,#dfeaff);border-color:#cfe3ff;color:#003a94;font-weight:700}
 
-/* Dual card (Bowl + TZ) */
-.duo-head{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-bottom:var(--sp-1)}
-.duo-head h2{margin:0;font-size:1.05rem;color:#0a4dc0}
-.duo-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
-@media (max-width:720px){ .duo-head,.duo-grid{grid-template-columns:1fr} }
-
-.kv{
-  display:grid; grid-template-columns: minmax(0,1fr) auto;
-  gap:.6rem .9rem; align-items:center;
+/* Duo card */
+.duo-head{
+  display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-bottom:var(--sp-1)
 }
+.duo-head h2{
+  margin:0;font-size:1.06rem;color:#0a4dc0;font-family:var(--displayFont)
+}
+.duo-grid{
+  display:grid;grid-template-columns:1fr 1px 1fr;gap:var(--sp-2);align-items:start
+}
+.split-line{
+  width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(10,77,192,.28),transparent);
+  border-radius:1px
+}
+@media (max-width:720px){
+  .duo-head{grid-template-columns:1fr}
+  .duo-grid{grid-template-columns:1fr;gap:var(--sp-3)}
+  .split-line{display:none}
+}
+
+.kv{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.6rem .9rem}
 .kv > div{min-width:0}
 .num{font-variant-numeric:tabular-nums;font-weight:700}
 
 /* Totals */
-.totals h2{margin:.1rem 0 var(--sp-2);font-size:1.05rem;color:#0a4dc0}
+.totals h2{
+  margin:.1rem 0 var(--sp-2);
+  font-size:1.06rem;color:#0a4dc0;font-family:var(--displayFont)
+}
 .totals-foot{margin-top:var(--sp-1);font-size:.95rem}
 
 /* KPIs */
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2)}
 @media (max-width:1100px){ .kpis{grid-template-columns:1fr 1fr 1fr} }
-@media (max-width:720px){ .kpis{grid-template-columns:1fr} }
+@media (max-width:720px){  .kpis{grid-template-columns:1fr} }
 .kpi{display:flex;flex-direction:column;align-items:center;justify-content:center}
 .kpi-label{font-size:.98rem;color:var(--muted);margin-bottom:6px}
-.kpi-value{font-size:clamp(1.6rem,4vw,2.6rem);font-weight:800;letter-spacing:.2px;color:#0f172a}
+.kpi-value{
+  font-size:clamp(1.6rem,4vw,2.6rem);font-weight:800;letter-spacing:.2px;color:#0f172a
+}
 
 /* Buttons & timer */
 .btn{
-  background:var(--accent);color:#fff;border:none;border-radius:12px;
+  background:#0a84ff;color:#fff;border:none;border-radius:12px;
   padding:10px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(10,132,255,.18);
   transition:transform .15s ease, box-shadow .2s ease;
 }
@@ -131,23 +146,20 @@ body{
 .btn.ghost{background:transparent;color:#0a66d6;border:1px solid #bcd7ff}
 
 .timer{display:flex;flex-direction:column;gap:var(--sp-2)}
-.timer.center{align-items:center;text-align:center;margin-inline:auto;max-width:520px}
-.timer .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.timer.center{align-items:center;text-align:center}
+.timer.fill{width:100%}            /* full column width */
+.timer .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;width:100%}
 .timer-face{
   font-size:clamp(1.4rem,4vw,2.2rem);font-weight:800;background:rgba(255,255,255,.96);
-  border:1px solid var(--glass-b);border-radius:14px;padding:10px 16px;min-width:140px;text-align:center;
+  border:1px solid var(--glass-b);border-radius:14px;padding:10px 16px;width:100%;text-align:center;
   animation: popIn .5s ease both;
 }
 @keyframes popIn{ from{transform:scale(.98);opacity:0} to{transform:scale(1);opacity:1} }
 
 .muted{color:var(--muted)}
-.foot{margin-top:var(--sp-3);text-align:center}
-
-/* Reduce bottom margins to avoid long scroll */
 .wrap > *{margin-bottom:var(--sp-3)}
 .wrap > *:last-child{margin-bottom:0}
 
-/* Respect reduced motion */
 @media (prefers-reduced-motion: reduce){
   .glass,.timer-face,.btn{animation:none;transition:none}
 }
