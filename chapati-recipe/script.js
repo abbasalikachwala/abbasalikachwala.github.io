@@ -169,5 +169,6 @@ $('#pauseTimer').addEventListener('click', pauseTimer);
 $('#resetTimer').addEventListener('click', resetTimer);
 
 // Init
+document.getElementById('dough').value = 35;  // default dough per chapati
 displayTimer();
 render();
