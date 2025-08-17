@@ -5,44 +5,42 @@
   <title>Chapati Recipe Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="wrap">
-    <header class="hero">
+    <header class="hero glass">
       <h1>Chapati Recipe Calculator</h1>
+      <p>Exact pieces every time. Ratio 190:90:120 (flour:yoghurt:milk). 5% flour → TZ, milk for TZ = 5× TZ flour.</p>
     </header>
 
     <!-- Controls -->
-    <section class="panel controls">
+    <section class="panel glass controls">
       <div class="grid g-6">
         <div class="field">
           <label>How many chapatis?</label>
-          <div class="row">
-            <button id="preset8"  class="chip" type="button">8</button>
-            <button id="preset14" class="chip" type="button">14</button>
-            <button id="preset16" class="chip" type="button">16</button>
-            <button id="preset20" class="chip" type="button">20</button>
+          <div class="seg">
+            <button id="preset8"  type="button" class="seg-btn">8</button>
+            <button id="preset14" type="button" class="seg-btn">14</button>
+            <button id="preset16" type="button" class="seg-btn">16</button>
+            <button id="preset20" type="button" class="seg-btn">20</button>
           </div>
           <input id="n" type="number" min="1" step="1" placeholder="e.g. 16" />
         </div>
 
         <div class="field">
           <label>Dough per chapati (g)</label>
-          <div class="row">
-            <button id="preset25"  class="chip" type="button">25</button>
-            <button id="preset30" class="chip" type="button">30</button>
-            <button id="preset35" class="chip" type="button">35</button>
-            <button id="preset40" class="chip" type="button">40</button>
+          <div class="seg">
+            <button data-dough="25" type="button" class="seg-btn doughPreset">25</button>
+            <button data-dough="30" type="button" class="seg-btn doughPreset">30</button>
+            <button data-dough="35" type="button" class="seg-btn doughPreset">35</button>
+            <button data-dough="40" type="button" class="seg-btn doughPreset">40</button>
           </div>
-          <input id="dough" type="number" min="20" step="1" value="35" />
-          <small>Used for total dough target (N × g). Salt ≈ 1% of total dough.</small>
+          <input id="dough" type="number" min="20" step="1" placeholder="e.g. 35" />
         </div>
 
         <div class="field">
-          <label>Yoghurt:</label>
+          <label>Yoghurt</label>
           <select id="yogBrand">
             <option value="yoplait" selected>Yoplait Max Protein Plain</option>
             <option value="gopala">Gopala Full Cream</option>
@@ -50,7 +48,7 @@
         </div>
 
         <div class="field">
-          <label>Trim Milk:</label>
+          <label>Trim Milk</label>
           <select id="milkBrand">
             <option value="value" selected>Value Trim Milk</option>
             <option value="dairydale">Dairy Dale Trim Milk</option>
@@ -59,27 +57,37 @@
         </div>
 
         <div class="field">
-          <label>Dusting flour used (g, optional)</label>
+          <label>Dusting flour used (g)</label>
           <input id="dust" type="number" min="0" step="1" placeholder="e.g. 20" />
-          <small>Nutrition only. Bowl/TZ weights don’t change.</small>
         </div>
 
         <div class="field">
           <label>Oil in dough (g)</label>
           <input id="oil" type="number" min="0" step="1" placeholder="auto" />
-          <small>Auto: ~5 g per 15 chapatis (≈0.33 g each).</small>
+          <small>Auto ≈ 5 g per 15 chapatis.</small>
         </div>
       </div>
     </section>
 
-    <!-- KPI row -->
-    <section class="kpis">
+    <!-- Totals (moved above nutrition) -->
+    <section class="panel glass totals">
+      <h2>Totals</h2>
+      <div class="kv">
+        <div>Flour total</div><div id="flourTotal" class="num">—</div>
+        <div>Milk total</div><div  id="milkTotal"  class="num">—</div>
+        <div>Yoghurt total</div><div id="yogTotal" class="num">—</div>
+        <div>Target dough</div><div id="targetDough" class="num">—</div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="kpis glass">
       <div class="kpi">
-        <div class="kpi-label">Protein/chapati</div>
+        <div class="kpi-label">Protein / chapati</div>
         <div class="kpi-value" id="proteinPer">—</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">Calories/chapati</div>
+        <div class="kpi-label">Calories / chapati</div>
         <div class="kpi-value" id="kcalPer">—</div>
       </div>
       <div class="kpi kpi-small">
@@ -87,9 +95,9 @@
       </div>
     </section>
 
-    <!-- Results grid -->
-    <section class="grid g-3">
-      <article class="panel">
+    <!-- Bowl + Tangzhong -->
+    <section class="grid g-2">
+      <article class="panel glass">
         <h2>Stand mixer bowl</h2>
         <div class="kv">
           <div>Flour</div><div id="flourBowl" class="num">—</div>
@@ -100,38 +108,28 @@
         </div>
       </article>
 
-      <article class="panel">
-        <h2>Tangzhong (microwave mug)</h2>
+      <article class="panel glass">
+        <h2>Tangzhong (mug)</h2>
         <div class="kv">
           <div>Flour</div><div id="flourTZ" class="num">—</div>
           <div>Milk</div><div  id="milkTZ"  class="num">—</div>
         </div>
       </article>
-
-      <article class="panel">
-        <h2>Totals</h2>
-        <div class="kv">
-          <div>Flour total</div><div id="flourTotal" class="num">—</div>
-          <div>Milk total</div><div  id="milkTotal"  class="num">—</div>
-          <div>Yoghurt total</div><div id="yogTotal" class="num">—</div>
-          <div>Target dough</div><div id="targetDough" class="num">—</div>
-        </div>
-      </article>
     </section>
 
-    <!-- Timer -->
-    <section class="panel timer">
+    <!-- Centered timer -->
+    <section class="panel glass timer center">
       <h2>Main mix timer</h2>
       <div class="timer-face" id="timer">08:30</div>
       <div class="row">
         <button id="startTimer" class="btn">Start</button>
-        <button id="pauseTimer" class="btn outline">Pause</button>
+        <button id="pauseTimer" class="btn ghost">Pause</button>
         <button id="resetTimer" class="btn ghost">Reset</button>
       </div>
     </section>
 
-    <footer class="foot">
-      <small class="muted" id="footnote">Choose yoghurt & milk above to compute accurate protein & kcal.</small>
+    <footer class="foot muted">
+      Choose yoghurt & milk above to compute protein & kcal. Dairy Dale uses typical NZ trim values until you confirm label data.
     </footer>
   </main>
 
