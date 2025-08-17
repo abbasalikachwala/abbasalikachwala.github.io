@@ -1,4 +1,4 @@
-// ---------- Ratios & brand data ----------
+// ===== Ratios & brand data =====
 const R = { FLOUR: 190, YOG: 90, MILK: 120, SUM: 400 };
 
 const BRANDS = {
@@ -21,7 +21,7 @@ const K_OIL_PER_G   = 9;        // kcal per g oil
 const WATER_YOG  = 0.80; // yoghurt ≈ 80% water
 const WATER_MILK = 0.90; // trim milk ≈ 90% water
 
-// ---------- Helpers ----------
+// ===== Helpers =====
 const $ = (sel) => document.querySelector(sel);
 const nearest10 = (x) => Math.round(x / 10) * 10;
 const roundHalf = (x) => Math.round(x * 2) / 2;
@@ -30,14 +30,12 @@ const fmtInt = (x) => Number.isFinite(x) ? `${Math.round(x)}` : "—";
 function pulse(id) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.classList.remove("pulse");
-  void el.offsetWidth;
-  el.classList.add("pulse");
+  el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse");
 }
 
 let userTouchedOil = false;
 
-// ---------- Core calc ----------
+// ===== Core calc =====
 function computePlan({ n, dough, dust, oil, yogBrand, milkBrand }) {
   if (!Number.isFinite(n) || !Number.isFinite(dough) || n <= 0 || dough <= 0) return null;
 
@@ -95,21 +93,16 @@ function computePlan({ n, dough, dust, oil, yogBrand, milkBrand }) {
   };
 }
 
-// ---------- IO ----------
+// ===== IO =====
 function read() {
-  const nEl = $("#n");
-  const doughEl = $("#dough");
-  const dustEl = $("#dust");
+  const n     = parseInt($("#n")?.value, 10);
+  const dough = parseInt($("#dough")?.value, 10);
+  const dust  = parseInt($("#dust")?.value, 10) || 0;
   const oilEl = $("#oil");
+  const oil   = (oilEl && userTouchedOil) ? parseInt(oilEl.value, 10) : undefined;
 
-  const n     = nEl     ? parseInt(nEl.value, 10)    : NaN;
-  const dough = doughEl ? parseInt(doughEl.value,10) : NaN;
-  const dust  = dustEl  ? parseInt(dustEl.value, 10) : 0;
-  const oil   = (oilEl && userTouchedOil) ? parseInt(oilEl.value,10) : undefined;
-
-  const yogBrand  = ($("#yogBrand")  && $("#yogBrand").value)  || "yoplait";
-  const milkBrand = ($("#milkBrand") && $("#milkBrand").value) || "value";
-
+  const yogBrand  = $("#yogBrand")?.value || "yoplait";
+  const milkBrand = $("#milkBrand")?.value || "value";
   return { n, dough, dust, oil, yogBrand, milkBrand };
 }
 
@@ -120,33 +113,22 @@ function clearOutputs() {
     "targetDough","proteinPer","kcalPer","hydration",
     "mealProtein","mealKcal"
   ];
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = "—";
-  });
-
-  const milkNote = document.getElementById("milkNote");
-  if (milkNote) milkNote.textContent = "";
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = "—"; });
+  const milkNote = document.getElementById("milkNote"); if (milkNote) milkNote.textContent = "";
 }
 
 function render() {
   const { n, dough, dust, oil, yogBrand, milkBrand } = read();
 
   const milkNote = document.getElementById("milkNote");
-  if (milkNote) {
-    milkNote.textContent = BRANDS.milk[milkBrand]?.approx
-      ? "Approx. values until label confirmed."
-      : "";
-  }
+  if (milkNote) milkNote.textContent = BRANDS.milk[milkBrand]?.approx ? "Approx. values until label confirmed." : "";
 
   const p = computePlan({ n, dough, dust, oil, yogBrand, milkBrand });
   if (!p) { clearOutputs(); return; }
 
-  const set = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = val; pulse(id); }
-  };
+  const set = (id, val) => { const el = document.getElementById(id); if (el){ el.textContent = val; pulse(id); } };
 
+  // bowl & tz
   set("flourBowl",  fmtInt(p.flourBowl) + " g");
   set("milkBowl",   fmtInt(p.milkBowl)  + " ml");
   set("yogBowl",    fmtInt(p.yogTotal)  + " g");
@@ -156,6 +138,7 @@ function render() {
   set("flourTZ",    fmtInt(p.flourTZ) + " g");
   set("milkTZ",     fmtInt(p.milkTZ)  + " ml");
 
+  // totals & per-chapati KPIs
   set("flourTotal", fmtInt(p.flourTotal) + " g");
   set("milkTotal",  fmtInt(p.milkTotal)  + " ml");
   set("yogTotal",   fmtInt(p.yogTotal)   + " g");
@@ -165,19 +148,15 @@ function render() {
   set("kcalPer",    p.kcalPer    + " kcal");
   set("hydration",  p.hydration  + "%");
 
-  // Meal totals (styled as stat pills)
-  const mealEl = document.getElementById("mealCount");
-  const mealN  = mealEl ? parseInt(mealEl.value, 10) : 0;
+  // Meal totals (separate card pills)
+  const mealN = parseInt(document.getElementById("mealCount")?.value, 10);
   const mealProtein = (mealN && mealN > 0) ? +(p.proteinPer * mealN).toFixed(1) : null;
   const mealKcal    = (mealN && mealN > 0) ? Math.round(p.kcalPer * mealN)       : null;
-
-  const mp = document.getElementById("mealProtein");
-  const mk = document.getElementById("mealKcal");
-  if (mp) mp.textContent = mealProtein !== null ? mealProtein : "—";
-  if (mk) mk.textContent = mealKcal    !== null ? mealKcal    : "—";
+  set("mealProtein", mealProtein !== null ? mealProtein + " g" : "—");
+  set("mealKcal",    mealKcal    !== null ? mealKcal    + " kcal" : "—");
 }
 
-// ---------- Timer (8:30) ----------
+// ===== Timer (8:30) =====
 let tHandle = null;
 let remaining = 8 * 60 + 30;
 
@@ -187,7 +166,6 @@ function displayTimer() {
   const t = document.getElementById("timer");
   if (t) t.textContent = `${m}:${s}`;
 }
-
 function startTimer() {
   if (tHandle) return;
   tHandle = setInterval(() => {
@@ -195,11 +173,10 @@ function startTimer() {
     else { clearInterval(tHandle); tHandle = null; }
   }, 1000);
 }
-
 function pauseTimer() { if (tHandle) { clearInterval(tHandle); tHandle = null; } }
 function resetTimer() { pauseTimer(); remaining = 8 * 60 + 30; displayTimer(); }
 
-// ---------- Events ----------
+// ===== Events =====
 ["n","dough","dust","yogBrand","milkBrand"].forEach(id => {
   const el = document.getElementById(id);
   if (el) el.addEventListener("input", render);
@@ -207,29 +184,23 @@ function resetTimer() { pauseTimer(); remaining = 8 * 60 + 30; displayTimer(); }
 const oilEl = document.getElementById("oil");
 if (oilEl) oilEl.addEventListener("input", () => { userTouchedOil = true; render(); });
 
-// Meal input + robust stepper (event delegation)
-const mealBox = document.getElementById("mealCount");
-if (mealBox) mealBox.addEventListener("input", render);
-const mealRow = document.querySelector(".meal-row");
+// Meal input + direct stepper listeners (fix for non-working buttons)
+const mealBox  = document.getElementById("mealCount");
+const mealMinus = document.getElementById("mealMinus");
+const mealPlus  = document.getElementById("mealPlus");
+if (mealBox)  mealBox.addEventListener("input", render);
 function stepMeal(delta){
   if (!mealBox) return;
   let v = parseInt(mealBox.value, 10);
   if (!Number.isFinite(v)) v = 0;
-  v += delta;
-  if (v < 1) v = 1;
+  v += delta; if (v < 1) v = 1;
   mealBox.value = v;
   render();
 }
-if (mealRow) {
-  mealRow.addEventListener("click", (e) => {
-    const btn = e.target.closest(".step");
-    if (!btn) return;
-    if (btn.id === "mealMinus") stepMeal(-1);
-    if (btn.id === "mealPlus")  stepMeal(+1);
-  });
-}
+if (mealMinus) mealMinus.addEventListener("click", () => stepMeal(-1));
+if (mealPlus)  mealPlus.addEventListener("click", () => stepMeal(+1));
 
-// Piece presets
+// Presets
 [["preset8",8],["preset14",14],["preset16",16],["preset20",20]].forEach(([id,val]) => {
   const btn = document.getElementById(id);
   if (btn) btn.addEventListener("click", () => {
@@ -254,12 +225,9 @@ document.querySelectorAll(".doughPreset").forEach(btn => {
 });
 
 // Timer buttons
-const startBtn = document.getElementById("startTimer");
-const pauseBtn = document.getElementById("pauseTimer");
-const resetBtn = document.getElementById("resetTimer");
-if (startBtn) startBtn.addEventListener("click", startTimer);
-if (pauseBtn) pauseBtn.addEventListener("click", pauseTimer);
-if (resetBtn) resetBtn.addEventListener("click", resetTimer);
+document.getElementById("startTimer")?.addEventListener("click", startTimer);
+document.getElementById("pauseTimer")?.addEventListener("click", pauseTimer);
+document.getElementById("resetTimer")?.addEventListener("click", resetTimer);
 
 // Init
 displayTimer();
