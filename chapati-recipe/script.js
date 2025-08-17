@@ -13,15 +13,28 @@ const BRANDS = {
 };
 
 // Flour & oil labels
-const P_FLOUR_PER_G = 4/30;   // g protein per g flour
-const K_FLOUR_PER_G = 100/30; // kcal per g flour
-const K_OIL_PER_G   = 9;      // kcal per g oil
+const P_FLOUR_PER_G = 4/30;    // g protein per g flour
+const K_FLOUR_PER_G = 100/30;  // kcal per g flour
+const K_OIL_PER_G   = 9;       // kcal per g oil
+
+// Hydration assumptions (approx.)
+const WATER_YOG  = 0.80; // yoghurt ≈ 80% water
+const WATER_MILK = 0.90; // trim milk ≈ 90% water
 
 // ---------- Helpers ----------
 const $ = (sel) => document.querySelector(sel);
 const nearest10 = (x) => Math.round(x/10)*10;
 const roundHalf = (x) => Math.round(x*2)/2;
 const fmtInt = (x) => Number.isFinite(x) ? `${Math.round(x)}` : '—';
+
+// Pulse animation on number change
+function pulse(id){
+  const el = $('#'+id); if (!el) return;
+  el.classList.remove('pulse'); // reset
+  // force reflow
+  void el.offsetWidth;
+  el.classList.add('pulse');
+}
 
 let userTouchedOil = false;
 
@@ -73,6 +86,10 @@ function computePlan({ n, dough, dust, oil, yogBrand, milkBrand }){
     + oilBowl    * K_OIL_PER_G
     + dustG      * K_FLOUR_PER_G;
 
+  // hydration (pre-dust)
+  const waterGrams = yogTotal * WATER_YOG + milkTotal * WATER_MILK;
+  const hydration  = +((waterGrams / flourTotal) * 100).toFixed(1);
+
   return {
     n, target,
     flourTotal, yogTotal, milkTotal,
@@ -80,7 +97,8 @@ function computePlan({ n, dough, dust, oil, yogBrand, milkBrand }){
     salt, oilBowl,
     proteinPer: +(proteinBatch / n).toFixed(2),
     kcalPer:    +(kcalBatch / n).toFixed(0),
-    approxMilk: !!M.approx
+    approxMilk: !!M.approx,
+    hydration
   };
 }
 
@@ -100,15 +118,17 @@ function clearOutputs(){
   [
     'flourBowl','milkBowl','yogBowl','salt','oilBowl',
     'flourTZ','milkTZ','flourTotal','milkTotal','yogTotal',
-    'targetDough','proteinPer','kcalPer'
+    'targetDough','proteinPer','kcalPer','hydration'
   ].forEach(id => { const el = $('#'+id); if (el) el.textContent='—'; });
-  $('#dustEcho').textContent = $('#dust')?.value || 0;
-  $('#oilEcho').textContent  = $('#oil')?.value  || 0;
+  $('#dustEcho')?.textContent = $('#dust')?.value || 0;
+  $('#oilEcho') ?.textContent = $('#oil') ?.value || 0;
+  $('#milkNote').textContent = '';
 }
 
 function render(){
   const { n, dough, dust, oil, yogBrand, milkBrand } = read();
 
+  // milk note
   $('#milkNote').textContent = BRANDS.milk[milkBrand]?.approx
     ? 'Approx. values until label confirmed.'
     : '';
@@ -116,26 +136,29 @@ function render(){
   const p = computePlan({ n, dough, dust, oil, yogBrand, milkBrand });
   if (!p){ clearOutputs(); return; }
 
-  // bowl & tz
-  $('#flourBowl').textContent = fmtInt(p.flourBowl) + ' g';
-  $('#milkBowl').textContent  = fmtInt(p.milkBowl)  + ' ml';
-  $('#yogBowl').textContent   = fmtInt(p.yogTotal)  + ' g';
-  $('#salt').textContent      = (p.salt % 1 ? p.salt.toFixed(1) : fmtInt(p.salt)) + ' g';
-  $('#oilBowl').textContent   = fmtInt(p.oilBowl) + ' g';
+  const set = (id, val) => { $('#'+id).textContent = val; pulse(id); };
 
-  $('#flourTZ').textContent   = fmtInt(p.flourTZ) + ' g';
-  $('#milkTZ').textContent    = fmtInt(p.milkTZ)  + ' ml';
+  // bowl & tz
+  set('flourBowl', fmtInt(p.flourBowl) + ' g');
+  set('milkBowl',  fmtInt(p.milkBowl)  + ' ml');
+  set('yogBowl',   fmtInt(p.yogTotal)  + ' g');
+  set('salt',      (p.salt % 1 ? p.salt.toFixed(1) : fmtInt(p.salt)) + ' g');
+  set('oilBowl',   fmtInt(p.oilBowl) + ' g');
+
+  set('flourTZ',   fmtInt(p.flourTZ) + ' g');
+  set('milkTZ',    fmtInt(p.milkTZ)  + ' ml');
 
   // totals & KPIs
-  $('#flourTotal').textContent = fmtInt(p.flourTotal) + ' g';
-  $('#milkTotal').textContent  = fmtInt(p.milkTotal)  + ' ml';
-  $('#yogTotal').textContent   = fmtInt(p.yogTotal)   + ' g';
-  $('#targetDough').textContent= fmtInt(p.target)     + ' g';
+  set('flourTotal', fmtInt(p.flourTotal) + ' g');
+  set('milkTotal',  fmtInt(p.milkTotal)  + ' ml');
+  set('yogTotal',   fmtInt(p.yogTotal)   + ' g');
+  set('targetDough',fmtInt(p.target)     + ' g');
 
-  $('#proteinPer').textContent = p.proteinPer + ' g';
-  $('#kcalPer').textContent    = p.kcalPer    + ' kcal';
-  $('#dustEcho').textContent   = $('#dust')?.value || 0;
-  $('#oilEcho').textContent    = fmtInt(p.oilBowl);
+  set('proteinPer', p.proteinPer + ' g');
+  set('kcalPer',    p.kcalPer    + ' kcal');
+  set('hydration',  p.hydration  + '%');
+  $('#dustEcho').textContent = $('#dust')?.value || 0;
+  $('#oilEcho').textContent  = fmtInt(p.oilBowl);
 
   if (!userTouchedOil && Number.isFinite(n) && Number.isFinite(dough)) {
     $('#oil').value = p.oilBowl;
@@ -192,3 +215,11 @@ $('#resetTimer').addEventListener('click', resetTimer);
 // Init
 displayTimer();
 render();
+
+/* --- number pulse animation (tiny) --- */
+const style = document.createElement('style');
+style.textContent = `
+  .pulse{ animation: numPulse .35s ease }
+  @keyframes numPulse{ from{background:rgba(10,132,255,.08)} to{background:transparent} }
+`;
+document.head.appendChild(style);
