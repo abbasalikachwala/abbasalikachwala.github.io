@@ -1,5 +1,3 @@
-// (unchanged from last good version; included for completeness)
-
 // ===== Ratios & brand data =====
 const R = {
    FLOUR: 190,
@@ -36,12 +34,16 @@ const BRANDS = {
    },
 };
 
-const P_FLOUR_PER_G = 4 / 30;
-const K_FLOUR_PER_G = 100 / 30;
-const K_OIL_PER_G = 9;
-const WATER_YOG = 0.80;
-const WATER_MILK = 0.90;
+// Flour & oil labels
+const P_FLOUR_PER_G = 4 / 30; // g protein per g flour
+const K_FLOUR_PER_G = 100 / 30; // kcal per g flour
+const K_OIL_PER_G = 9; // kcal per g oil
 
+// Hydration assumptions
+const WATER_YOG = 0.80; // yoghurt ≈ 80% water
+const WATER_MILK = 0.90; // trim milk ≈ 90% water
+
+// ===== Helpers =====
 const $ = (sel) => document.querySelector(sel);
 const nearest10 = (x) => Math.round(x / 10) * 10;
 const roundHalf = (x) => Math.round(x * 2) / 2;
@@ -57,6 +59,7 @@ function pulse(id) {
 
 let userTouchedOil = false;
 
+// ===== Core calc =====
 function computePlan({
    n,
    dough,
@@ -128,6 +131,7 @@ function computePlan({
    };
 }
 
+// ===== IO =====
 function read() {
    const n = parseInt($("#n")?.value, 10);
    const dough = parseInt($("#dough")?.value, 10);
@@ -162,6 +166,7 @@ function clearOutputs() {
    if (milkNote) milkNote.textContent = "";
 }
 
+// ===== Render =====
 function render() {
    const {
       n,
@@ -196,6 +201,7 @@ function render() {
       }
    };
 
+   // Bowl & TZ
    set("flourBowl", fmtInt(p.flourBowl) + " g");
    set("milkBowl", fmtInt(p.milkBowl) + " ml");
    set("yogBowl", fmtInt(p.yogTotal) + " g");
@@ -205,6 +211,7 @@ function render() {
    set("flourTZ", fmtInt(p.flourTZ) + " g");
    set("milkTZ", fmtInt(p.milkTZ) + " ml");
 
+   // Totals & per-chapati KPIs
    set("flourTotal", fmtInt(p.flourTotal) + " g");
    set("milkTotal", fmtInt(p.milkTotal) + " ml");
    set("yogTotal", fmtInt(p.yogTotal) + " g");
@@ -214,19 +221,21 @@ function render() {
    set("kcalPer", p.kcalPer + " kcal");
    set("hydration", p.hydration + "%");
 
+   // Meal totals
    const mealN = parseInt(document.getElementById("mealCount")?.value, 10);
    const mealProtein = (mealN && mealN > 0) ? +(p.proteinPer * mealN).toFixed(1) : null;
    const mealKcal = (mealN && mealN > 0) ? Math.round(p.kcalPer * mealN) : null;
    set("mealProtein", mealProtein !== null ? mealProtein + " g" : "—");
    set("mealKcal", mealKcal !== null ? mealKcal + " kcal" : "—");
 
+   // Auto-fill oil initially
    if (!userTouchedOil && Number.isFinite(n) && Number.isFinite(dough)) {
       const oilEl = document.getElementById("oil");
       if (oilEl) oilEl.value = p.oilBowl;
    }
 }
 
-/* Timer */
+// ===== Timer (8:30) =====
 let tHandle = null;
 let remaining = 8 * 60 + 30;
 
@@ -263,7 +272,7 @@ function resetTimer() {
    displayTimer();
 }
 
-/* Events */
+// ===== Events =====
 ["n", "dough", "dust", "yogBrand", "milkBrand"].forEach(id => {
    const el = document.getElementById(id);
    if (el) el.addEventListener("input", render);
@@ -274,6 +283,7 @@ if (oilEl) oilEl.addEventListener("input", () => {
    render();
 });
 
+// Meal input + direct stepper listeners
 const mealBox = document.getElementById("mealCount");
 const mealMinus = document.getElementById("mealMinus");
 const mealPlus = document.getElementById("mealPlus");
@@ -291,6 +301,7 @@ function stepMeal(delta) {
 if (mealMinus) mealMinus.addEventListener("click", () => stepMeal(-1));
 if (mealPlus) mealPlus.addEventListener("click", () => stepMeal(+1));
 
+// Preset buttons
 [
    ["preset8", 8],
    ["preset14", 14],
@@ -306,6 +317,8 @@ if (mealPlus) mealPlus.addEventListener("click", () => stepMeal(+1));
       render();
    });
 });
+
+// Dough presets
 document.querySelectorAll(".doughPreset").forEach(btn => {
    btn.addEventListener("click", () => {
       const grams = parseInt(btn.dataset.dough, 10);
@@ -317,10 +330,11 @@ document.querySelectorAll(".doughPreset").forEach(btn => {
    });
 });
 
+// Timer buttons
 document.getElementById("startTimer")?.addEventListener("click", startTimer);
 document.getElementById("pauseTimer")?.addEventListener("click", pauseTimer);
 document.getElementById("resetTimer")?.addEventListener("click", resetTimer);
 
-/* Init */
+// Init
 displayTimer();
 render();
