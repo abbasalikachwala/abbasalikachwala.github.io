@@ -1,4 +1,4 @@
-/* Apple-ish, blue glass. Tight spacing. No overflow on resize. */
+/* Apple-ish, blue glass, two-column layout, tight spacing + animations */
 :root{
   --sp-1: clamp(6px, 0.6vw, 10px);
   --sp-2: clamp(10px, 0.9vw, 14px);
@@ -8,6 +8,7 @@
   --bg0:#e6f0ff; --bg1:#f8fbff;
   --ink:#0b1220; --muted:#5b6b81;
   --accent:#0a84ff;
+
   --glass: rgba(255,255,255,.55);
   --glass-b: rgba(255,255,255,.30);
   --line: rgba(0,0,0,.06);
@@ -26,9 +27,21 @@ body{
 }
 
 .wrap{width:100%;max-width:1200px;margin:0 auto;padding:var(--sp-3)}
-.hero{margin-bottom:var(--sp-3)}
+.hero{margin-bottom:var(--sp-2)}
 .hero h1{margin:0 0 var(--sp-1) 0;font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:.2px}
 .hero p{margin:0;color:var(--muted)}
+
+/* Two-column layout that collapses gracefully */
+.layout{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:var(--sp-3);
+}
+@media (max-width:900px){
+  .layout{ grid-template-columns:1fr }
+}
+
+.col{display:flex;flex-direction:column;gap:var(--sp-3)}
 
 .glass{
   background:var(--glass);
@@ -37,19 +50,39 @@ body{
   -webkit-backdrop-filter:saturate(180%) blur(16px);
   box-shadow:var(--shadow);
   border-radius:18px;
+
+  /* Entrance animation */
+  opacity:0; transform: translateY(10px);
+  animation: fadeSlideUp .6s cubic-bezier(.2,.6,.2,1) forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes fadeSlideUp{
+  to { opacity:1; transform:translateY(0) }
 }
 
 .panel{padding:var(--sp-3)}
-/* Controls grid: responsive auto-fit columns (prevents overflow) */
+
+/* Controls grid */
 .grid-controls{
   display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
   gap:var(--sp-2);
+}
+@media (max-width:1100px){
+  .grid-controls{ grid-template-columns:1fr 1fr }
+}
+@media (max-width:720px){
+  .grid-controls{ grid-template-columns:1fr }
 }
 .controls .field{display:flex;flex-direction:column;gap:var(--sp-1); min-width:0}
 .controls input,.controls select{
   padding:12px 14px;border:1px solid var(--line);
-  border-radius:14px;background:rgba(255,255,255,.95);font:inherit;min-width:0
+  border-radius:14px;background:rgba(255,255,255,.95);font:inherit;min-width:0;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.controls input:focus,.controls select:focus{
+  outline:none; border-color:#bcd7ff; box-shadow:0 0 0 4px rgba(10,132,255,.12)
 }
 
 /* Preset chips */
@@ -57,66 +90,64 @@ body{
 .seg-btn{
   appearance:none;border:1px solid var(--glass-b);background:rgba(255,255,255,.9);
   padding:8px 12px;border-radius:999px;color:#0a4dc0;cursor:pointer;
-  box-shadow:0 2px 6px rgba(0,0,0,.06)
+  box-shadow:0 2px 6px rgba(0,0,0,.06);
+  transition:transform .15s ease, background .2s ease;
 }
+.seg-btn:hover{ transform: translateY(-1px) }
 .seg-btn.active{background:linear-gradient(180deg,#e7f0ff,#dfeaff);border-color:#cfe3ff;color:#003a94;font-weight:700}
 
-/* Two-column section (bowl + tz) that collapses gracefully */
-.grid-two{
-  display:grid; gap:var(--sp-2); margin-top:var(--sp-3);
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-}
+/* Dual card (Bowl + TZ) */
+.duo-head{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-bottom:var(--sp-1)}
+.duo-head h2{margin:0;font-size:1.05rem;color:#0a4dc0}
+.duo-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
+@media (max-width:720px){ .duo-head,.duo-grid{grid-template-columns:1fr} }
 
-/* Totals strip */
-.totals{margin-top:var(--sp-2)}
-.totals h2{margin:.1rem 0 var(--sp-2);font-size:1.05rem;color:#0a4dc0}
-.totals-foot{
-  margin-top: var(--sp-1);
-  font-size: .95rem;
-}
-
-/* Key-value table */
 .kv{
   display:grid; grid-template-columns: minmax(0,1fr) auto;
   gap:.6rem .9rem; align-items:center;
 }
-.kv > div{min-width:0} /* prevent overflow */
+.kv > div{min-width:0}
 .num{font-variant-numeric:tabular-nums;font-weight:700}
 
-/* KPIs row with auto-fit (no overflow) */
-.kpis{
-  display:grid; gap:var(--sp-2); margin-top:var(--sp-2); padding:var(--sp-2);
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
+/* Totals */
+.totals h2{margin:.1rem 0 var(--sp-2);font-size:1.05rem;color:#0a4dc0}
+.totals-foot{margin-top:var(--sp-1);font-size:.95rem}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2)}
+@media (max-width:1100px){ .kpis{grid-template-columns:1fr 1fr 1fr} }
+@media (max-width:720px){ .kpis{grid-template-columns:1fr} }
 .kpi{display:flex;flex-direction:column;align-items:center;justify-content:center}
 .kpi-label{font-size:.98rem;color:var(--muted);margin-bottom:6px}
 .kpi-value{font-size:clamp(1.6rem,4vw,2.6rem);font-weight:800;letter-spacing:.2px;color:#0f172a}
-.kpi-small .kpi-sub{font-size:.95rem;color:var(--muted);text-align:center}
 
 /* Buttons & timer */
 .btn{
   background:var(--accent);color:#fff;border:none;border-radius:12px;
-  padding:10px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(10,132,255,.18)
+  padding:10px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(10,132,255,.18);
+  transition:transform .15s ease, box-shadow .2s ease;
 }
+.btn:hover{ transform: translateY(-1px); box-shadow:0 6px 16px rgba(10,132,255,.22) }
 .btn.ghost{background:transparent;color:#0a66d6;border:1px solid #bcd7ff}
 
-.timer{display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-2)}
+.timer{display:flex;flex-direction:column;gap:var(--sp-2)}
 .timer.center{align-items:center;text-align:center;margin-inline:auto;max-width:520px}
 .timer .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .timer-face{
   font-size:clamp(1.4rem,4vw,2.2rem);font-weight:800;background:rgba(255,255,255,.96);
-  border:1px solid var(--glass-b);border-radius:14px;padding:10px 16px;min-width:140px;text-align:center
+  border:1px solid var(--glass-b);border-radius:14px;padding:10px 16px;min-width:140px;text-align:center;
+  animation: popIn .5s ease both;
 }
+@keyframes popIn{ from{transform:scale(.98);opacity:0} to{transform:scale(1);opacity:1} }
 
 .muted{color:var(--muted)}
 .foot{margin-top:var(--sp-3);text-align:center}
 
-/* Trim top/bottom spacing so there's no “mystery scroll” */
+/* Reduce bottom margins to avoid long scroll */
 .wrap > *{margin-bottom:var(--sp-3)}
 .wrap > *:last-child{margin-bottom:0}
 
-/* Print */
-@media print{
-  .wrap{max-width:none;padding:0}
-  .glass{box-shadow:none}
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .glass,.timer-face,.btn{animation:none;transition:none}
 }
