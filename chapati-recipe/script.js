@@ -2,8 +2,8 @@
 const R = {
    FLOUR: 190,
    YOG: 90,
-   MILK: 102,
-   SUM: 382
+   MILK: 110,
+   SUM: 390
 };
 
 const BRANDS = {
