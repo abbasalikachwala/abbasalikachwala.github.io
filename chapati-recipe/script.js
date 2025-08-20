@@ -1,9 +1,9 @@
 // ===== Ratios & brand data =====
 const R = {
    FLOUR: 190,
-   YOG: 90,
+   YOG: 95,
    MILK: 110,
-   SUM: 390
+   SUM: 395
 };
 
 const BRANDS = {
