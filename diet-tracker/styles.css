@@ -293,7 +293,6 @@ progress.prog-green::-moz-progress-bar {
 
 /* ---------- Inputs ---------- */
 :where(input[type="number"], input[type="text"], select) {
-	width: 100%;
 	padding: 9px 12px;
 	border-radius: 12px;
 	border: 1px solid var(--border);
@@ -301,6 +300,7 @@ progress.prog-green::-moz-progress-bar {
 	color: var(--text);
 	transition: border-color .12s ease, background .15s ease, box-shadow .12s ease;
 	height: 36px;
+	text-align: center;
 }
 
 :where(input[type="number"], input[type="text"])::placeholder {
@@ -633,6 +633,23 @@ input[type=number] {
 
 .grid-4.mini {
 	gap: 10px;
+}
+
+/* Week view: full grid borders */
+#weeklyView .table{
+  border-collapse: collapse;   /* ensure shared borders */
+  border: 1px solid var(--border); /* outer border */
+}
+#weeklyView .table th,
+#weeklyView .table td{
+  border: 1px solid var(--border); /* inner gridlines */
+}
+#weeklyView .table thead th{
+  background: color-mix(in oklab, var(--panel) 94%, var(--bg));
+}
+#weeklyView .table tfoot th,
+#weeklyView .table tfoot td{
+  border-top: 2px solid var(--border); /* slightly stronger total row */
 }
 
 /* ---------- Responsive ---------- */
