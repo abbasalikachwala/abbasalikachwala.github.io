@@ -286,11 +286,6 @@ progress.prog-green::-moz-progress-bar {
 	font-weight: 600;
 }
 
-.table th.r,
-.table td.r {
-	text-align: right;
-}
-
 .table.compact th,
 .table.compact td {
 	padding: 7px 6px;
