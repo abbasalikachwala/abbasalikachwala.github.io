@@ -639,6 +639,10 @@ input[type=number] {
 	gap: 10px;
 }
 
+.macros-modal {
+	text-align: center;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1200px) {
 	.dashboard {
