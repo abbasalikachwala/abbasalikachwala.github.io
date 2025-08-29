@@ -1,5 +1,5 @@
 // ====================================================================
-// Daily Macros Tracker — kcal-first, Apple-style UI
+// Daily Macros Tracker — kcal-first, Dashboard UI
 // Client-only (GH Pages safe). Data saved in localStorage.
 // ====================================================================
 
@@ -25,7 +25,7 @@ function isoWeek(dStr){
 }
 
 // ---------- Storage ----------
-const LS = { settings: 'dm_settings_v2_kcal', diary: 'dm_diary_v2', misc: 'dm_misc_v2' };
+const LS = { settings: 'dm_settings_v3_kcal', diary: 'dm_diary_v3', misc: 'dm_misc_v3' };
 const saveJSON = (k, o) => localStorage.setItem(k, JSON.stringify(o));
 const loadJSON = (k, fb) => { try { return JSON.parse(localStorage.getItem(k)) ?? fb; } catch { return fb; } };
 
@@ -34,12 +34,12 @@ const DEFAULTS = {
   proteinTarget: 130,
   milkDefaultML: 300,
   milkPer100ml: { p: 3.8, c: 5.0, f: 0.2, kcal: 39.5 },     // ~165 kJ
-  yoghurtPer100g: { p: 9.0, c: 9.6, f: 2.3, kcal: 93.3 },   // ~390 kJ (brand you gave)
-  proteinBar: { p: 10.0, c: 14.8, f: 9.9, kcal: 195 },      // label energy wins
+  yoghurtPer100g: { p: 9.0, c: 9.6, f: 2.3, kcal: 93.3 },   // per your brand
+  proteinBar: { p: 10.0, c: 14.8, f: 9.9, kcal: 195 },
   proteinScoop: { p: 20.7, c: 0.6, f: 0.5, kcal: 96.6 },    // placeholder; edit in Settings
   banana: {
     edibleFrac: 0.70,
-    per100g: { p: 1.09, c: 22.8, f: 0.33, kcal: 88.7 }      // typical ripe banana
+    per100g: { p: 1.09, c: 22.8, f: 0.33, kcal: 88.7 }
   },
   chapatiPerPiece: { p: 3.45, c: 12.0, f: 0.5, kcal: 70 },
   eggs: {
@@ -54,7 +54,7 @@ let settings = loadJSON(LS.settings, DEFAULTS);
 let diary    = loadJSON(LS.diary, {});
 let miscByDay= loadJSON(LS.misc, {});
 
-// ---------- Energy helpers (kcal only for display) ----------
+// ---------- Energy helpers ----------
 function kcalFromMacros(p,c,f){ return (4*p) + (4*c) + (9*f); }
 function energyFromUnit(u){
   const p = u.p || 0, c = u.c || 0, f = u.f || 0;
@@ -76,20 +76,32 @@ const scalePerItem = (x, q) => scalePerPiece(x, q);
 // ---------- Day model ----------
 const dayPicker = $('#dayPicker');
 dayPicker.value = todayStr();
-function getDay(){
-  const date = dayPicker.value || todayStr();
-  diary[date] ||= {
+
+function newDaySeed(){
+  return {
+    // Breakfast
     breakfast: { bananaPeelOn: 0, yoghurtG: 180, shakeOn: false, shakeScoops: 1, shakeMilkML: 350 },
+    // Morning Snack (eggs + milk)
+    morning:   { eggsOn: false, eggsWhole: settings.eggs.defaultWhole, eggsWhites: settings.eggs.defaultWhites, milkOn: false },
+    // Lunch / Dinner
     lunch:     { meatG: 0, curryG: 0, chapatis: 0, milkOn: false },
     dinner:    { meatG: 0, curryG: 0, chapatis: 0, milkOn: false },
-    snacks:    { eggsOn: false, eggsWhole: settings.eggs.defaultWhole, eggsWhites: settings.eggs.defaultWhites, barOn: false, barQty: 1, milkOn: false, milkExtraML: 0 },
+    // Afternoon Snack (protein bar + milk)
+    afternoon: { barOn: false, barQty: 1, milkOn: false },
+    // Misc
+    miscMilkML: 0,
   };
+}
+function getDay(){
+  const date = dayPicker.value || todayStr();
+  // migrate older shapes if present
+  diary[date] = Object.assign(newDaySeed(), diary[date] || {});
   miscByDay[date] ||= [];
   return diary[date];
 }
 function save(){ saveJSON(LS.diary, diary); saveJSON(LS.misc, miscByDay); }
 
-// ---------- UI State sync (segmented controls) ----------
+// ---------- UI: segmented controls ----------
 function setSegActive(btn){
   const wrap = btn.closest('.seg');
   if (!wrap) return;
@@ -110,16 +122,24 @@ function syncBfShakeSeg(){
   $('#bfShakeNo').classList.toggle('is-active',  val==='no');
 }
 
-// Global segmented handler (data-bind groups + breakfast shake + top Today/Week)
+// Global segmented handler (header view switch + all data-bind segs + breakfast shake)
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.seg-btn');
   if (!btn) return;
 
-  // Header Today/Week
+  // Header view switch
   if (btn.id === 'btnToday' || btn.id === 'btnWeekly'){
+    $('.seg-btn#btnToday').classList.remove('is-active');
+    $('.seg-btn#btnWeekly').classList.remove('is-active');
     setSegActive(btn);
-    if (btn.id === 'btnWeekly'){ $('#weeklyPanel').style.display='block'; renderWeek(); }
-    if (btn.id === 'btnToday'){ $('#weeklyPanel').style.display='none'; }
+    if (btn.id === 'btnWeekly'){
+      $('#todayView').style.display = 'none';
+      $('#weeklyView').style.display = '';
+      renderWeek();
+    } else {
+      $('#weeklyView').style.display = 'none';
+      $('#todayView').style.display = '';
+    }
     return;
   }
 
@@ -134,7 +154,7 @@ document.addEventListener('click', (e) => {
     return;
   }
 
-  // data-bind groups (e.g., lMilk/dMilk/sEggsOn/sMilk/sBarOn)
+  // data-bind groups
   const bind = btn.dataset.bind;
   if (bind){
     setSegActive(btn);
@@ -142,124 +162,44 @@ document.addEventListener('click', (e) => {
     const sel = $('#'+bind);
     if (sel) sel.value = val;
 
-    // Update model according to bind target
     const d = getDay();
+    if (bind === 'msEggsOn') d.morning.eggsOn = (val === 'yes');
+    if (bind === 'msMilk')   d.morning.milkOn = (val === 'yes');
+
     if (bind === 'lMilk') d.lunch.milkOn = (val === 'yes');
     if (bind === 'dMilk') d.dinner.milkOn = (val === 'yes');
-    if (bind === 'sEggsOn') d.snacks.eggsOn = (val === 'yes');
-    if (bind === 'sMilk') d.snacks.milkOn = (val === 'yes');
-    if (bind === 'sBarOn') d.snacks.barOn = (val === 'yes');
+
+    if (bind === 'asBarOn') d.afternoon.barOn = (val === 'yes');
+    if (bind === 'asMilk')  d.afternoon.milkOn = (val === 'yes');
 
     save(); renderAll();
   }
 });
 
-// ---------- Top nav / basic buttons ----------
-$('#btnToday').classList.add('is-active');
-$('#btnToday').addEventListener('click', () => { $('#weeklyPanel').style.display='none'; });
-$('#btnWeekly').addEventListener('click', () => { $('#weeklyPanel').style.display='block'; renderWeek(); });
-$('#btnExportWeek').addEventListener('click', exportCurrentWeekCSV);
-$('#btnExportDay').addEventListener('click', exportDayJSON);
-$('#btnClearDay').addEventListener('click', () => {
-  if (confirm('Clear this day?')) {
-    diary[dayPicker.value] = { breakfast:{ bananaPeelOn:0, yoghurtG:180, shakeOn:false, shakeScoops:1, shakeMilkML:350 },
-                               lunch:{ meatG:0, curryG:0, chapatis:0, milkOn:false },
-                               dinner:{ meatG:0, curryG:0, chapatis:0, milkOn:false },
-                               snacks:{ eggsOn:false, eggsWhole:settings.eggs.defaultWhole, eggsWhites:settings.eggs.defaultWhites, barOn:false, barQty:1, milkOn:false, milkExtraML:0 } };
-    miscByDay[dayPicker.value] = [];
-    save(); renderAll();
-  }
+// ---------- Header buttons (non-duplicated IDs guarded below) ----------
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.id === 'btnExportWeek') exportCurrentWeekCSV();
 });
-$('#btnSubmit').addEventListener('click', onSubmitDay);
-$('#btnSettings').addEventListener('click', openSettings);
+$('#btnExportDay')?.addEventListener('click', exportDayJSON);
+$('#btnClearDay')?.addEventListener('click', onClearDay);
+$('#btnSubmit')?.addEventListener('click', onSubmitDay);
+$('#btnSettings')?.addEventListener('click', openSettings);
 dayPicker.addEventListener('change', renderAll);
 
-// ---------- Preset defaults on first load ----------
-function applyPresetDefaults(){
-  $('#yoghurtGrams').value = 180;
-  $('#proteinBarQty').value = 1;
-  $('#eggsWhole').value = settings.eggs.defaultWhole;
-  $('#eggsWhites').value = settings.eggs.defaultWhites;
-  $('#shakeScoops').value = 1;
-  $('#shakeMilkML').value = 350;
-  $('#bfShakeScoops').value = 1;
-  $('#bfShakeMilkML').value = 350;
-  $('#bfYoghurtG').value = 180;
-  $('#bananaPeelOn').value = 0;
-  $('#sEggsWhole').value = settings.eggs.defaultWhole;
-  $('#sEggsWhites').value = settings.eggs.defaultWhites;
-  $('#sBarQty').value = 1;
+// ---------- Clear day ----------
+function onClearDay(){
+  if (!confirm('Clear this day?')) return;
+  diary[dayPicker.value] = newDaySeed();
+  miscByDay[dayPicker.value] = [];
+  save(); renderAll();
 }
-applyPresetDefaults();
-
-// ---------- Inputs -> model wiring ----------
-function n(val){ const x = Number(val); return isFinite(x) ? x : 0; }
-
-// Quick toggles mirror real fields
-$('#togYoghurt').addEventListener('change', e => { const d=getDay(); d.breakfast.yoghurtG = e.target.checked ? n($('#yoghurtGrams').value||180) : 0; save(); renderAll(); });
-$('#yoghurtGrams').addEventListener('input', e => { const d=getDay(); if ($('#togYoghurt').checked){ d.breakfast.yoghurtG = n(e.target.value); save(); renderAll(); } });
-
-$('#togProteinBar').addEventListener('change', e => { const d=getDay(); d.snacks.barOn = e.target.checked; save(); renderAll(); });
-$('#proteinBarQty').addEventListener('input', e => { const d=getDay(); d.snacks.barQty = n(e.target.value); save(); renderAll(); });
-
-$('#togEggs').addEventListener('change', e => { const d=getDay(); d.snacks.eggsOn = e.target.checked; save(); renderAll(); });
-$('#eggsWhole').addEventListener('input', e => { const d=getDay(); d.snacks.eggsWhole = n(e.target.value); save(); renderAll(); });
-$('#eggsWhites').addEventListener('input', e => { const d=getDay(); d.snacks.eggsWhites = n(e.target.value); save(); renderAll(); });
-
-$('#togProteinShake').addEventListener('change', e => { const d=getDay(); d.breakfast.shakeOn = e.target.checked; save(); renderAll(); });
-$('#shakeScoops').addEventListener('input', e => { const d=getDay(); d.breakfast.shakeScoops = n(e.target.value); save(); renderAll(); });
-$('#shakeMilkML').addEventListener('input', e => { const d=getDay(); d.breakfast.shakeMilkML = n(e.target.value); save(); renderAll(); });
-
-// Breakfast section
-$('#bananaPeelOn').addEventListener('input', e => { const d=getDay(); d.breakfast.bananaPeelOn = n(e.target.value); save(); renderAll(); });
-$('#bfYoghurtG').addEventListener('input', e => { const d=getDay(); d.breakfast.yoghurtG = n(e.target.value); save(); renderAll(); });
-$('#bfShakeOn').addEventListener('change', e => { const d=getDay(); d.breakfast.shakeOn = (e.target.value==='yes'); save(); renderAll(); });
-$('#bfShakeScoops').addEventListener('input', e => { const d=getDay(); d.breakfast.shakeScoops = n(e.target.value); save(); renderAll(); });
-$('#bfShakeMilkML').addEventListener('input', e => { const d=getDay(); d.breakfast.shakeMilkML = n(e.target.value); save(); renderAll(); });
-
-// Lunch/Dinner
-$('#lMeatG').addEventListener('input', e => { const d=getDay(); d.lunch.meatG = n(e.target.value); save(); renderAll(); });
-$('#lCurryG').addEventListener('input', e => { const d=getDay(); d.lunch.curryG = n(e.target.value); save(); renderAll(); });
-$('#lChapati').addEventListener('input', e => { const d=getDay(); d.lunch.chapatis = n(e.target.value); save(); renderAll(); });
-$('#lMilk').addEventListener('change', e => { const d=getDay(); d.lunch.milkOn = (e.target.value==='yes'); save(); renderAll(); });
-
-$('#dMeatG').addEventListener('input', e => { const d=getDay(); d.dinner.meatG = n(e.target.value); save(); renderAll(); });
-$('#dCurryG').addEventListener('input', e => { const d=getDay(); d.dinner.curryG = n(e.target.value); save(); renderAll(); });
-$('#dChapati').addEventListener('input', e => { const d=getDay(); d.dinner.chapatis = n(e.target.value); save(); renderAll(); });
-$('#dMilk').addEventListener('change', e => { const d=getDay(); d.dinner.milkOn = (e.target.value==='yes'); save(); renderAll(); });
-
-// Snacks
-$('#sEggsOn').addEventListener('change', e => { const d=getDay(); d.snacks.eggsOn = (e.target.value==='yes'); save(); renderAll(); });
-$('#sEggsWhole').addEventListener('input', e => { const d=getDay(); d.snacks.eggsWhole = n(e.target.value); save(); renderAll(); });
-$('#sEggsWhites').addEventListener('input', e => { const d=getDay(); d.snacks.eggsWhites = n(e.target.value); save(); renderAll(); });
-$('#sMilk').addEventListener('change', e => { const d=getDay(); d.snacks.milkOn = (e.target.value==='yes'); save(); renderAll(); });
-$('#sBarOn').addEventListener('change', e => { const d=getDay(); d.snacks.barOn = (e.target.value==='yes'); save(); renderAll(); });
-$('#sBarQty').addEventListener('input', e => { const d=getDay(); d.snacks.barQty = n(e.target.value); save(); renderAll(); });
-$('#sMilkExtra').addEventListener('input', e => { const d=getDay(); d.snacks.milkExtraML = n(e.target.value); save(); renderAll(); });
-
-// Misc items
-$('#addMisc').addEventListener('click', () => {
-  const name = $('#miscName').value.trim();
-  const kcal = n($('#miscKcal').value);
-  const p = n($('#miscP').value);
-  const c = n($('#miscC').value);
-  const f = n($('#miscF').value);
-  if (!name) return alert('Name required');
-  const date = dayPicker.value;
-  const arr = miscByDay[date] || [];
-  arr.push({ name, kcal, p, c, f });
-  miscByDay[date] = arr; save();
-  ['miscName','miscKcal','miscP','miscC','miscF'].forEach(id => $('#'+id).value = '');
-  renderAll();
-});
-$('#clearMisc').addEventListener('click', () => { miscByDay[dayPicker.value] = []; save(); renderAll(); });
 
 // ---------- Settings (kcal) ----------
 const dlg = $('#dlgSettings');
-$('#closeSettings').addEventListener('click', () => dlg.close());
-$('#saveSettings').addEventListener('click', saveSettings);
-$('#exportPresets').addEventListener('click', exportPresets);
-$('#importPresets').addEventListener('change', importPresets);
+$('#closeSettings')?.addEventListener('click', () => dlg.close());
+$('#saveSettings')?.addEventListener('click', saveSettings);
+$('#exportPresets')?.addEventListener('click', exportPresets);
+$('#importPresets')?.addEventListener('change', importPresets);
 
 function openSettings(){
   $('#setProteinTarget').value = settings.proteinTarget || 0;
@@ -316,6 +256,8 @@ function openSettings(){
   dlg.showModal();
 }
 function saveSettings(){
+  const n = (v)=>{ const x=Number(v); return isFinite(x)?x:0; };
+
   settings.proteinTarget = n($('#setProteinTarget').value);
   settings.milkDefaultML = n($('#setMilkDefault').value);
 
@@ -359,66 +301,57 @@ function importPresets(ev){
   reader.readAsText(file);
 }
 
+// ---------- Inputs -> model wiring ----------
+function n(val){ const x = Number(val); return isFinite(x) ? x : 0; }
+
+// Breakfast
+$('#bananaPeelOn')?.addEventListener('input', e => { const d=getDay(); d.breakfast.bananaPeelOn = n(e.target.value); save(); renderAll(); });
+$('#bfYoghurtG')?.addEventListener('input', e => { const d=getDay(); d.breakfast.yoghurtG = n(e.target.value); save(); renderAll(); });
+$('#bfShakeOn')?.addEventListener('change', e => { const d=getDay(); d.breakfast.shakeOn = (e.target.value==='yes'); save(); renderAll(); });
+$('#bfShakeScoops')?.addEventListener('input', e => { const d=getDay(); d.breakfast.shakeScoops = n(e.target.value); save(); renderAll(); });
+$('#bfShakeMilkML')?.addEventListener('input', e => { const d=getDay(); d.breakfast.shakeMilkML = n(e.target.value); save(); renderAll(); });
+
+// Morning Snack
+$('#msEggsOn')?.addEventListener('change', e => { const d=getDay(); d.morning.eggsOn = (e.target.value==='yes'); save(); renderAll(); });
+$('#msEggsWhole')?.addEventListener('input', e => { const d=getDay(); d.morning.eggsWhole = n(e.target.value); save(); renderAll(); });
+$('#msEggsWhites')?.addEventListener('input', e => { const d=getDay(); d.morning.eggsWhites = n(e.target.value); save(); renderAll(); });
+$('#msMilk')?.addEventListener('change', e => { const d=getDay(); d.morning.milkOn = (e.target.value==='yes'); save(); renderAll(); });
+
+// Lunch/Dinner
+$('#lMeatG')?.addEventListener('input', e => { const d=getDay(); d.lunch.meatG = n(e.target.value); save(); renderAll(); });
+$('#lCurryG')?.addEventListener('input', e => { const d=getDay(); d.lunch.curryG = n(e.target.value); save(); renderAll(); });
+$('#lChapati')?.addEventListener('input', e => { const d=getDay(); d.lunch.chapatis = n(e.target.value); save(); renderAll(); });
+$('#lMilk')?.addEventListener('change', e => { const d=getDay(); d.lunch.milkOn = (e.target.value==='yes'); save(); renderAll(); });
+
+$('#dMeatG')?.addEventListener('input', e => { const d=getDay(); d.dinner.meatG = n(e.target.value); save(); renderAll(); });
+$('#dCurryG')?.addEventListener('input', e => { const d=getDay(); d.dinner.curryG = n(e.target.value); save(); renderAll(); });
+$('#dChapati')?.addEventListener('input', e => { const d=getDay(); d.dinner.chapatis = n(e.target.value); save(); renderAll(); });
+$('#dMilk')?.addEventListener('change', e => { const d=getDay(); d.dinner.milkOn = (e.target.value==='yes'); save(); renderAll(); });
+
+// Afternoon Snack
+$('#asBarOn')?.addEventListener('change', e => { const d=getDay(); d.afternoon.barOn = (e.target.value==='yes'); save(); renderAll(); });
+$('#asBarQty')?.addEventListener('input', e => { const d=getDay(); d.afternoon.barQty = n(e.target.value); save(); renderAll(); });
+$('#asMilk')?.addEventListener('change', e => { const d=getDay(); d.afternoon.milkOn = (e.target.value==='yes'); save(); renderAll(); });
+
+// Misc items
+$('#addMisc')?.addEventListener('click', () => {
+  const name = $('#miscName').value.trim();
+  const kcal = n($('#miscKcal').value);
+  const p = n($('#miscP').value);
+  const c = n($('#miscC').value);
+  const f = n($('#miscF').value);
+  if (!name) return alert('Name required');
+  const date = dayPicker.value;
+  const arr = miscByDay[date] || [];
+  arr.push({ name, kcal, p, c, f });
+  miscByDay[date] = arr; save();
+  ['miscName','miscKcal','miscP','miscC','miscF'].forEach(id => $('#'+id).value = '');
+  renderAll();
+});
+$('#clearMisc')?.addEventListener('click', () => { miscByDay[dayPicker.value] = []; save(); renderAll(); });
+$('#miscMilkML')?.addEventListener('input', e => { const d=getDay(); d.miscMilkML = n(e.target.value); save(); renderAll(); });
+
 // ---------- Tables ----------
-function renderTables(){
-  const d = getDay();
-
-  // Breakfast
-  const rowsB = [];
-  if (d.breakfast.bananaPeelOn > 0){
-    const edible = round(d.breakfast.bananaPeelOn * (settings.banana.edibleFrac || 0.7));
-    const bn = scalePer100(settings.banana.per100g, edible);
-    rowsB.push([`Banana (edible ${edible} g)`, bn]);
-  }
-  if (d.breakfast.yoghurtG > 0){
-    rowsB.push([`Greek yoghurt (${d.breakfast.yoghurtG} g)`, scalePer100(settings.yoghurtPer100g, d.breakfast.yoghurtG)]);
-  }
-  if (d.breakfast.shakeOn){
-    const scoops = d.breakfast.shakeScoops || 1;
-    rowsB.push([`Protein powder (${scoops} scoop)`, scalePerPiece(settings.proteinScoop, scoops)]);
-    if (d.breakfast.shakeMilkML > 0){
-      rowsB.push([`Milk for shake (${d.breakfast.shakeMilkML} ml)`, scalePer100(settings.milkPer100ml, d.breakfast.shakeMilkML)]);
-    }
-  }
-  fillMealTable('tblBreakfast','kcalBreakfast','pBreakfast','cBreakfast','fBreakfast', rowsB);
-
-  // Lunch
-  const rowsL = [];
-  if (d.lunch.meatG > 0)  rowsL.push([`Meat (${d.lunch.meatG} g)`, scalePer100(settings.meatPer100g, d.lunch.meatG)]);
-  if (d.lunch.curryG > 0) rowsL.push([`Curry (${d.lunch.curryG} g)`, scalePer100(settings.curryPer100g, d.lunch.curryG)]);
-  if (d.lunch.chapatis > 0) rowsL.push([`Chapati ×${d.lunch.chapatis}`, scalePerPiece(settings.chapatiPerPiece, d.lunch.chapatis)]);
-  if (d.lunch.milkOn) rowsL.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
-  fillMealTable('tblLunch','kcalLunch','pLunch','cLunch','fLunch', rowsL);
-
-  // Dinner
-  const rowsD = [];
-  if (d.dinner.meatG > 0)  rowsD.push([`Meat (${d.dinner.meatG} g)`, scalePer100(settings.meatPer100g, d.dinner.meatG)]);
-  if (d.dinner.curryG > 0) rowsD.push([`Curry (${d.dinner.curryG} g)`, scalePer100(settings.curryPer100g, d.dinner.curryG)]);
-  if (d.dinner.chapatis > 0) rowsD.push([`Chapati ×${d.dinner.chapatis}`, scalePerPiece(settings.chapatiPerPiece, d.dinner.chapatis)]);
-  if (d.dinner.milkOn) rowsD.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
-  fillMealTable('tblDinner','kcalDinner','pDinner','cDinner','fDinner', rowsD);
-
-  // Snacks
-  const rowsS = [];
-  if (d.snacks.eggsOn){
-    if ((d.snacks.eggsWhole||0) > 0) rowsS.push([`Eggs (whole ×${d.snacks.eggsWhole})`, scalePerPiece(settings.eggs.perWhole, d.snacks.eggsWhole||0)]);
-    if ((d.snacks.eggsWhites||0) > 0) rowsS.push([`Egg whites ×${d.snacks.eggsWhites}`, scalePerPiece(settings.eggs.perWhite, d.snacks.eggsWhites||0)]);
-  }
-  if (d.snacks.barOn && (d.snacks.barQty||0) > 0){
-    rowsS.push([`Protein bar ×${d.snacks.barQty}`, scalePerItem(settings.proteinBar, d.snacks.barQty)]);
-  }
-  if (d.snacks.milkOn){
-    rowsS.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
-  }
-  if ((d.snacks.milkExtraML||0) > 0){
-    rowsS.push([`Extra milk (${d.snacks.milkExtraML} ml)`, scalePer100(settings.milkPer100ml, d.snacks.milkExtraML)]);
-  }
-  (miscByDay[dayPicker.value] || []).forEach(m => {
-    const kcal = round(m.kcal || kcalFromMacros(m.p||0,m.c||0,m.f||0));
-    rowsS.push([m.name, { kcal, p: m.p||0, c: m.c||0, f: m.f||0 }]);
-  });
-  fillMealTable('tblSnacks','kcalSnacks','pSnacks','cSnacks','fSnacks', rowsS);
-}
 function fillMealTable(tbodyId, kcalId, pId, cId, fId, rows){
   const tbody = $('#'+tbodyId);
   tbody.innerHTML = '';
@@ -435,21 +368,94 @@ function fillMealTable(tbodyId, kcalId, pId, cId, fId, rows){
   $('#'+fId).textContent = round(tot.f);
 }
 
-// ---------- Day totals (kcal display) ----------
+function renderTables(){
+  const d = getDay();
+
+  // Breakfast
+  const rowsB = [];
+  if ((d.breakfast.bananaPeelOn||0) > 0){
+    const edible = round(d.breakfast.bananaPeelOn * (settings.banana.edibleFrac || 0.7));
+    const bn = scalePer100(settings.banana.per100g, edible);
+    rowsB.push([`Banana (edible ${edible} g)`, bn]);
+  }
+  if ((d.breakfast.yoghurtG||0) > 0){
+    rowsB.push([`Greek yoghurt (${d.breakfast.yoghurtG} g)`, scalePer100(settings.yoghurtPer100g, d.breakfast.yoghurtG)]);
+  }
+  if (d.breakfast.shakeOn){
+    const scoops = d.breakfast.shakeScoops || 1;
+    rowsB.push([`Protein powder (${scoops} scoop)`, scalePerPiece(settings.proteinScoop, scoops)]);
+    if ((d.breakfast.shakeMilkML||0) > 0){
+      rowsB.push([`Milk for shake (${d.breakfast.shakeMilkML} ml)`, scalePer100(settings.milkPer100ml, d.breakfast.shakeMilkML)]);
+    }
+  }
+  fillMealTable('tblBreakfast','kcalBreakfast','pBreakfast','cBreakfast','fBreakfast', rowsB);
+
+  // Morning Snack (eggs + milk)
+  const rowsMS = [];
+  if (d.morning.eggsOn){
+    if ((d.morning.eggsWhole||0) > 0) rowsMS.push([`Eggs (whole ×${d.morning.eggsWhole})`, scalePerPiece(settings.eggs.perWhole, d.morning.eggsWhole||0)]);
+    if ((d.morning.eggsWhites||0) > 0) rowsMS.push([`Egg whites ×${d.morning.eggsWhites}`, scalePerPiece(settings.eggs.perWhite, d.morning.eggsWhites||0)]);
+  }
+  if (d.morning.milkOn){
+    rowsMS.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
+  }
+  fillMealTable('tblMorning','kcalMorning','pMorning','cMorning','fMorning', rowsMS);
+
+  // Lunch
+  const rowsL = [];
+  if ((d.lunch.meatG||0) > 0)  rowsL.push([`Meat (${d.lunch.meatG} g)`, scalePer100(settings.meatPer100g, d.lunch.meatG)]);
+  if ((d.lunch.curryG||0) > 0) rowsL.push([`Curry (${d.lunch.curryG} g)`, scalePer100(settings.curryPer100g, d.lunch.curryG)]);
+  if ((d.lunch.chapatis||0) > 0) rowsL.push([`Chapati ×${d.lunch.chapatis}`, scalePerPiece(settings.chapatiPerPiece, d.lunch.chapatis)]);
+  if (d.lunch.milkOn) rowsL.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
+  fillMealTable('tblLunch','kcalLunch','pLunch','cLunch','fLunch', rowsL);
+
+  // Afternoon (protein bar + milk)
+  const rowsAS = [];
+  if (d.afternoon.barOn && (d.afternoon.barQty||0) > 0){
+    rowsAS.push([`Protein bar ×${d.afternoon.barQty}`, scalePerItem(settings.proteinBar, d.afternoon.barQty)]);
+  }
+  if (d.afternoon.milkOn){
+    rowsAS.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
+  }
+  fillMealTable('tblAfternoon','kcalAfternoon','pAfternoon','cAfternoon','fAfternoon', rowsAS);
+
+  // Dinner
+  const rowsD = [];
+  if ((d.dinner.meatG||0) > 0)  rowsD.push([`Meat (${d.dinner.meatG} g)`, scalePer100(settings.meatPer100g, d.dinner.meatG)]);
+  if ((d.dinner.curryG||0) > 0) rowsD.push([`Curry (${d.dinner.curryG} g)`, scalePer100(settings.curryPer100g, d.dinner.curryG)]);
+  if ((d.dinner.chapatis||0) > 0) rowsD.push([`Chapati ×${d.dinner.chapatis}`, scalePerPiece(settings.chapatiPerPiece, d.dinner.chapatis)]);
+  if (d.dinner.milkOn) rowsD.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
+  fillMealTable('tblDinner','kcalDinner','pDinner','cDinner','fDinner', rowsD);
+
+  // Misc (separate)
+  const rowsM = [];
+  const miscArr = miscByDay[dayPicker.value] || [];
+  miscArr.forEach(m => {
+    const kcal = round(m.kcal || kcalFromMacros(m.p||0,m.c||0,m.f||0));
+    rowsM.push([m.name, { kcal, p: m.p||0, c: m.c||0, f: m.f||0 }]);
+  });
+  if ((d.miscMilkML||0) > 0){
+    rowsM.push([`Extra milk (${d.miscMilkML} ml)`, scalePer100(settings.milkPer100ml, d.miscMilkML)]);
+  }
+  fillMealTable('tblMisc','kcalMisc','pMisc','cMisc','fMisc', rowsM);
+}
+
+// ---------- Day totals (include ALL sections, incl. Misc) ----------
 function renderTotals(){
-  const segs = ['Breakfast','Lunch','Dinner','Snacks'];
   const ids = {
     Breakfast: { kcal:'kcalBreakfast', p:'pBreakfast', c:'cBreakfast', f:'fBreakfast' },
-    Lunch: { kcal:'kcalLunch', p:'pLunch', c:'cLunch', f:'fLunch' },
-    Dinner: { kcal:'kcalDinner', p:'pDinner', c:'cDinner', f:'fDinner' },
-    Snacks: { kcal:'kcalSnacks', p:'pSnacks', c:'cSnacks', f:'fSnacks' },
+    Morning:   { kcal:'kcalMorning',   p:'pMorning',   c:'cMorning',   f:'fMorning'   },
+    Lunch:     { kcal:'kcalLunch',     p:'pLunch',     c:'cLunch',     f:'fLunch'     },
+    Afternoon: { kcal:'kcalAfternoon', p:'pAfternoon', c:'cAfternoon', f:'fAfternoon' },
+    Dinner:    { kcal:'kcalDinner',    p:'pDinner',    c:'cDinner',    f:'fDinner'    },
+    Misc:      { kcal:'kcalMisc',      p:'pMisc',      c:'cMisc',      f:'fMisc'      },
   };
   const tot = { kcal:0, p:0, c:0, f:0 };
-  segs.forEach(s => {
-    tot.kcal += Number($('#'+ids[s].kcal).textContent)||0;
-    tot.p    += Number($('#'+ids[s].p).textContent)||0;
-    tot.c    += Number($('#'+ids[s].c).textContent)||0;
-    tot.f    += Number($('#'+ids[s].f).textContent)||0;
+  Object.values(ids).forEach(s => {
+    tot.kcal += Number($('#'+s.kcal).textContent)||0;
+    tot.p    += Number($('#'+s.p).textContent)||0;
+    tot.c    += Number($('#'+s.c).textContent)||0;
+    tot.f    += Number($('#'+s.f).textContent)||0;
   });
   $('#dayKcal').textContent = round(tot.kcal);
   $('#dayP').textContent = round(tot.p);
@@ -461,47 +467,58 @@ function renderTotals(){
   $('#proteinTargetText').textContent = pt ? `Target ${pt} g` : '';
 }
 
-// ---------- Groups ----------
+// ---------- Daily groups (table) ----------
+function collectRowsFromTable(tbodyId){
+  return $$('#'+tbodyId+' tr').map(tr => {
+    const t = tr.querySelectorAll('td');
+    if (t.length !== 5) return null;
+    return {
+      name: t[0].textContent,
+      kcal: Number(t[1].textContent)||0,
+      p: Number(t[2].textContent)||0,
+      c: Number(t[3].textContent)||0,
+      f: Number(t[4].textContent)||0
+    };
+  }).filter(Boolean);
+}
 function renderGroups(){
   const groups = {
-    Protein: { kcal:0,p:0,c:0,f:0, items:[] },
-    Dairy:   { kcal:0,p:0,c:0,f:0, items:[] },
-    Grains:  { kcal:0,p:0,c:0,f:0, items:[] },
-    Curries: { kcal:0,p:0,c:0,f:0, items:[] },
-    Snacks:  { kcal:0,p:0,c:0,f:0, items:[] },
+    Protein: { kcal:0,p:0,c:0,f:0 },
+    Dairy:   { kcal:0,p:0,c:0,f:0 },
+    Grains:  { kcal:0,p:0,c:0,f:0 },
+    Curries: { kcal:0,p:0,c:0,f:0 },
+    Other:   { kcal:0,p:0,c:0,f:0 },
   };
-  function collectRows(tbodyId){
-    return $$('#'+tbodyId+' tr').map(tr => {
-      const t = tr.querySelectorAll('td');
-      if (t.length !== 5) return null;
-      return { name: t[0].textContent, kcal: Number(t[1].textContent)||0, p: Number(t[2].textContent)||0, c: Number(t[3].textContent)||0, f: Number(t[4].textContent)||0 };
-    }).filter(Boolean);
-  }
-  const all = [ ...collectRows('tblBreakfast'), ...collectRows('tblLunch'), ...collectRows('tblDinner'), ...collectRows('tblSnacks') ];
-  function classify(name){
-    const n = name.toLowerCase();
+  const all = [
+    ...collectRowsFromTable('tblBreakfast'),
+    ...collectRowsFromTable('tblMorning'),
+    ...collectRowsFromTable('tblLunch'),
+    ...collectRowsFromTable('tblAfternoon'),
+    ...collectRowsFromTable('tblDinner'),
+    ...collectRowsFromTable('tblMisc'),
+  ];
+  function classify(nm){
+    const n = nm.toLowerCase();
     if (n.includes('meat (') || n.includes('protein powder') || n.includes('protein bar') || n.startsWith('eggs') || n.startsWith('egg whites')) return 'Protein';
     if (n.includes('milk') || n.includes('yoghurt')) return 'Dairy';
     if (n.includes('chapati')) return 'Grains';
     if (n.startsWith('curry')) return 'Curries';
-    return 'Snacks';
+    return 'Other';
   }
-  all.forEach(r => { const g = classify(r.name); const b = groups[g]; b.kcal+=r.kcal; b.p+=r.p; b.c+=r.c; b.f+=r.f; b.items.push(r.name); });
+  all.forEach(r => { const g = classify(r.name); const b = groups[g]; b.kcal+=r.kcal; b.p+=r.p; b.c+=r.c; b.f+=r.f; });
 
-  const host = $('#groupTotals'); host.innerHTML = '';
+  const tbody = $('#tblGroups'); tbody.innerHTML = '';
+  const sum = { kcal:0,p:0,c:0,f:0 };
   Object.entries(groups).forEach(([k,v]) => {
-    const div = document.createElement('div');
-    div.className = 'subcard';
-    div.innerHTML = `<h3>${k}</h3>
-      <div class="grid-4">
-        <div><span class="muted">kcal</span><div><strong>${round(v.kcal)}</strong></div></div>
-        <div><span class="muted">Protein</span><div><strong>${round(v.p)} g</strong></div></div>
-        <div><span class="muted">Carbs</span><div><strong>${round(v.c)} g</strong></div></div>
-        <div><span class="muted">Fat</span><div><strong>${round(v.f)} g</strong></div></div>
-      </div>
-      <div class="muted mt8">${v.items.join(' • ')}</div>`;
-    host.appendChild(div);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${k}</td><td class="r">${round(v.kcal)}</td><td class="r">${round(v.p)} g</td><td class="r">${round(v.c)} g</td><td class="r">${round(v.f)} g</td>`;
+    tbody.appendChild(tr);
+    sum.kcal+=v.kcal; sum.p+=v.p; sum.c+=v.c; sum.f+=v.f;
   });
+  $('#grpKcal').textContent = round(sum.kcal);
+  $('#grpP').textContent    = round(sum.p);
+  $('#grpC').textContent    = round(sum.c);
+  $('#grpF').textContent    = round(sum.f);
 }
 
 // ---------- Week view & export ----------
@@ -569,8 +586,7 @@ function exportDayJSON(){
 function onSubmitDay(){
   save();
   alert('Day saved. Weekly totals updated.');
-  renderWeek();
-  // Switch header segmented to Week view for quick check
+  // Jump to Week view for a quick check
   $('#btnWeekly').click();
 }
 
@@ -578,19 +594,7 @@ function onSubmitDay(){
 function renderAll(){
   const d = getDay();
 
-  // Quick toggles <-> day
-  $('#togYoghurt').checked = (d.breakfast.yoghurtG > 0);
-  $('#yoghurtGrams').value = d.breakfast.yoghurtG;
-  $('#togProteinBar').checked = d.snacks.barOn;
-  $('#proteinBarQty').value = d.snacks.barQty;
-  $('#togEggs').checked = d.snacks.eggsOn;
-  $('#eggsWhole').value = d.snacks.eggsWhole;
-  $('#eggsWhites').value = d.snacks.eggsWhites;
-  $('#togProteinShake').checked = d.breakfast.shakeOn;
-  $('#shakeScoops').value = d.breakfast.shakeScoops;
-  $('#shakeMilkML').value = d.breakfast.shakeMilkML;
-
-  // Breakfast specific
+  // Breakfast
   $('#bananaPeelOn').value = d.breakfast.bananaPeelOn;
   $('#bfYoghurtG').value = d.breakfast.yoghurtG;
   $('#bfShakeOn').value = d.breakfast.shakeOn ? 'yes' : 'no';
@@ -598,34 +602,43 @@ function renderAll(){
   $('#bfShakeMilkML').value = d.breakfast.shakeMilkML;
   syncBfShakeSeg();
 
-  // Lunch/Dinner selects to segs
+  // Morning
+  $('#msEggsOn').value = d.morning.eggsOn ? 'yes' : 'no';
+  $('#msEggsWhole').value = d.morning.eggsWhole;
+  $('#msEggsWhites').value = d.morning.eggsWhites;
+  $('#msMilk').value = d.morning.milkOn ? 'yes' : 'no';
+  ['msEggsOn','msMilk'].forEach(syncSegFromSelect);
+
+  // Lunch
   $('#lMeatG').value = d.lunch.meatG;
   $('#lCurryG').value = d.lunch.curryG;
   $('#lChapati').value = d.lunch.chapatis;
   $('#lMilk').value = d.lunch.milkOn ? 'yes' : 'no';
   syncSegFromSelect('lMilk');
 
+  // Afternoon
+  $('#asBarOn').value = d.afternoon.barOn ? 'yes' : 'no';
+  $('#asBarQty').value = d.afternoon.barQty;
+  $('#asMilk').value = d.afternoon.milkOn ? 'yes' : 'no';
+  ['asBarOn','asMilk'].forEach(syncSegFromSelect);
+
+  // Dinner
   $('#dMeatG').value = d.dinner.meatG;
   $('#dCurryG').value = d.dinner.curryG;
   $('#dChapati').value = d.dinner.chapatis;
   $('#dMilk').value = d.dinner.milkOn ? 'yes' : 'no';
   syncSegFromSelect('dMilk');
 
-  // Snacks selects to segs
-  $('#sEggsOn').value = d.snacks.eggsOn ? 'yes' : 'no';
-  $('#sEggsWhole').value = d.snacks.eggsWhole;
-  $('#sEggsWhites').value = d.snacks.eggsWhites;
-  $('#sMilk').value = d.snacks.milkOn ? 'yes' : 'no';
-  $('#sBarOn').value = d.snacks.barOn ? 'yes' : 'no';
-  $('#sBarQty').value = d.snacks.barQty;
-  $('#sMilkExtra').value = d.snacks.milkExtraML;
-  ['sEggsOn','sMilk','sBarOn'].forEach(syncSegFromSelect);
+  // Misc
+  $('#miscMilkML').value = d.miscMilkML;
 
+  // Tables + totals + groups
   renderTables();
   renderTotals();
   renderGroups();
-  // Keep whatever panel state user is on (do not force-close weekly)
 }
 
 // ---------- Boot ----------
+$('#btnToday')?.classList.add('is-active');
+$('#weeklyView').style.display = 'none';
 renderAll();
