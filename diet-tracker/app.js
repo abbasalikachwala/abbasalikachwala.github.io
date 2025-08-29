@@ -1,6 +1,8 @@
 // ====================================================================
-// Daily Macros Tracker — kcal-first, Dashboard UI
-// Client-only (GH Pages safe). Data saved in localStorage.
+// Daily Diet Tracker — kcal-first Dashboard + Weekly tools
+// - Client-only (GH Pages safe). Data saved in localStorage.
+// - Weekly view: edit Burned (past/today only), per-day Clear, Clear week,
+//   daily/weekly deficit (burned - intake), CSV includes burned/deficit.
 // ====================================================================
 
 // ---------- DOM helpers ----------
@@ -10,10 +12,21 @@ const round = (v) => Math.round((v + Number.EPSILON) * 100) / 100;
 
 // ---------- Time/Date ----------
 function todayStr(d = new Date()) {
+   // Use local timezone; produce YYYY-MM-DD
    const tzo = d.getTimezoneOffset() * 60000;
    return new Date(d - tzo).toISOString().slice(0, 10);
 }
 
+function parseISODate(s) {
+   const [y, m, d] = s.split('-').map(Number);
+   return new Date(y, m - 1, d);
+}
+
+function isFuture(dateStr) {
+   return parseISODate(dateStr) > parseISODate(todayStr());
+}
+
+// ISO week label
 function isoWeek(dStr) {
    const d = new Date(dStr + "T12:00:00");
    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -25,11 +38,27 @@ function isoWeek(dStr) {
    return `${date.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
 }
 
+function weekDates(anchor) {
+   // Returns array of 7 YYYY-MM-DD for Mon..Sun of the week containing anchor date
+   const d = parseISODate(anchor);
+   const day = (d.getDay() + 6) % 7; // 0=Mon
+   const monday = new Date(d);
+   monday.setDate(d.getDate() - day);
+   const out = [];
+   for (let i = 0; i < 7; i++) {
+      const dt = new Date(monday);
+      dt.setDate(monday.getDate() + i);
+      out.push(todayStr(dt));
+   }
+   return out;
+}
+
 // ---------- Storage ----------
 const LS = {
-   settings: 'dm_settings_v5_kcal',
-   diary: 'dm_diary_v5',
-   misc: 'dm_misc_v5'
+   settings: 'ddt_settings_v6_kcal',
+   diary: 'ddt_diary_v6',
+   misc: 'ddt_misc_v6',
+   burned: 'ddt_burned_v1'
 };
 const saveJSON = (k, o) => localStorage.setItem(k, JSON.stringify(o));
 const loadJSON = (k, fb) => {
@@ -41,15 +70,14 @@ const loadJSON = (k, fb) => {
 };
 
 // ---------- Defaults (kcal-first) ----------
-// Main form stays at 0. Settings are prefilled (editable) for everything EXCEPT curry.
 const DEFAULTS = {
    proteinTarget: 130,
    milkDefaultML: 300,
    milkPer100ml: {
-      p: 3.7,
-      c: 4.9,
-      f: 0.3,
-      kcal: 38
+      p: 3.8,
+      c: 5.0,
+      f: 0.2,
+      kcal: 39.5
    }, // trim milk
    yoghurtPer100g: {
       p: 9.0,
@@ -98,14 +126,14 @@ const DEFAULTS = {
          kcal: 17
       },
       defaultWhole: 1,
-      defaultWhites: 1, // (not auto-filled in form; just kept as your usual)
+      defaultWhites: 1,
    },
    meatPer100g: {
       p: 31,
       c: 0,
       f: 3.6,
       kcal: 165
-   }, // cooked chicken breast baseline
+   },
    curryPer100g: {
       p: 0,
       c: 0,
@@ -116,6 +144,7 @@ const DEFAULTS = {
 let settings = loadJSON(LS.settings, DEFAULTS);
 let diary = loadJSON(LS.diary, {});
 let miscByDay = loadJSON(LS.misc, {});
+let burnedByDay = loadJSON(LS.burned, {});
 
 // ---------- Energy helpers ----------
 function kcalFromMacros(p, c, f) {
@@ -164,7 +193,6 @@ dayPicker.value = todayStr();
 
 function newDaySeed() {
    return {
-      // Breakfast
       breakfast: {
          bananaPeelOn: 0,
          yoghurtG: 0,
@@ -172,14 +200,12 @@ function newDaySeed() {
          shakeScoops: 0,
          shakeMilkML: 0
       },
-      // Morning Snack (eggs + milk)
       morning: {
          eggsOn: false,
          eggsWhole: 0,
          eggsWhites: 0,
          milkOn: false
       },
-      // Lunch / Dinner
       lunch: {
          meatG: 0,
          curryG: 0,
@@ -192,13 +218,11 @@ function newDaySeed() {
          chapatis: 0,
          milkOn: false
       },
-      // Afternoon Snack (protein bar + milk)
       afternoon: {
          barOn: false,
          barQty: 0,
          milkOn: false
       },
-      // Misc
       miscMilkML: 0,
    };
 }
@@ -210,12 +234,13 @@ function getDay() {
    return diary[date];
 }
 
-function save() {
+function saveAll() {
    saveJSON(LS.diary, diary);
    saveJSON(LS.misc, miscByDay);
+   saveJSON(LS.burned, burnedByDay);
 }
 
-// ---------- Segmented toggles (no dropdowns) ----------
+// ---------- Segmented toggles ----------
 function setSegActiveGroup(bind, val) {
    $$(`.seg-btn[data-bind="${bind}"]`).forEach(b => {
       b.classList.toggle('is-active', b.dataset.val === val);
@@ -258,26 +283,74 @@ document.addEventListener('click', (e) => {
    if (bind === 'asBarOn') d.afternoon.barOn = (btn.dataset.val === 'yes');
    if (bind === 'asMilk') d.afternoon.milkOn = (btn.dataset.val === 'yes');
 
-   save();
+   saveAll();
    renderAll();
 });
 
 // ---------- Header actions ----------
 document.addEventListener('click', (e) => {
-   if (e.target && e.target.id === 'btnExportWeek') exportCurrentWeekCSV();
+   const t = e.target;
+   if (!t) return;
+
+   // Export week CSV (button in Weekly view)
+   if (t.id === 'btnExportWeek') {
+      exportCurrentWeekCSV();
+   }
+
+   // Weekly: Clear a single day
+   if (t.classList && t.classList.contains('wk-clear')) {
+      const date = t.dataset.date;
+      if (!date) return;
+      if (!confirm(`Clear ${date}?`)) return;
+      diary[date] = newDaySeed();
+      miscByDay[date] = [];
+      burnedByDay[date] = 0;
+      saveAll();
+      renderWeek();
+   }
+
+   // Weekly: Clear the whole week
+   if (t.id === 'btnClearWeek') {
+      const dates = weekDates(dayPicker.value);
+      if (!confirm(`Clear all entries for week of ${dates[0]} to ${dates[6]}?`)) return;
+      dates.forEach(dt => {
+         diary[dt] = newDaySeed();
+         miscByDay[dt] = [];
+         burnedByDay[dt] = 0;
+      });
+      saveAll();
+      renderWeek();
+   }
 });
+
 $('#btnExportDay')?.addEventListener('click', exportDayJSON);
 $('#btnClearDay')?.addEventListener('click', onClearDay);
 $('#btnSubmit')?.addEventListener('click', onSubmitDay);
 $('#btnSettings')?.addEventListener('click', openSettings);
-dayPicker.addEventListener('change', renderAll);
+dayPicker.addEventListener('change', () => {
+   renderAll();
+   if ($('#weeklyView').style.display !== 'none') renderWeek();
+});
 
-// ---------- Clear day ----------
+// Weekly: update burned via event delegation
+document.addEventListener('input', (e) => {
+   const el = e.target;
+   if (!el.classList || !el.classList.contains('wk-burn')) return;
+   const date = el.dataset.date;
+   if (!date || isFuture(date)) return; // safety
+   const val = Number(el.value);
+   burnedByDay[date] = isFinite(val) ? Math.max(0, val) : 0;
+   saveJSON(LS.burned, burnedByDay);
+   // Live-update totals row
+   renderWeek();
+});
+
+// ---------- Clear day (Today view) ----------
 function onClearDay() {
    if (!confirm('Clear this day?')) return;
    diary[dayPicker.value] = newDaySeed();
    miscByDay[dayPicker.value] = [];
-   save();
+   saveAll();
    renderAll();
 }
 
@@ -296,13 +369,25 @@ function setFieldVal(id, val, blankZero = false) {
 }
 
 function openSettings() {
-   // Curry shown BLANK if zeroed (you'll paste your recipe numbers)
+   // Meat per 100 g
+   setFieldVal('meatP100', settings.meatPer100g.p);
+   setFieldVal('meatC100', settings.meatPer100g.c);
+   setFieldVal('meatF100', settings.meatPer100g.f);
+   setFieldVal('meatKcal100', settings.meatPer100g.kcal);
+
+   // Curry per 100 g (blank zeros)
    setFieldVal('curryP100', settings.curryPer100g.p, true);
    setFieldVal('curryC100', settings.curryPer100g.c, true);
    setFieldVal('curryF100', settings.curryPer100g.f, true);
    setFieldVal('curryKcal100', settings.curryPer100g.kcal, true);
 
-   // Targets & defaults (prefilled)
+   // Chapati per piece
+   setFieldVal('chapatiP', settings.chapatiPerPiece.p);
+   setFieldVal('chapatiC', settings.chapatiPerPiece.c);
+   setFieldVal('chapatiF', settings.chapatiPerPiece.f);
+   setFieldVal('chapatiKcal', settings.chapatiPerPiece.kcal);
+
+   // Targets & defaults
    setFieldVal('setProteinTarget', settings.proteinTarget);
    setFieldVal('setMilkDefault', settings.milkDefaultML);
 
@@ -318,13 +403,13 @@ function openSettings() {
    setFieldVal('yogF100', settings.yoghurtPer100g.f);
    setFieldVal('yogKcal100', settings.yoghurtPer100g.kcal);
 
-   // Protein bar (per bar)
+   // Protein bar
    setFieldVal('barP', settings.proteinBar.p);
    setFieldVal('barC', settings.proteinBar.c);
    setFieldVal('barF', settings.proteinBar.f);
    setFieldVal('barKcal', settings.proteinBar.kcal);
 
-   // Scoop (per scoop)
+   // Protein scoop
    setFieldVal('scoopP', settings.proteinScoop.p);
    setFieldVal('scoopC', settings.proteinScoop.c);
    setFieldVal('scoopF', settings.proteinScoop.f);
@@ -337,18 +422,6 @@ function openSettings() {
    setFieldVal('bananaF100', settings.banana.per100g.f);
    setFieldVal('bananaKcal100', settings.banana.per100g.kcal);
 
-   // Chapati
-   setFieldVal('chapatiP', settings.chapatiPerPiece.p);
-   setFieldVal('chapatiC', settings.chapatiPerPiece.c);
-   setFieldVal('chapatiF', settings.chapatiPerPiece.f);
-   setFieldVal('chapatiKcal', settings.chapatiPerPiece.kcal);
-
-   // Meat per 100 g
-   setFieldVal('meatP100', settings.meatPer100g.p);
-   setFieldVal('meatC100', settings.meatPer100g.c);
-   setFieldVal('meatF100', settings.meatPer100g.f);
-   setFieldVal('meatKcal100', settings.meatPer100g.kcal);
-
    dlg.showModal();
 }
 
@@ -356,6 +429,25 @@ function saveSettings() {
    const n = (v) => {
       const x = Number(v);
       return isFinite(x) ? x : 0;
+   };
+
+   settings.meatPer100g = {
+      p: n($('#meatP100').value),
+      c: n($('#meatC100').value),
+      f: n($('#meatF100').value),
+      kcal: n($('#meatKcal100').value)
+   };
+   settings.curryPer100g = {
+      p: $('#curryP100').value === '' ? 0 : n($('#curryP100').value),
+      c: $('#curryC100').value === '' ? 0 : n($('#curryC100').value),
+      f: $('#curryF100').value === '' ? 0 : n($('#curryF100').value),
+      kcal: $('#curryKcal100').value === '' ? 0 : n($('#curryKcal100').value),
+   };
+   settings.chapatiPerPiece = {
+      p: n($('#chapatiP').value),
+      c: n($('#chapatiC').value),
+      f: n($('#chapatiF').value),
+      kcal: n($('#chapatiKcal').value)
    };
 
    settings.proteinTarget = n($('#setProteinTarget').value);
@@ -373,6 +465,7 @@ function saveSettings() {
       f: n($('#yogF100').value),
       kcal: n($('#yogKcal100').value)
    };
+
    settings.proteinBar = {
       p: n($('#barP').value),
       c: n($('#barC').value),
@@ -385,6 +478,7 @@ function saveSettings() {
       f: n($('#scoopF').value),
       kcal: n($('#scoopKcal').value)
    };
+
    settings.banana = {
       edibleFrac: n($('#bananaFrac').value) || 0.7,
       per100g: {
@@ -393,30 +487,6 @@ function saveSettings() {
          f: n($('#bananaF100').value),
          kcal: n($('#bananaKcal100').value)
       }
-   };
-   settings.chapatiPerPiece = {
-      p: n($('#chapatiP').value),
-      c: n($('#chapatiC').value),
-      f: n($('#chapatiF').value),
-      kcal: n($('#chapatiKcal').value)
-   };
-   settings.meatPer100g = {
-      p: n($('#meatP100').value),
-      c: n($('#meatC100').value),
-      f: n($('#meatF100').value),
-      kcal: n($('#meatKcal100').value)
-   };
-
-   // Curry can remain blank; if you typed numbers, save them (else keep zeros)
-   const cp = $('#curryP100').value,
-      cc = $('#curryC100').value,
-      cf = $('#curryF100').value,
-      ck = $('#curryKcal100').value;
-   settings.curryPer100g = {
-      p: cp === '' ? 0 : Number(cp) || 0,
-      c: cc === '' ? 0 : Number(cc) || 0,
-      f: cf === '' ? 0 : Number(cf) || 0,
-      kcal: ck === '' ? 0 : Number(ck) || 0,
    };
 
    saveJSON(LS.settings, settings);
@@ -464,25 +534,25 @@ function n(val) {
 $('#bananaPeelOn')?.addEventListener('input', e => {
    const d = getDay();
    d.breakfast.bananaPeelOn = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 $('#bfYoghurtG')?.addEventListener('input', e => {
    const d = getDay();
    d.breakfast.yoghurtG = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 $('#bfShakeScoops')?.addEventListener('input', e => {
    const d = getDay();
    d.breakfast.shakeScoops = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 $('#bfShakeMilkML')?.addEventListener('input', e => {
    const d = getDay();
    d.breakfast.shakeMilkML = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 
@@ -490,13 +560,13 @@ $('#bfShakeMilkML')?.addEventListener('input', e => {
 $('#msEggsWhole')?.addEventListener('input', e => {
    const d = getDay();
    d.morning.eggsWhole = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 $('#msEggsWhites')?.addEventListener('input', e => {
    const d = getDay();
    d.morning.eggsWhites = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 
@@ -504,38 +574,38 @@ $('#msEggsWhites')?.addEventListener('input', e => {
 $('#lMeatG')?.addEventListener('input', e => {
    const d = getDay();
    d.lunch.meatG = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 $('#lCurryG')?.addEventListener('input', e => {
    const d = getDay();
    d.lunch.curryG = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 $('#lChapati')?.addEventListener('input', e => {
    const d = getDay();
    d.lunch.chapatis = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 
 $('#dMeatG')?.addEventListener('input', e => {
    const d = getDay();
    d.dinner.meatG = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 $('#dCurryG')?.addEventListener('input', e => {
    const d = getDay();
    d.dinner.curryG = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 $('#dChapati')?.addEventListener('input', e => {
    const d = getDay();
    d.dinner.chapatis = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 
@@ -543,7 +613,7 @@ $('#dChapati')?.addEventListener('input', e => {
 $('#asBarQty')?.addEventListener('input', e => {
    const d = getDay();
    d.afternoon.barQty = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 
@@ -565,23 +635,23 @@ $('#addMisc')?.addEventListener('click', () => {
       f
    });
    miscByDay[date] = arr;
-   save();
+   saveAll();
    ['miscName', 'miscKcal', 'miscP', 'miscC', 'miscF'].forEach(id => $('#' + id).value = '');
    renderAll();
 });
 $('#clearMisc')?.addEventListener('click', () => {
    miscByDay[dayPicker.value] = [];
-   save();
+   saveAll();
    renderAll();
 });
 $('#miscMilkML')?.addEventListener('input', e => {
    const d = getDay();
    d.miscMilkML = n(e.target.value);
-   save();
+   saveAll();
    renderAll();
 });
 
-// ---------- Tables ----------
+// ---------- Tables (Today view) ----------
 function fillMealTable(tbodyId, kcalId, pId, cId, fId, rows) {
    const tbody = $('#' + tbodyId);
    tbody.innerHTML = '';
@@ -665,7 +735,7 @@ function renderTables() {
    if (d.dinner.milkOn && (settings.milkDefaultML || 0) > 0) rowsD.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
    fillMealTable('tblDinner', 'kcalDinner', 'pDinner', 'cDinner', 'fDinner', rowsD);
 
-   // Misc (separate)
+   // Misc
    const rowsM = [];
    const miscArr = miscByDay[dayPicker.value] || [];
    miscArr.forEach(m => {
@@ -684,7 +754,7 @@ function renderTables() {
    fillMealTable('tblMisc', 'kcalMisc', 'pMisc', 'cMisc', 'fMisc', rowsM);
 }
 
-// ---------- Day totals (include ALL sections) ----------
+// ---------- Totals & progress (Today view) ----------
 function setProgressColor(percent) {
    const el = $('#proteinProgress');
    el.classList.remove('prog-red', 'prog-amber', 'prog-green');
@@ -757,7 +827,7 @@ function renderTotals() {
    $('#proteinTargetText').textContent = pt ? `Target ${pt} g — ${round(pct)}%` : '';
 }
 
-// ---------- Daily groups (table) ----------
+// ---------- Daily groups (Today view) ----------
 function collectRowsFromTable(tbodyId) {
    return $$('#' + tbodyId + ' tr').map(tr => {
       const t = tr.querySelectorAll('td');
@@ -854,48 +924,109 @@ function renderGroups() {
    $('#grpF').textContent = round(sum.f);
 }
 
-// ---------- Week view & export ----------
-function calcTotalsForDate(date) {
-   const orig = dayPicker.value;
-   dayPicker.value = date;
-   renderTables();
-   renderTotals();
-   const totals = {
-      kcal: Number($('#dayKcal').textContent) || 0,
-      p: Number($('#dayP').textContent) || 0,
-      c: Number($('#dayC').textContent) || 0,
-      f: Number($('#dayF').textContent) || 0,
+// ---------- Compute totals for any date (no DOM side effects) ----------
+function computeTotalsForDate(date) {
+   const d = diary[date] ? Object.assign(newDaySeed(), diary[date]) : newDaySeed();
+   const add = (acc, x) => {
+      acc.kcal += x.kcal;
+      acc.p += x.p;
+      acc.c += x.c;
+      acc.f += x.f;
    };
-   dayPicker.value = orig;
-   renderTables();
-   renderTotals();
-   return totals;
-}
 
-function gatherWeekData(weekKey) {
-   const rows = [];
-   Object.keys(diary).forEach(date => {
-      if (isoWeek(date) === weekKey) {
-         rows.push({
-            date,
-            ...calcTotalsForDate(date)
-         });
-      }
-   });
-   rows.sort((a, b) => a.date.localeCompare(b.date));
-   const sum = rows.reduce((acc, r) => {
-      acc.kcal += r.kcal;
-      acc.p += r.p;
-      acc.c += r.c;
-      acc.f += r.f;
-      return acc;
-   }, {
+   const sum = {
       kcal: 0,
       p: 0,
       c: 0,
       f: 0
+   };
+
+   // Breakfast
+   if ((d.breakfast.bananaPeelOn || 0) > 0) {
+      const edible = Math.round(d.breakfast.bananaPeelOn * (settings.banana.edibleFrac || 0.7));
+      add(sum, scalePer100(settings.banana.per100g, edible));
+   }
+   if ((d.breakfast.yoghurtG || 0) > 0) {
+      add(sum, scalePer100(settings.yoghurtPer100g, d.breakfast.yoghurtG));
+   }
+   if (d.breakfast.shakeOn) {
+      const scoops = d.breakfast.shakeScoops || 0;
+      if (scoops > 0) add(sum, scalePerPiece(settings.proteinScoop, scoops));
+      if ((d.breakfast.shakeMilkML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, d.breakfast.shakeMilkML));
+   }
+
+   // Morning
+   if (d.morning.eggsOn) {
+      if ((d.morning.eggsWhole || 0) > 0) add(sum, scalePerPiece(settings.eggs.perWhole, d.morning.eggsWhole || 0));
+      if ((d.morning.eggsWhites || 0) > 0) add(sum, scalePerPiece(settings.eggs.perWhite, d.morning.eggsWhites || 0));
+   }
+   if (d.morning.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, settings.milkDefaultML));
+
+   // Lunch
+   if ((d.lunch.meatG || 0) > 0) add(sum, scalePer100(settings.meatPer100g, d.lunch.meatG));
+   if ((d.lunch.curryG || 0) > 0) add(sum, scalePer100(settings.curryPer100g, d.lunch.curryG));
+   if ((d.lunch.chapatis || 0) > 0) add(sum, scalePerPiece(settings.chapatiPerPiece, d.lunch.chapatis));
+   if (d.lunch.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, settings.milkDefaultML));
+
+   // Afternoon
+   if (d.afternoon.barOn && (d.afternoon.barQty || 0) > 0) add(sum, scalePerItem(settings.proteinBar, d.afternoon.barQty));
+   if (d.afternoon.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, settings.milkDefaultML));
+
+   // Dinner
+   if ((d.dinner.meatG || 0) > 0) add(sum, scalePer100(settings.meatPer100g, d.dinner.meatG));
+   if ((d.dinner.curryG || 0) > 0) add(sum, scalePer100(settings.curryPer100g, d.dinner.curryG));
+   if ((d.dinner.chapatis || 0) > 0) add(sum, scalePerPiece(settings.chapatiPerPiece, d.dinner.chapatis));
+   if (d.dinner.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, settings.milkDefaultML));
+
+   // Misc list
+   const arr = miscByDay[date] || [];
+   arr.forEach(m => add(sum, {
+      kcal: round(m.kcal || kcalFromMacros(m.p || 0, m.c || 0, m.f || 0)),
+      p: m.p || 0,
+      c: m.c || 0,
+      f: m.f || 0
+   }));
+   if ((d.miscMilkML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, d.miscMilkML));
+
+   return {
+      kcal: round(sum.kcal),
+      p: round(sum.p),
+      c: round(sum.c),
+      f: round(sum.f)
+   };
+}
+
+// ---------- Week view ----------
+function gatherWeekData() {
+   const dates = weekDates(dayPicker.value);
+   const rows = dates.map(date => {
+      const totals = computeTotalsForDate(date);
+      const burned = Number(burnedByDay[date] || 0);
+      const deficit = round(burned - totals.kcal);
+      return {
+         date,
+         ...totals,
+         burned,
+         deficit
+      };
+   });
+   const sum = rows.reduce((a, r) => ({
+      kcal: a.kcal + r.kcal,
+      p: a.p + r.p,
+      c: a.c + r.c,
+      f: a.f + r.f,
+      burned: a.burned + r.burned,
+      deficit: a.deficit + r.deficit
+   }), {
+      kcal: 0,
+      p: 0,
+      c: 0,
+      f: 0,
+      burned: 0,
+      deficit: 0
    });
    return {
+      dates,
       rows,
       sum
    };
@@ -903,22 +1034,42 @@ function gatherWeekData(weekKey) {
 
 function renderWeek() {
    const wk = isoWeek(dayPicker.value);
-   $('#weeklyLabel').textContent = `Week ${wk}`;
+   const dates = weekDates(dayPicker.value);
+   $('#weeklyLabel').textContent = `Week ${wk} — ${dates[0]} → ${dates[6]}`;
+
    const {
       rows,
       sum
-   } = gatherWeekData(wk);
+   } = gatherWeekData();
    const tbody = $('#tblWeek');
    tbody.innerHTML = '';
+
    rows.forEach(r => {
+      const future = isFuture(r.date);
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${r.date}</td><td class="r">${round(r.kcal)}</td><td class="r">${round(r.p)}</td><td class="r">${round(r.c)}</td><td class="r">${round(r.f)}</td>`;
+      tr.innerHTML = `
+      <td>${r.date}</td>
+      <td class="r">${r.kcal}</td>
+      <td class="r">${r.p}</td>
+      <td class="r">${r.c}</td>
+      <td class="r">${r.f}</td>
+      <td class="r">
+        <input type="number" class="wk-burn" data-date="${r.date}" min="0" step="1" ${future ? 'disabled' : ''} value="${r.burned}">
+      </td>
+      <td class="r">${r.deficit}</td>
+      <td class="r">
+        <button class="btn tiny outline danger wk-clear" data-date="${r.date}" ${future ? 'disabled' : ''}>Clear</button>
+      </td>
+    `;
       tbody.appendChild(tr);
    });
+
    $('#wkKcal').textContent = round(sum.kcal);
    $('#wkP').textContent = round(sum.p);
    $('#wkC').textContent = round(sum.c);
    $('#wkF').textContent = round(sum.f);
+   $('#wkBurned').textContent = round(sum.burned);
+   $('#wkDeficit').textContent = round(sum.deficit);
 }
 
 function exportCurrentWeekCSV() {
@@ -926,12 +1077,12 @@ function exportCurrentWeekCSV() {
    const {
       rows,
       sum
-   } = gatherWeekData(wk);
-   let csv = 'date,kcal,protein_g,carbs_g,fat_g\n';
+   } = gatherWeekData();
+   let csv = 'date,kcal,protein_g,carbs_g,fat_g,burned_kcal,deficit_kcal\n';
    rows.forEach(r => {
-      csv += `${r.date},${round(r.kcal)},${round(r.p)},${round(r.c)},${round(r.f)}\n`;
+      csv += `${r.date},${r.kcal},${r.p},${r.c},${r.f},${r.burned},${r.deficit}\n`;
    });
-   csv += `WEEK_TOTAL,${round(sum.kcal)},${round(sum.p)},${round(sum.c)},${round(sum.f)}\n`;
+   csv += `WEEK_TOTAL,${round(sum.kcal)},${round(sum.p)},${round(sum.c)},${round(sum.f)},${round(sum.burned)},${round(sum.deficit)}\n`;
    const blob = new Blob([csv], {
       type: 'text/csv'
    });
@@ -947,7 +1098,8 @@ function exportDayJSON() {
    const data = {
       date,
       day: getDay(),
-      misc: miscByDay[date] || []
+      misc: miscByDay[date] || [],
+      burned: burnedByDay[date] || 0
    };
    const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json'
@@ -961,13 +1113,13 @@ function exportDayJSON() {
 
 // ---------- Submit ----------
 function onSubmitDay() {
-   save();
+   saveAll();
    alert('Day saved. Weekly totals updated.');
-   // Jump to Week view for a quick check
-   $('#btnWeekly').click();
+   // optional: jump to Week view
+   // $('#btnWeekly').click();
 }
 
-// ---------- Render all ----------
+// ---------- Render all (Today view) ----------
 function renderAll() {
    const d = getDay();
 
@@ -1004,7 +1156,6 @@ function renderAll() {
    // Misc
    $('#miscMilkML').value = d.miscMilkML;
 
-   // Tables + totals + groups
    renderTables();
    renderTotals();
    renderGroups();
