@@ -277,9 +277,9 @@ progress.prog-green::-moz-progress-bar {
 }
 
 .table th {
-	text-align: left;
+	text-align: center;
 	font-weight: 700;
-	font-size: 13.5px;
+	font-size: 20px;
 	color: var(--muted);
 	letter-spacing: .2px;
 }
@@ -513,7 +513,7 @@ input[type=number] {
 
 /* ---------- Settings dialog (pretty, readable inputs) ---------- */
 .dialog {
-	width: min(1120px, 96vw);
+	width: 85%;
 	border: 1px solid var(--border);
 	border-radius: 18px;
 	background: var(--panel);
