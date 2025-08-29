@@ -105,7 +105,7 @@ input[type="date"] {
 	height: 36px;
 }
 
-/* ---------- Segmented control (Today/Week + Yes/No) ---------- */
+/* ---------- Segmented control ---------- */
 .seg {
 	display: inline-flex;
 	gap: 0;
@@ -246,7 +246,6 @@ progress::-moz-progress-bar {
 	background: var(--accent);
 }
 
-/* Dynamic color states (JS adds classes below) */
 progress.prog-red::-webkit-progress-value,
 progress.prog-red::-moz-progress-bar {
 	background: var(--danger);
@@ -273,19 +272,23 @@ progress.prog-green::-moz-progress-bar {
 	padding: 9px 8px;
 	border-bottom: 1px solid var(--border);
 	vertical-align: middle;
-	text-align: center;
 }
 
 .table th {
-	text-align: center;
+	text-align: left;
 	font-weight: 700;
-	font-size: 20px;
+	font-size: 13.5px;
 	color: var(--muted);
 	letter-spacing: .2px;
 }
 
 .table td {
 	font-weight: 600;
+}
+
+.table th.r,
+.table td.r {
+	text-align: right;
 }
 
 .table.compact th,
@@ -316,7 +319,6 @@ progress.prog-green::-moz-progress-bar {
 	background: var(--panel);
 }
 
-/* Remove number spinners */
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
 	-webkit-appearance: none;
@@ -412,6 +414,7 @@ input[type=number] {
 
 .btn.outline.danger {
 	border-color: color-mix(in oklab, var(--danger) 65%, var(--border));
+	color: var(--danger);
 }
 
 .btn.outline.danger:hover {
@@ -466,11 +469,10 @@ input[type=number] {
 	transition: background .12s ease, color .12s ease;
 }
 
-.tabs>#tabB:checked~label[for="tabB"],
-.tabs>#tabMS:checked~label[for="tabMS"],
-.tabs>#tabL:checked~label[for="tabL"],
-.tabs>#tabAS:checked~label[for="tabAS"],
-.tabs>#tabD:checked~label[for="tabD"] {
+.tabs>#tabMorning:checked~label[for="tabMorning"],
+.tabs>#tabAfternoon:checked~label[for="tabAfternoon"],
+.tabs>#tabDinner:checked~label[for="tabDinner"],
+.tabs>#tabMisc:checked~label[for="tabMisc"] {
 	background: var(--accent);
 	color: #fff;
 	border-color: transparent;
@@ -484,24 +486,20 @@ input[type=number] {
 	display: none;
 }
 
-/* Order: B(1), MS(2), L(3), AS(4), D(5) */
-#tabB:checked~.tab-panels .tab-panel:nth-child(1) {
+/* Order: Morning(1), Afternoon(2), Dinner(3), Misc(4) */
+#tabMorning:checked~.tab-panels .tab-panel:nth-child(1) {
 	display: block;
 }
 
-#tabMS:checked~.tab-panels .tab-panel:nth-child(2) {
+#tabAfternoon:checked~.tab-panels .tab-panel:nth-child(2) {
 	display: block;
 }
 
-#tabL:checked~.tab-panels .tab-panel:nth-child(3) {
+#tabDinner:checked~.tab-panels .tab-panel:nth-child(3) {
 	display: block;
 }
 
-#tabAS:checked~.tab-panels .tab-panel:nth-child(4) {
-	display: block;
-}
-
-#tabD:checked~.tab-panels .tab-panel:nth-child(5) {
+#tabMisc:checked~.tab-panels .tab-panel:nth-child(4) {
 	display: block;
 }
 
@@ -511,9 +509,9 @@ input[type=number] {
 	font-weight: 700;
 }
 
-/* ---------- Settings dialog (pretty, readable inputs) ---------- */
+/* ---------- Settings dialog ---------- */
 .dialog {
-	width: 85%;
+	width: min(1120px, 96vw);
 	border: 1px solid var(--border);
 	border-radius: 18px;
 	background: var(--panel);
@@ -605,7 +603,6 @@ input[type=number] {
 	display: none;
 }
 
-/* Readable stacked fields */
 .field {
 	display: flex;
 	flex-direction: column;
