@@ -414,7 +414,6 @@ input[type=number] {
 
 .btn.outline.danger {
 	border-color: color-mix(in oklab, var(--danger) 65%, var(--border));
-	color: var(--danger);
 }
 
 .btn.outline.danger:hover {
