@@ -10,7 +10,7 @@
 <body>
   <!-- Topbar -->
   <header class="topbar">
-    <div class="brand">Daily Diet Tracker</div>
+    <div class="brand">Macros</div>
     <div class="seg" role="tablist" aria-label="View">
       <button id="btnToday" class="seg-btn is-active" aria-selected="true">Today</button>
       <button id="btnWeekly" class="seg-btn" aria-selected="false">Week</button>
@@ -56,8 +56,8 @@
                   <td>Protein shake</td>
                   <td class="r">
                     <div class="seg seg-small">
-                      <button id="bfShakeNo" class="seg-btn is-active" data-val="no">No</button>
-                      <button id="bfShakeYes" class="seg-btn" data-val="yes">Yes</button>
+                      <button id="bfShakeNo" class="seg-btn is-active" data-bind="bfShake" data-val="no">No</button>
+                      <button id="bfShakeYes" class="seg-btn" data-bind="bfShake" data-val="yes">Yes</button>
                     </div>
                   </td>
                   <td></td>
@@ -353,13 +353,26 @@
     </div>
   </section>
 
-  <!-- Settings (kcal-based; visuals will be upgraded in CSS) -->
+  <!-- Settings (kcal-based; Curry first, others prefilled) -->
   <dialog id="dlgSettings" class="dialog">
     <div class="dialog-head">
       <h3>Settings</h3>
       <button id="closeSettings" class="btn ghost tiny">Close</button>
     </div>
     <div class="settings-grid">
+
+      <!-- 1) CURRY — at the top, intentionally blank by default -->
+      <div class="set-block">
+        <h4>Curry — per 100 g</h4>
+        <div class="grid-4 mini">
+          <div class="inline"><label>Protein</label><input type="number" id="curryP100" step="0.01" placeholder="" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="curryC100" step="0.01" placeholder="" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="curryF100" step="0.01" placeholder="" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="curryKcal100" step="0.1" placeholder="" /><span class="unit">kcal</span></div>
+        </div>
+      </div>
+
+      <!-- 2) Targets -->
       <div class="set-block">
         <h4>Targets</h4>
         <label>Daily protein target</label>
@@ -369,89 +382,89 @@
         </div>
       </div>
 
+      <!-- 3) Milk -->
       <div class="set-block">
         <h4>Milk (trim) — per 100 ml</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>Protein</label><input type="number" id="milkP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Carbs</label><input type="number" id="milkC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Fat</label><input type="number" id="milkF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="milkKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="milkP100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="milkC100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="milkF100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="milkKcal100" step="0.1" /><span class="unit">kcal</span></div>
         </div>
         <label class="mt8">Default per meal</label>
-        <div class="inline"><input type="number" id="setMilkDefault" min="0" step="1" placeholder="300" /><span class="unit">ml</span></div>
+        <div class="inline"><input type="number" id="setMilkDefault" min="0" step="1" /><span class="unit">ml</span></div>
       </div>
 
+      <!-- 4) Greek yoghurt -->
       <div class="set-block">
         <h4>Greek yoghurt — per 100 g</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>Protein</label><input type="number" id="yogP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Carbs</label><input type="number" id="yogC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Fat</label><input type="number" id="yogF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="yogKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="yogP100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="yogC100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="yogF100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="yogKcal100" step="0.1" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
-      <div class="set-block">
-        <h4>Protein bar — per bar</h4>
-        <div class="grid-4 mini">
-          <div class="inline"><label>Protein</label><input type="number" id="barP" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Carbs</label><input type="number" id="barC" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Fat</label><input type="number" id="barF" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="barKcal" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
-        </div>
-      </div>
-
+      <!-- 5) Protein powder -->
       <div class="set-block">
         <h4>Protein powder — per scoop</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>Protein</label><input type="number" id="scoopP" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Carbs</label><input type="number" id="scoopC" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Fat</label><input type="number" id="scoopF" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="scoopKcal" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="scoopP" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="scoopC" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="scoopF" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="scoopKcal" step="0.1" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
+      <!-- 6) Protein bar -->
+      <div class="set-block">
+        <h4>Protein bar — per bar</h4>
+        <div class="grid-4 mini">
+          <div class="inline"><label>Protein</label><input type="number" id="barP" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="barC" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="barF" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="barKcal" step="0.1" /><span class="unit">kcal</span></div>
+        </div>
+      </div>
+
+      <!-- 7) Banana -->
       <div class="set-block">
         <h4>Banana</h4>
         <label>Edible fraction (0–1)</label>
-        <input type="number" id="bananaFrac" min="0" max="1" step="0.01" placeholder="0.70" />
+        <input type="number" id="bananaFrac" min="0" max="1" step="0.01" />
         <h5 class="mt8">Per 100 g (edible)</h5>
         <div class="grid-4 mini">
-          <div class="inline"><label>Protein</label><input type="number" id="bananaP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Carbs</label><input type="number" id="bananaC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Fat</label><input type="number" id="bananaF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="bananaKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="bananaP100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="bananaC100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="bananaF100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="bananaKcal100" step="0.1" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
+      <!-- 8) Chapati -->
       <div class="set-block">
         <h4>Chapati — per piece</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>Protein</label><input type="number" id="chapatiP" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Carbs</label><input type="number" id="chapatiC" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Fat</label><input type="number" id="chapatiF" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="chapatiKcal" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="chapatiP" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="chapatiC" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="chapatiF" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="chapatiKcal" step="0.1" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
+      <!-- 9) Meat -->
       <div class="set-block">
-        <h4>Meat & Curry — per 100 g</h4>
-        <h5>Meat</h5>
+        <h4>Meat — per 100 g</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>Protein</label><input type="number" id="meatP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Carbs</label><input type="number" id="meatC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Fat</label><input type="number" id="meatF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="meatKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
-        </div>
-        <h5 class="mt8">Curry</h5>
-        <div class="grid-4 mini">
-          <div class="inline"><label>Protein</label><input type="number" id="curryP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Carbs</label><input type="number" id="curryC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>Fat</label><input type="number" id="curryF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="curryKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="meatP100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="meatC100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="meatF100" step="0.01" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="meatKcal100" step="0.1" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
+      <!-- Actions -->
       <div class="set-block">
         <div class="grid-3">
           <button id="saveSettings" class="btn">Save</button>
@@ -462,6 +475,7 @@
           </label>
         </div>
       </div>
+
     </div>
   </dialog>
 
