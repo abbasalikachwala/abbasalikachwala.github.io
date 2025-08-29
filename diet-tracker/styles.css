@@ -1,5 +1,5 @@
 /* =========================================================
-   Daily Macros Tracker — Dashboard UI (Apple-ish)
+   Daily Macros Tracker — Dashboard UI (refined)
    - Two-column layout: inputs (left) + sticky summaries (right)
    - Light/Dark via prefers-color-scheme
    - System font stack (SF Pro on Apple)
@@ -61,10 +61,10 @@ body{
 .seg.seg-small{ transform: scale(.92); transform-origin: left center; }
 .seg-btn{
   appearance:none; background:transparent; border:0; padding:8px 14px; cursor:pointer;
-  border-radius:999px; color:var(--text); font-weight:600; transition: background .12s ease, color .12s ease;
+  border-radius:999px; color:var(--text); font-weight:600; transition: background .12s ease, color .12s ease, box-shadow .12s ease;
 }
 .seg-btn:hover{ background: color-mix(in oklab, var(--panel) 80%, var(--bg)); }
-.seg-btn.is-active{ background: var(--accent); color: #fff; }
+.seg-btn.is-active{ background: var(--accent); color: #fff; box-shadow: 0 6px 18px color-mix(in oklab, var(--accent) 26%, transparent); }
 
 /* Right side of topbar */
 .nav-rt{ display:flex; gap:10px; align-items:center; }
@@ -73,11 +73,12 @@ input[type="date"]{
   border-radius: 12px; padding:8px 10px; height: 36px;
 }
 
-/* Dashboard grid */
+/* Layout */
 .dashboard{
   width:100%; max-width: 1280px; margin: 16px auto; padding: 0 16px;
   display:grid; gap: 16px; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.9fr);
 }
+.container-narrow{ width:100%; max-width: 940px; margin: 16px auto; padding: 0 16px; }
 .col{ display:grid; gap:16px; }
 .col-right{ align-content: start; }
 .sticky{ position: sticky; top: var(--sticky-top); }
@@ -104,14 +105,13 @@ input[type="date"]{
 
 /* Tables */
 .table{ width:100%; border-collapse: collapse; }
-.table th, .table td{ padding: 10px 8px; border-bottom: 1px solid var(--border); }
+.table th, .table td{ padding: 9px 8px; border-bottom: 1px solid var(--border); }
 .table th{ text-align:left; font-weight:700; font-size: 13.5px; color: var(--muted); letter-spacing:.2px; }
 .table td{ font-weight:600; }
 .table th.r, .table td.r{ text-align:right; }
-.table.compact th, .table.compact td{ padding: 8px 6px; }
-.table.compact td .inline{ justify-content: flex-end; }
+.table.compact th, .table.compact td{ padding: 7px 6px; }
 
-/* Inputs — compact, rounded, minimal */
+/* Inputs — crisp, compact */
 :where(input[type="number"], input[type="text"], select){
   width: 100%; padding: 9px 12px; border-radius: 12px;
   border:1px solid var(--border); background: color-mix(in oklab, var(--panel) 92%, transparent);
@@ -124,12 +124,6 @@ input[type="date"]{
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
   background: var(--panel);
 }
-
-/* Tighter native controls */
-input[type="checkbox"], input[type="radio"]{
-  width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;
-}
-
 /* Remove number spinners (WebKit) */
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
@@ -146,7 +140,7 @@ input[type=number]{ -moz-appearance: textfield; }
 .mt4{ margin-top: 4px; }
 .mt8{ margin-top: 8px; }
 
-/* Buttons — softer, pill */
+/* Buttons — primary, ghost, and outline-danger clarified */
 .btn{
   appearance:none; border:1px solid transparent; background: var(--accent); color:#fff;
   padding:10px 14px; border-radius: 12px; font-weight:700; cursor:pointer;
@@ -156,39 +150,42 @@ input[type=number]{ -moz-appearance: textfield; }
 .btn:hover{ transform: translateY(-1px); box-shadow: 0 6px 18px color-mix(in oklab, var(--accent) 26%, transparent); }
 .btn:active{ transform: translateY(0); }
 .btn.ghost{ background: transparent; color: var(--text); border-color: var(--border); }
-.btn.danger{ background: var(--danger); border-color: color-mix(in oklab, var(--danger) 80%, black 5%); }
-.btn.ghost.danger{ color: var(--danger); border-color: color-mix(in oklab, var(--danger) 40%, var(--border)); }
+.btn.outline{ background: transparent; border:1.5px solid var(--border); color: var(--text); }
+.btn.outline.danger{ border-color: color-mix(in oklab, var(--danger) 65%, var(--border)); color: var(--danger); }
+.btn.outline.danger:hover{ box-shadow: 0 0 0 4px color-mix(in oklab, var(--danger) 18%, transparent); }
+.btn.danger{ background: var(--danger); border-color: color-mix(in oklab, var(--danger) 80%, black 5%); color:#fff; }
 .btn.tiny{ padding:8px 10px; font-size: 12.5px; border-radius:10px; height: 34px; }
 
 /* Actions row */
 .actions-row{ display:flex; flex-wrap:wrap; gap:10px; }
 
-/* Tabs (meal tables) */
+/* Tabs (5 tabs) */
 .tabs{ display:block; }
 .tabs > input[type="radio"]{ position:absolute; left:-9999px; }
 .tabs > label{
   display:inline-block; padding:8px 12px; margin-right:6px; cursor:pointer; user-select:none;
   border:1px solid var(--border); border-radius: 999px; font-weight:700;
-  background: var(--panel); color: var(--text);
+  background: var(--panel); color: var(--text); transition: background .12s ease, color .12s ease;
 }
-.tabs > #tabB:checked ~ label[for="tabB"],
-.tabs > #tabL:checked ~ label[for="tabL"],
-.tabs > #tabD:checked ~ label[for="tabD"],
-.tabs > #tabS:checked ~ label[for="tabS"]{
+.tabs > #tabB:checked  ~ label[for="tabB"],
+.tabs > #tabMS:checked ~ label[for="tabMS"],
+.tabs > #tabL:checked  ~ label[for="tabL"],
+.tabs > #tabAS:checked ~ label[for="tabAS"],
+.tabs > #tabD:checked  ~ label[for="tabD"]{
   background: var(--accent); color:#fff; border-color: transparent;
 }
 .tab-panels{ margin-top: 10px; }
 .tab-panels .tab-panel{ display:none; }
-#tabB:checked ~ .tab-panels .tab-panel:nth-child(1){ display:block; }
-#tabL:checked ~ .tab-panels .tab-panel:nth-child(2){ display:block; }
-#tabD:checked ~ .tab-panels .tab-panel:nth-child(3){ display:block; }
-#tabS:checked ~ .tab-panels .tab-panel:nth-child(4){ display:block; }
+/* Order of panels matches HTML: B(1), MS(2), L(3), AS(4), D(5) */
+#tabB:checked  ~ .tab-panels .tab-panel:nth-child(1){ display:block; }
+#tabMS:checked ~ .tab-panels .tab-panel:nth-child(2){ display:block; }
+#tabL:checked  ~ .tab-panels .tab-panel:nth-child(3){ display:block; }
+#tabAS:checked ~ .tab-panels .tab-panel:nth-child(4){ display:block; }
+#tabD:checked  ~ .tab-panels .tab-panel:nth-child(5){ display:block; }
 
-/* Group totals */
-.group-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.subcard{
-  background: var(--surface); border:1px dashed var(--border); border-radius: 14px; padding: 12px;
-}
+/* Group totals table */
+#tblGroups tr > th:first-child,
+#tblGroups tr > td:first-child{ font-weight:700; }
 
 /* Dialog (Settings) */
 .dialog{
@@ -203,6 +200,8 @@ input[type=number]{ -moz-appearance: textfield; }
 .settings-grid{
   display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px; padding: 16px;
 }
+
+/* Responsive */
 @media (max-width: 1100px){
   .dashboard{ grid-template-columns: 1fr; }
   .col-right .sticky{ position: static; }
@@ -213,7 +212,6 @@ input[type=number]{ -moz-appearance: textfield; }
 }
 @media (max-width: 640px){
   .hero-row{ grid-template-columns: 1fr; }
-  .group-grid{ grid-template-columns: 1fr; }
 }
 
 /* Accessibility focus */
