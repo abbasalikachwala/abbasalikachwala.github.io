@@ -273,6 +273,7 @@ progress.prog-green::-moz-progress-bar {
 	padding: 9px 8px;
 	border-bottom: 1px solid var(--border);
 	vertical-align: middle;
+	text-align: center;
 }
 
 .table th {
@@ -285,11 +286,6 @@ progress.prog-green::-moz-progress-bar {
 
 .table td {
 	font-weight: 600;
-}
-
-.table th.r,
-.table td.r {
-	text-align: right;
 }
 
 .table.compact th,
