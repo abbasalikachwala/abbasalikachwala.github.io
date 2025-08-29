@@ -10,7 +10,7 @@
 <body>
   <!-- Topbar -->
   <header class="topbar">
-    <div class="brand">Macros</div>
+    <div class="brand">Daily Diet Tracker</div>
     <div class="seg" role="tablist" aria-label="View">
       <button id="btnToday" class="seg-btn is-active" aria-selected="true">Today</button>
       <button id="btnWeekly" class="seg-btn" aria-selected="false">Week</button>
@@ -49,7 +49,7 @@
               <tbody>
                 <tr>
                   <td>Greek yoghurt</td>
-                  <td class="r"><input type="number" id="bfYoghurtG" min="0" step="1" /></td>
+                  <td class="r"><input type="number" id="bfYoghurtG" min="0" step="1" placeholder="0" /></td>
                   <td class="r"><span class="unit">g</span></td>
                 </tr>
                 <tr>
@@ -59,21 +59,17 @@
                       <button id="bfShakeNo" class="seg-btn is-active" data-val="no">No</button>
                       <button id="bfShakeYes" class="seg-btn" data-val="yes">Yes</button>
                     </div>
-                    <select id="bfShakeOn" class="sr-only">
-                      <option value="no" selected>No</option>
-                      <option value="yes">Yes</option>
-                    </select>
                   </td>
                   <td></td>
                 </tr>
                 <tr>
                   <td>— Scoops</td>
-                  <td class="r"><input type="number" id="bfShakeScoops" min="0" step="1" /></td>
+                  <td class="r"><input type="number" id="bfShakeScoops" min="0" step="1" placeholder="0" /></td>
                   <td class="r"><span class="unit">scoop</span></td>
                 </tr>
                 <tr>
                   <td>— Milk</td>
-                  <td class="r"><input type="number" id="bfShakeMilkML" min="0" step="1" /></td>
+                  <td class="r"><input type="number" id="bfShakeMilkML" min="0" step="1" placeholder="0" /></td>
                   <td class="r"><span class="unit">ml</span></td>
                 </tr>
               </tbody>
@@ -94,11 +90,10 @@
                   <button class="seg-btn" data-bind="msEggsOn" data-val="no">No</button>
                   <button class="seg-btn" data-bind="msEggsOn" data-val="yes">Yes</button>
                 </div>
-                <select id="msEggsOn" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
               </td>
               <td class="r">
-                <div class="inline"><input type="number" id="msEggsWhole" min="0" step="1" /><span class="unit">whole</span></div>
-                <div class="inline mt4"><input type="number" id="msEggsWhites" min="0" step="1" /><span class="unit">whites</span></div>
+                <div class="inline"><input type="number" id="msEggsWhole" min="0" step="1" placeholder="0" /><span class="unit">whole</span></div>
+                <div class="inline mt4"><input type="number" id="msEggsWhites" min="0" step="1" placeholder="0" /><span class="unit">whites</span></div>
               </td>
               <td></td>
             </tr>
@@ -109,7 +104,6 @@
                   <button class="seg-btn" data-bind="msMilk" data-val="no">No</button>
                   <button class="seg-btn" data-bind="msMilk" data-val="yes">Yes</button>
                 </div>
-                <select id="msMilk" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
               </td>
               <td></td><td></td>
             </tr>
@@ -125,9 +119,9 @@
             <h3 class="subtitle">Lunch</h3>
             <table class="table compact">
               <tbody>
-                <tr><td>Meat</td><td class="r"><input type="number" id="lMeatG" min="0" step="1" /></td><td class="r"><span class="unit">g</span></td></tr>
-                <tr><td>Curry</td><td class="r"><input type="number" id="lCurryG" min="0" step="1" /></td><td class="r"><span class="unit">g</span></td></tr>
-                <tr><td>Chapatis</td><td class="r"><input type="number" id="lChapati" min="0" step="1" /></td><td></td></tr>
+                <tr><td>Meat</td><td class="r"><input type="number" id="lMeatG" min="0" step="1" placeholder="0" /></td><td class="r"><span class="unit">g</span></td></tr>
+                <tr><td>Curry</td><td class="r"><input type="number" id="lCurryG" min="0" step="1" placeholder="0" /></td><td class="r"><span class="unit">g</span></td></tr>
+                <tr><td>Chapatis</td><td class="r"><input type="number" id="lChapati" min="0" step="1" placeholder="0" /></td><td></td></tr>
                 <tr>
                   <td>Milk 300 ml?</td>
                   <td class="r">
@@ -135,7 +129,6 @@
                       <button class="seg-btn" data-bind="lMilk" data-val="no">No</button>
                       <button class="seg-btn" data-bind="lMilk" data-val="yes">Yes</button>
                     </div>
-                    <select id="lMilk" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
                   </td>
                   <td></td>
                 </tr>
@@ -147,9 +140,9 @@
             <h3 class="subtitle">Dinner</h3>
             <table class="table compact">
               <tbody>
-                <tr><td>Meat</td><td class="r"><input type="number" id="dMeatG" min="0" step="1" /></td><td class="r"><span class="unit">g</span></td></tr>
-                <tr><td>Curry</td><td class="r"><input type="number" id="dCurryG" min="0" step="1" /></td><td class="r"><span class="unit">g</span></td></tr>
-                <tr><td>Chapatis</td><td class="r"><input type="number" id="dChapati" min="0" step="1" /></td><td></td></tr>
+                <tr><td>Meat</td><td class="r"><input type="number" id="dMeatG" min="0" step="1" placeholder="0" /></td><td class="r"><span class="unit">g</span></td></tr>
+                <tr><td>Curry</td><td class="r"><input type="number" id="dCurryG" min="0" step="1" placeholder="0" /></td><td class="r"><span class="="unit">g</span></td></tr>
+                <tr><td>Chapatis</td><td class="r"><input type="number" id="dChapati" min="0" step="1" placeholder="0" /></td><td></td></tr>
                 <tr>
                   <td>Milk 300 ml?</td>
                   <td class="r">
@@ -157,7 +150,6 @@
                       <button class="seg-btn" data-bind="dMilk" data-val="no">No</button>
                       <button class="seg-btn" data-bind="dMilk" data-val="yes">Yes</button>
                     </div>
-                    <select id="dMilk" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
                   </td>
                   <td></td>
                 </tr>
@@ -180,10 +172,9 @@
                   <button class="seg-btn" data-bind="asBarOn" data-val="no">No</button>
                   <button class="seg-btn" data-bind="asBarOn" data-val="yes">Yes</button>
                 </div>
-                <select id="asBarOn" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
               </td>
               <td class="r">
-                <div class="inline"><input type="number" id="asBarQty" min="0" step="1" /><span class="unit">qty</span></div>
+                <div class="inline"><input type="number" id="asBarQty" min="0" step="1" placeholder="0" /><span class="unit">qty</span></div>
               </td>
               <td></td>
             </tr>
@@ -194,7 +185,6 @@
                   <button class="seg-btn" data-bind="asMilk" data-val="no">No</button>
                   <button class="seg-btn" data-bind="asMilk" data-val="yes">Yes</button>
                 </div>
-                <select id="asMilk" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
               </td>
               <td></td><td></td>
             </tr>
@@ -256,35 +246,35 @@
           <div class="tab-panels">
             <div class="tab-panel">
               <table class="table">
-                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">Protein</th><th class="r">Carbs</th><th class="r">Fat</th></tr></thead>
                 <tbody id="tblBreakfast"></tbody>
                 <tfoot><tr><th>Breakfast total</th><th class="r" id="kcalBreakfast">0</th><th class="r" id="pBreakfast">0</th><th class="r" id="cBreakfast">0</th><th class="r" id="fBreakfast">0</th></tr></tfoot>
               </table>
             </div>
             <div class="tab-panel">
               <table class="table">
-                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">Protein</th><th class="r">Carbs</th><th class="r">Fat</th></tr></thead>
                 <tbody id="tblMorning"></tbody>
                 <tfoot><tr><th>Morning total</th><th class="r" id="kcalMorning">0</th><th class="r" id="pMorning">0</th><th class="r" id="cMorning">0</th><th class="r" id="fMorning">0</th></tr></tfoot>
               </table>
             </div>
             <div class="tab-panel">
               <table class="table">
-                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">Protein</th><th class="r">Carbs</th><th class="r">Fat</th></tr></thead>
                 <tbody id="tblLunch"></tbody>
                 <tfoot><tr><th>Lunch total</th><th class="r" id="kcalLunch">0</th><th class="r" id="pLunch">0</th><th class="r" id="cLunch">0</th><th class="r" id="fLunch">0</th></tr></tfoot>
               </table>
             </div>
             <div class="tab-panel">
               <table class="table">
-                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">Protein</th><th class="r">Carbs</th><th class="r">Fat</th></tr></thead>
                 <tbody id="tblAfternoon"></tbody>
                 <tfoot><tr><th>Afternoon total</th><th class="r" id="kcalAfternoon">0</th><th class="r" id="pAfternoon">0</th><th class="r" id="cAfternoon">0</th><th class="r" id="fAfternoon">0</th></tr></tfoot>
               </table>
             </div>
             <div class="tab-panel">
               <table class="table">
-                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">Protein</th><th class="r">Carbs</th><th class="r">Fat</th></tr></thead>
                 <tbody id="tblDinner"></tbody>
                 <tfoot><tr><th>Dinner total</th><th class="r" id="kcalDinner">0</th><th class="r" id="pDinner">0</th><th class="r" id="cDinner">0</th><th class="r" id="fDinner">0</th></tr></tfoot>
               </table>
@@ -307,17 +297,17 @@
         </table>
       </section>
 
-      <!-- Miscellaneous (separate; extra milk moved here) -->
+      <!-- Miscellaneous (separate; extra milk lives here) -->
       <section class="card surface">
         <h2 class="title">Miscellaneous</h2>
         <div class="grid-4">
           <input id="miscName" placeholder="Name" />
           <input type="number" id="miscKcal" min="0" step="0.1" placeholder="kcal" />
-          <input type="number" id="miscP" min="0" step="0.1" placeholder="P" />
-          <input type="number" id="miscC" min="0" step="0.1" placeholder="C" />
+          <input type="number" id="miscP" min="0" step="0.1" placeholder="Protein" />
+          <input type="number" id="miscC" min="0" step="0.1" placeholder="Carbs" />
         </div>
         <div class="grid-4 mt8">
-          <input type="number" id="miscF" min="0" step="0.1" placeholder="F" />
+          <input type="number" id="miscF" min="0" step="0.1" placeholder="Fat" />
           <button id="addMisc" class="btn tiny">Add</button>
           <button id="clearMisc" class="btn tiny outline danger">Clear</button>
         </div>
@@ -331,7 +321,7 @@
 
         <div class="meal-totals mt8">
           <table class="table">
-            <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+            <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">Protein</th><th class="r">Carbs</th><th class="r">Fat</th></tr></thead>
             <tbody id="tblMisc"></tbody>
             <tfoot><tr><th>Misc total</th><th class="r" id="kcalMisc">0</th><th class="r" id="pMisc">0</th><th class="r" id="cMisc">0</th><th class="r" id="fMisc">0</th></tr></tfoot>
           </table>
@@ -340,7 +330,7 @@
     </aside>
   </main>
 
-  <!-- WEEK VIEW (separate screen for the toggle) -->
+  <!-- WEEK VIEW -->
   <section id="weeklyView" style="display:none;">
     <div class="container-narrow">
       <section class="card surface">
@@ -348,7 +338,7 @@
         <div class="muted" id="weeklyLabel"></div>
         <table class="table mt8">
           <thead>
-            <tr><th>Date</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr>
+            <tr><th>Date</th><th class="r">kcal</th><th class="r">Protein</th><th class="r">Carbs</th><th class="r">Fat</th></tr>
           </thead>
           <tbody id="tblWeek"></tbody>
           <tfoot>
@@ -363,7 +353,7 @@
     </div>
   </section>
 
-  <!-- Settings (kcal-based) -->
+  <!-- Settings (kcal-based; visuals will be upgraded in CSS) -->
   <dialog id="dlgSettings" class="dialog">
     <div class="dialog-head">
       <h3>Settings</h3>
@@ -374,7 +364,7 @@
         <h4>Targets</h4>
         <label>Daily protein target</label>
         <div class="inline">
-          <input type="number" id="setProteinTarget" min="0" step="1" />
+          <input type="number" id="setProteinTarget" min="0" step="1" placeholder="0" />
           <span class="unit">g</span>
         </div>
       </div>
@@ -382,65 +372,65 @@
       <div class="set-block">
         <h4>Milk (trim) — per 100 ml</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>P</label><input type="number" id="milkP100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>C</label><input type="number" id="milkC100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>F</label><input type="number" id="milkF100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="milkKcal100" step="0.1" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="milkP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="milkC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="milkF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="milkKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
         </div>
         <label class="mt8">Default per meal</label>
-        <div class="inline"><input type="number" id="setMilkDefault" min="0" step="1" /><span class="unit">ml</span></div>
+        <div class="inline"><input type="number" id="setMilkDefault" min="0" step="1" placeholder="300" /><span class="unit">ml</span></div>
       </div>
 
       <div class="set-block">
         <h4>Greek yoghurt — per 100 g</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>P</label><input type="number" id="yogP100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>C</label><input type="number" id="yogC100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>F</label><input type="number" id="yogF100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="yogKcal100" step="0.1" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="yogP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="yogC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="yogF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="yogKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
       <div class="set-block">
         <h4>Protein bar — per bar</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>P</label><input type="number" id="barP" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>C</label><input type="number" id="barC" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>F</label><input type="number" id="barF" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="barKcal" step="0.1" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="barP" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="barC" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="barF" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="barKcal" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
       <div class="set-block">
         <h4>Protein powder — per scoop</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>P</label><input type="number" id="scoopP" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>C</label><input type="number" id="scoopC" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>F</label><input type="number" id="scoopF" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="scoopKcal" step="0.1" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="scoopP" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="scoopC" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="scoopF" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="scoopKcal" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
       <div class="set-block">
         <h4>Banana</h4>
         <label>Edible fraction (0–1)</label>
-        <input type="number" id="bananaFrac" min="0" max="1" step="0.01" />
+        <input type="number" id="bananaFrac" min="0" max="1" step="0.01" placeholder="0.70" />
         <h5 class="mt8">Per 100 g (edible)</h5>
         <div class="grid-4 mini">
-          <div class="inline"><label>P</label><input type="number" id="bananaP100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>C</label><input type="number" id="bananaC100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>F</label><input type="number" id="bananaF100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="bananaKcal100" step="0.1" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="bananaP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="bananaC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="bananaF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="bananaKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
       <div class="set-block">
         <h4>Chapati — per piece</h4>
         <div class="grid-4 mini">
-          <div class="inline"><label>P</label><input type="number" id="chapatiP" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>C</label><input type="number" id="chapatiC" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>F</label><input type="number" id="chapatiF" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="chapatiKcal" step="0.1" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="chapatiP" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="chapatiC" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="chapatiF" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="chapatiKcal" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
@@ -448,17 +438,17 @@
         <h4>Meat & Curry — per 100 g</h4>
         <h5>Meat</h5>
         <div class="grid-4 mini">
-          <div class="inline"><label>P</label><input type="number" id="meatP100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>C</label><input type="number" id="meatC100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>F</label><input type="number" id="meatF100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="meatKcal100" step="0.1" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="meatP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="meatC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="meatF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="meatKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
         </div>
         <h5 class="mt8">Curry</h5>
         <div class="grid-4 mini">
-          <div class="inline"><label>P</label><input type="number" id="curryP100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>C</label><input type="number" id="curryC100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>F</label><input type="number" id="curryF100" step="0.01" /><span class="unit">g</span></div>
-          <div class="inline"><label>kcal</label><input type="number" id="curryKcal100" step="0.1" /><span class="unit">kcal</span></div>
+          <div class="inline"><label>Protein</label><input type="number" id="curryP100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Carbs</label><input type="number" id="curryC100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>Fat</label><input type="number" id="curryF100" step="0.01" placeholder="0" /><span class="unit">g</span></div>
+          <div class="inline"><label>kcal</label><input type="number" id="curryKcal100" step="0.1" placeholder="0" /><span class="unit">kcal</span></div>
         </div>
       </div>
 
