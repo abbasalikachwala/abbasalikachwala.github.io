@@ -1,12 +1,8 @@
 // ====================================================================
 // Daily Diet Tracker — kcal-first Dashboard + Weekly tools
-// Client-only (GH Pages safe). Data saved in localStorage.
-//
-// Weekly view:
-// - Burned kcal input (past/today only). No full re-render on typing.
-// - Per-day Clear and Clear Week.
-// - Daily/Weekly deficit = burned - intake.
-// - Pretty dates: DD/MMM/YY in rows; header "Week 35 — 25th August → 31st August".
+// Weekly view: DD/MMM/YY rows, header "Week 35 — 25th August → 31st August"
+// Burned input doesn't kill caret (no full re-render on typing).
+// Meal tables merged: Morning(Breakfast+Morning Snack), Afternoon(Lunch+Afternoon), Dinner, Misc.
 // ====================================================================
 
 // ---------- DOM helpers ----------
@@ -121,7 +117,7 @@ const DEFAULTS = {
       c: 0.6,
       f: 0.5,
       kcal: 96.6
-   }, // edit to match your scoop
+   }, // adjust to your scoop
    banana: {
       edibleFrac: 0.70,
       per100g: {
@@ -154,17 +150,17 @@ const DEFAULTS = {
       defaultWhites: 1,
    },
    meatPer100g: {
-      p: 0,
+      p: 31,
       c: 0,
-      f: 0,
-      kcal: 0
+      f: 3.6,
+      kcal: 165
    },
    curryPer100g: {
       p: 0,
       c: 0,
       f: 0,
       kcal: 0
-   }, // left blank in Settings UI
+   }, // left 0 to edit in Settings
 };
 let settings = loadJSON(LS.settings, DEFAULTS);
 let diary = loadJSON(LS.diary, {});
@@ -317,7 +313,6 @@ document.addEventListener('click', (e) => {
    const t = e.target;
    if (!t) return;
 
-   // Export week CSV (Weekly view)
    if (t.id === 'btnExportWeek') {
       exportCurrentWeekCSV();
    }
@@ -405,17 +400,17 @@ function setFieldVal(id, val, blankZero = false) {
 }
 
 function openSettings() {
+   // Curry per 100 g
+   setFieldVal('curryP100', settings.curryPer100g.p, true);
+   setFieldVal('curryC100', settings.curryPer100g.c, true);
+   setFieldVal('curryF100', settings.curryPer100g.f, true);
+   setFieldVal('curryKcal100', settings.curryPer100g.kcal, true);
+
    // Meat per 100 g
    setFieldVal('meatP100', settings.meatPer100g.p);
    setFieldVal('meatC100', settings.meatPer100g.c);
    setFieldVal('meatF100', settings.meatPer100g.f);
    setFieldVal('meatKcal100', settings.meatPer100g.kcal);
-
-   // Curry per 100 g (blank zeros)
-   setFieldVal('curryP100', settings.curryPer100g.p, true);
-   setFieldVal('curryC100', settings.curryPer100g.c, true);
-   setFieldVal('curryF100', settings.curryPer100g.f, true);
-   setFieldVal('curryKcal100', settings.curryPer100g.kcal, true);
 
    // Chapati per piece
    setFieldVal('chapatiP', settings.chapatiPerPiece.p);
@@ -467,18 +462,19 @@ function saveSettings() {
       return isFinite(x) ? x : 0;
    };
 
-   settings.meatPer100g = {
-      p: n($('#meatP100').value),
-      c: n($('#meatC100').value),
-      f: n($('#meatF100').value),
-      kcal: n($('#meatKcal100').value)
-   };
    settings.curryPer100g = {
       p: $('#curryP100').value === '' ? 0 : n($('#curryP100').value),
       c: $('#curryC100').value === '' ? 0 : n($('#curryC100').value),
       f: $('#curryF100').value === '' ? 0 : n($('#curryF100').value),
       kcal: $('#curryKcal100').value === '' ? 0 : n($('#curryKcal100').value),
    };
+   settings.meatPer100g = {
+      p: n($('#meatP100').value),
+      c: n($('#meatC100').value),
+      f: n($('#meatF100').value),
+      kcal: n($('#meatKcal100').value)
+   };
+
    settings.chapatiPerPiece = {
       p: n($('#chapatiP').value),
       c: n($('#chapatiC').value),
@@ -715,12 +711,11 @@ function fillMealTable(tbodyId, kcalId, pId, cId, fId, rows) {
 function renderTables() {
    const d = getDay();
 
-   // Breakfast
+   // Breakfast → rowsB
    const rowsB = [];
    if ((d.breakfast.bananaPeelOn || 0) > 0) {
       const edible = round(d.breakfast.bananaPeelOn * (settings.banana.edibleFrac || 0.7));
-      const bn = scalePer100(settings.banana.per100g, edible);
-      rowsB.push([`Banana (edible ${edible} g)`, bn]);
+      rowsB.push([`Banana (edible ${edible} g)`, scalePer100(settings.banana.per100g, edible)]);
    }
    if ((d.breakfast.yoghurtG || 0) > 0) {
       rowsB.push([`Greek yoghurt (${d.breakfast.yoghurtG} g)`, scalePer100(settings.yoghurtPer100g, d.breakfast.yoghurtG)]);
@@ -732,9 +727,8 @@ function renderTables() {
          rowsB.push([`Milk for shake (${d.breakfast.shakeMilkML} ml)`, scalePer100(settings.milkPer100ml, d.breakfast.shakeMilkML)]);
       }
    }
-   fillMealTable('tblBreakfast', 'kcalBreakfast', 'pBreakfast', 'cBreakfast', 'fBreakfast', rowsB);
 
-   // Morning Snack (eggs + milk)
+   // Morning Snack → rowsMS
    const rowsMS = [];
    if (d.morning.eggsOn) {
       if ((d.morning.eggsWhole || 0) > 0) rowsMS.push([`Eggs (whole ×${d.morning.eggsWhole})`, scalePerPiece(settings.eggs.perWhole, d.morning.eggsWhole || 0)]);
@@ -743,17 +737,15 @@ function renderTables() {
    if (d.morning.milkOn && (settings.milkDefaultML || 0) > 0) {
       rowsMS.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
    }
-   fillMealTable('tblMorning', 'kcalMorning', 'pMorning', 'cMorning', 'fMorning', rowsMS);
 
-   // Lunch
+   // Lunch → rowsL
    const rowsL = [];
    if ((d.lunch.meatG || 0) > 0) rowsL.push([`Meat (${d.lunch.meatG} g)`, scalePer100(settings.meatPer100g, d.lunch.meatG)]);
    if ((d.lunch.curryG || 0) > 0) rowsL.push([`Curry (${d.lunch.curryG} g)`, scalePer100(settings.curryPer100g, d.lunch.curryG)]);
    if ((d.lunch.chapatis || 0) > 0) rowsL.push([`Chapati ×${d.lunch.chapatis}`, scalePerPiece(settings.chapatiPerPiece, d.lunch.chapatis)]);
    if (d.lunch.milkOn && (settings.milkDefaultML || 0) > 0) rowsL.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
-   fillMealTable('tblLunch', 'kcalLunch', 'pLunch', 'cLunch', 'fLunch', rowsL);
 
-   // Afternoon (protein bar + milk)
+   // Afternoon Snack → rowsAS
    const rowsAS = [];
    if (d.afternoon.barOn && (d.afternoon.barQty || 0) > 0) {
       rowsAS.push([`Protein bar ×${d.afternoon.barQty}`, scalePerItem(settings.proteinBar, d.afternoon.barQty)]);
@@ -761,17 +753,15 @@ function renderTables() {
    if (d.afternoon.milkOn && (settings.milkDefaultML || 0) > 0) {
       rowsAS.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
    }
-   fillMealTable('tblAfternoon', 'kcalAfternoon', 'pAfternoon', 'cAfternoon', 'fAfternoon', rowsAS);
 
-   // Dinner
+   // Dinner → rowsD
    const rowsD = [];
    if ((d.dinner.meatG || 0) > 0) rowsD.push([`Meat (${d.dinner.meatG} g)`, scalePer100(settings.meatPer100g, d.dinner.meatG)]);
    if ((d.dinner.curryG || 0) > 0) rowsD.push([`Curry (${d.dinner.curryG} g)`, scalePer100(settings.curryPer100g, d.dinner.curryG)]);
    if ((d.dinner.chapatis || 0) > 0) rowsD.push([`Chapati ×${d.dinner.chapatis}`, scalePerPiece(settings.chapatiPerPiece, d.dinner.chapatis)]);
    if (d.dinner.milkOn && (settings.milkDefaultML || 0) > 0) rowsD.push([`Milk (${settings.milkDefaultML} ml)`, scalePer100(settings.milkPer100ml, settings.milkDefaultML)]);
-   fillMealTable('tblDinner', 'kcalDinner', 'pDinner', 'cDinner', 'fDinner', rowsD);
 
-   // Misc
+   // Misc → rowsM
    const rowsM = [];
    const miscArr = miscByDay[dayPicker.value] || [];
    miscArr.forEach(m => {
@@ -787,6 +777,11 @@ function renderTables() {
    if ((dday.miscMilkML || 0) > 0) {
       rowsM.push([`Extra milk (${dday.miscMilkML} ml)`, scalePer100(settings.milkPer100ml, dday.miscMilkML)]);
    }
+
+   // Fill merged tables
+   fillMealTable('tblMorningAll', 'kcalMorningAll', 'pMorningAll', 'cMorningAll', 'fMorningAll', [...rowsB, ...rowsMS]);
+   fillMealTable('tblAfternoonAll', 'kcalAfternoonAll', 'pAfternoonAll', 'cAfternoonAll', 'fAfternoonAll', [...rowsL, ...rowsAS]);
+   fillMealTable('tblDinner', 'kcalDinner', 'pDinner', 'cDinner', 'fDinner', rowsD);
    fillMealTable('tblMisc', 'kcalMisc', 'pMisc', 'cMisc', 'fMisc', rowsM);
 }
 
@@ -794,7 +789,7 @@ function renderTables() {
 function setProgressColor(percent) {
    const el = $('#proteinProgress');
    el.classList.remove('prog-red', 'prog-amber', 'prog-green');
-   if (percent <= 0) return; // leave neutral
+   if (percent <= 0) return; // neutral
    if (percent < 50) el.classList.add('prog-red');
    else if (percent < 90) el.classList.add('prog-amber');
    else el.classList.add('prog-green');
@@ -802,29 +797,17 @@ function setProgressColor(percent) {
 
 function renderTotals() {
    const ids = {
-      Breakfast: {
-         kcal: 'kcalBreakfast',
-         p: 'pBreakfast',
-         c: 'cBreakfast',
-         f: 'fBreakfast'
-      },
       Morning: {
-         kcal: 'kcalMorning',
-         p: 'pMorning',
-         c: 'cMorning',
-         f: 'fMorning'
-      },
-      Lunch: {
-         kcal: 'kcalLunch',
-         p: 'pLunch',
-         c: 'cLunch',
-         f: 'fLunch'
+         kcal: 'kcalMorningAll',
+         p: 'pMorningAll',
+         c: 'cMorningAll',
+         f: 'fMorningAll'
       },
       Afternoon: {
-         kcal: 'kcalAfternoon',
-         p: 'pAfternoon',
-         c: 'cAfternoon',
-         f: 'fAfternoon'
+         kcal: 'kcalAfternoonAll',
+         p: 'pAfternoonAll',
+         c: 'cAfternoonAll',
+         f: 'fAfternoonAll'
       },
       Dinner: {
          kcal: 'kcalDinner',
@@ -879,6 +862,12 @@ function collectRowsFromTable(tbodyId) {
 }
 
 function renderGroups() {
+   const all = [
+      ...collectRowsFromTable('tblMorningAll'),
+      ...collectRowsFromTable('tblAfternoonAll'),
+      ...collectRowsFromTable('tblDinner'),
+      ...collectRowsFromTable('tblMisc'),
+   ];
    const groups = {
       Protein: {
          kcal: 0,
@@ -911,14 +900,6 @@ function renderGroups() {
          f: 0
       },
    };
-   const all = [
-      ...collectRowsFromTable('tblBreakfast'),
-      ...collectRowsFromTable('tblMorning'),
-      ...collectRowsFromTable('tblLunch'),
-      ...collectRowsFromTable('tblAfternoon'),
-      ...collectRowsFromTable('tblDinner'),
-      ...collectRowsFromTable('tblMisc'),
-   ];
 
    function classify(nm) {
       const n = nm.toLowerCase();
@@ -1012,7 +993,7 @@ function computeTotalsForDate(date) {
    if ((d.dinner.meatG || 0) > 0) add(sum, scalePer100(settings.meatPer100g, d.dinner.meatG));
    if ((d.dinner.curryG || 0) > 0) add(sum, scalePer100(settings.curryPer100g, d.dinner.curryG));
    if ((d.dinner.chapatis || 0) > 0) add(sum, scalePerPiece(settings.chapatiPerPiece, d.dinner.chapatis));
-   if (d.dinner.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, d.dinner.milkOn ? settings.milkDefaultML : 0));
+   if (d.dinner.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, settings.milkDefaultML));
 
    // Misc list
    const arr = miscByDay[date] || [];
@@ -1075,11 +1056,9 @@ function renderWeek() {
       sum
    } = gatherWeekData();
 
-   const wkFull = isoWeek(dayPicker.value); // "2025-W35"
-   const wkNum = parseInt(wkFull.split("-W")[1], 10); // 35
-   const start = dates[0],
-      end = dates[6];
-   $('#weeklyLabel').textContent = `Week ${wkNum} — ${fmtOrdinalMonth(start)} → ${fmtOrdinalMonth(end)}`;
+   const wkFull = isoWeek(dayPicker.value); // "YYYY-W##"
+   const wkNum = parseInt(wkFull.split("-W")[1], 10);
+   $('#weeklyLabel').textContent = `Week ${wkNum} — ${fmtOrdinalMonth(dates[0])} → ${fmtOrdinalMonth(dates[6])}`;
 
    const tbody = $('#tblWeek');
    tbody.innerHTML = '';
@@ -1182,8 +1161,6 @@ function exportDayJSON() {
 function onSubmitDay() {
    saveAll();
    alert('Day saved. Weekly totals updated.');
-   // Optional: switch to Week view automatically
-   // $('#btnWeekly').click();
 }
 
 // ---------- Render all (Today view) ----------
