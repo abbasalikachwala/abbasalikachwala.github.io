@@ -277,7 +277,7 @@ progress.prog-green::-moz-progress-bar {
 .table th {
 	text-align: left;
 	font-weight: 700;
-	font-size: 13.5px;
+	font-size: 20px;
 	color: var(--muted);
 	letter-spacing: .2px;
 }
