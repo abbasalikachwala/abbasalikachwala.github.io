@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Daily Macros Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Daily Macros Tracker</div>
+    <nav class="nav">
+      <button id="btnToday" class="btn secondary">Today</button>
+      <input type="date" id="dayPicker" />
+      <button id="btnSubmit" class="btn">Submit Day</button>
+      <button id="btnWeekly" class="btn secondary">Weekly View</button>
+      <button id="btnSettings" class="btn secondary">Settings</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="totals card">
+      <h2>Day Totals</h2>
+      <div class="grid-4">
+        <div class="metric">
+          <div class="label">Energy</div>
+          <div class="value"><span id="dayKcal">0</span> kcal</div>
+        </div>
+        <div class="metric">
+          <div class="label">Protein</div>
+          <div class="value"><span id="dayP">0</span> g</div>
+          <progress id="proteinProgress" value="0" max="100"></progress>
+          <div class="muted" id="proteinTargetText"></div>
+        </div>
+        <div class="metric">
+          <div class="label">Carbs</div>
+          <div class="value"><span id="dayC">0</span> g</div>
+        </div>
+        <div class="metric">
+          <div class="label">Fat</div>
+          <div class="value"><span id="dayF">0</span> g</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Presets quick toggles -->
+    <section class="card">
+      <div class="section-head">
+        <h2>Daily Presets</h2>
+        <div class="muted">Tick what you had today. Values can be edited in Settings.</div>
+      </div>
+      <div class="presets">
+        <div class="preset">
+          <label class="toggle"><input type="checkbox" id="togYoghurt" /> Greek yoghurt</label>
+          <div class="preset-fields">
+            <label>Grams</label>
+            <input type="number" id="yoghurtGrams" min="0" step="1" />
+          </div>
+        </div>
+        <div class="preset">
+          <label class="toggle"><input type="checkbox" id="togProteinBar" /> Protein bar</label>
+          <div class="preset-fields">
+            <label>Quantity</label>
+            <input type="number" id="proteinBarQty" min="0" step="1" />
+          </div>
+        </div>
+        <div class="preset">
+          <label class="toggle"><input type="checkbox" id="togEggs" /> Eggs (1 whole + 1 whites)</label>
+          <div class="preset-fields">
+            <label>Whole</label>
+            <input type="number" id="eggsWhole" min="0" step="1" />
+            <label>Whites only</label>
+            <input type="number" id="eggsWhites" min="0" step="1" />
+          </div>
+        </div>
+        <div class="preset">
+          <label class="toggle"><input type="checkbox" id="togProteinShake" /> Protein shake</label>
+          <div class="preset-fields">
+            <label>Scoops</label>
+            <input type="number" id="shakeScoops" min="0" step="1" />
+            <label>Milk (ml)</label>
+            <input type="number" id="shakeMilkML" min="0" step="1" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Meals -->
+    <section class="card">
+      <h2>Breakfast (with Pre/Post)</h2>
+      <div class="grid-2">
+        <div class="subcard">
+          <h3>Pre-workout</h3>
+          <label>Banana (peel-on grams)</label>
+          <input type="number" id="bananaPeelOn" min="0" step="1" />
+          <div class="muted">We’ll convert to edible grams using your “edible fraction”.</div>
+        </div>
+        <div class="subcard">
+          <h3>Post-workout</h3>
+          <div class="grid-2">
+            <div>
+              <label>Greek yoghurt (g)</label>
+              <input type="number" id="bfYoghurtG" min="0" step="1" />
+            </div>
+            <div>
+              <label>Protein shake?</label>
+              <select id="bfShakeOn">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label>Scoops</label>
+              <input type="number" id="bfShakeScoops" min="0" step="1" />
+            </div>
+            <div>
+              <label>Milk (ml)</label>
+              <input type="number" id="bfShakeMilkML" min="0" step="1" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="meal-totals">
+        <table class="table">
+          <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+          <tbody id="tblBreakfast"></tbody>
+          <tfoot><tr><th>Breakfast total</th><th class="r" id="kcalBreakfast">0</th><th class="r" id="pBreakfast">0</th><th class="r" id="cBreakfast">0</th><th class="r" id="fBreakfast">0</th></tr></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Lunch</h2>
+      <div class="grid-4">
+        <div>
+          <label>Meat (g)</label>
+          <input type="number" id="lMeatG" min="0" step="1" />
+        </div>
+        <div>
+          <label>Curry (g)</label>
+          <input type="number" id="lCurryG" min="0" step="1" />
+        </div>
+        <div>
+          <label>Chapatis (count)</label>
+          <input type="number" id="lChapati" min="0" step="1" />
+        </div>
+        <div>
+          <label>Milk 300 ml?</label>
+          <select id="lMilk">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+      </div>
+      <div class="meal-totals">
+        <table class="table">
+          <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+          <tbody id="tblLunch"></tbody>
+          <tfoot><tr><th>Lunch total</th><th class="r" id="kcalLunch">0</th><th class="r" id="pLunch">0</th><th class="r" id="cLunch">0</th><th class="r" id="fLunch">0</th></tr></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Dinner</h2>
+      <div class="grid-4">
+        <div>
+          <label>Meat (g)</label>
+          <input type="number" id="dMeatG" min="0" step="1" />
+        </div>
+        <div>
+          <label>Curry (g)</label>
+          <input type="number" id="dCurryG" min="0" step="1" />
+        </div>
+        <div>
+          <label>Chapatis (count)</label>
+          <input type="number" id="dChapati" min="0" step="1" />
+        </div>
+        <div>
+          <label>Milk 300 ml?</label>
+          <select id="dMilk">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+      </div>
+      <div class="meal-totals">
+        <table class="table">
+          <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+          <tbody id="tblDinner"></tbody>
+          <tfoot><tr><th>Dinner total</th><th class="r" id="kcalDinner">0</th><th class="r" id="pDinner">0</th><th class="r" id="cDinner">0</th><th class="r" id="fDinner">0</th></tr></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Snacks</h2>
+      <div class="grid-4">
+        <div>
+          <label>Eggs today?</label>
+          <select id="sEggsOn">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div>
+          <label>Whole</label>
+          <input type="number" id="sEggsWhole" min="0" step="1" />
+        </div>
+        <div>
+          <label>Whites only</label>
+          <input type="number" id="sEggsWhites" min="0" step="1" />
+        </div>
+        <div>
+          <label>Milk 300 ml?</label>
+          <select id="sMilk">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-3 mt8">
+        <div class="subcard">
+          <h3>Protein bar?</h3>
+          <select id="sBarOn">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+          <label>Quantity</label>
+          <input type="number" id="sBarQty" min="0" step="1" />
+        </div>
+        <div class="subcard">
+          <h3>Extra milk (ml)</h3>
+          <input type="number" id="sMilkExtra" min="0" step="1" placeholder="0" />
+          <div class="muted">For milk outside meals.</div>
+        </div>
+        <div class="subcard">
+          <h3>Misc one-offs</h3>
+          <div class="grid-4">
+            <input id="miscName" placeholder="Name" />
+            <input type="number" id="miscKcal" min="0" step="0.1" placeholder="kcal" />
+            <input type="number" id="miscP" min="0" step="0.1" placeholder="P" />
+            <input type="number" id="miscC" min="0" step="0.1" placeholder="C" />
+          </div>
+          <div class="grid-4">
+            <input type="number" id="miscF" min="0" step="0.1" placeholder="F" />
+            <button id="addMisc" class="btn small">Add</button>
+            <button id="clearMisc" class="btn small danger">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="meal-totals">
+        <table class="table">
+          <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+          <tbody id="tblSnacks"></tbody>
+          <tfoot><tr><th>Snacks total</th><th class="r" id="kcalSnacks">0</th><th class="r" id="pSnacks">0</th><th class="r" id="cSnacks">0</th><th class="r" id="fSnacks">0</th></tr></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Daily Group Totals</h2>
+      <div id="groupTotals" class="group-grid"></div>
+    </section>
+
+    <section class="card">
+      <div class="grid-3">
+        <button id="btnExportWeek" class="btn secondary">Export current week CSV</button>
+        <button id="btnExportDay" class="btn secondary">Export this day JSON</button>
+        <button id="btnClearDay" class="btn danger">Clear this day</button>
+      </div>
+    </section>
+
+    <section id="weeklyPanel" class="card" style="display:none;">
+      <h2>Weekly View</h2>
+      <div class="muted" id="weeklyLabel"></div>
+      <table class="table mt8">
+        <thead>
+          <tr><th>Date</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr>
+        </thead>
+        <tbody id="tblWeek"></tbody>
+        <tfoot>
+          <tr><th>Week total</th><th class="r" id="wkKcal">0</th><th class="r" id="wkP">0</th><th class="r" id="wkC">0</th><th class="r" id="wkF">0</th></tr>
+        </tfoot>
+      </table>
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <dialog id="dlgSettings" class="dialog">
+    <div class="dialog-head">
+      <h3>Settings</h3>
+      <button id="closeSettings" class="btn small secondary">Close</button>
+    </div>
+    <div class="settings-grid">
+      <div class="set-block">
+        <h4>Targets</h4>
+        <label>Daily protein target (g)</label>
+        <input type="number" id="setProteinTarget" min="0" step="1" />
+      </div>
+      <div class="set-block">
+        <h4>Milk (trim)</h4>
+        <label>Default per meal (ml)</label>
+        <input type="number" id="setMilkDefault" min="0" step="1" />
+        <label>Per 100 ml — Protein</label><input type="number" id="milkP100" step="0.01" />
+        <label>Per 100 ml — Carbs</label><input type="number" id="milkC100" step="0.01" />
+        <label>Per 100 ml — Fat</label><input type="number" id="milkF100" step="0.01" />
+        <label>Per 100 ml — kJ (optional)</label><input type="number" id="milkKJ100" step="0.1" />
+      </div>
+      <div class="set-block">
+        <h4>Greek yoghurt</h4>
+        <label>Per 100 g — Protein</label><input type="number" id="yogP100" step="0.01" />
+        <label>Per 100 g — Carbs</label><input type="number" id="yogC100" step="0.01" />
+        <label>Per 100 g — Fat</label><input type="number" id="yogF100" step="0.01" />
+        <label>Per 100 g — kJ</label><input type="number" id="yogKJ100" step="0.1" />
+      </div>
+      <div class="set-block">
+        <h4>Protein bar (per bar)</h4>
+        <label>Protein</label><input type="number" id="barP" step="0.01" />
+        <label>Carbs</label><input type="number" id="barC" step="0.01" />
+        <label>Fat</label><input type="number" id="barF" step="0.01" />
+        <label>kJ</label><input type="number" id="barKJ" step="0.1" />
+      </div>
+      <div class="set-block">
+        <h4>Protein powder (per scoop)</h4>
+        <label>Protein</label><input type="number" id="scoopP" step="0.01" />
+        <label>Carbs</label><input type="number" id="scoopC" step="0.01" />
+        <label>Fat</label><input type="number" id="scoopF" step="0.01" />
+        <label>kJ (optional)</label><input type="number" id="scoopKJ" step="0.1" />
+      </div>
+      <div class="set-block">
+        <h4>Banana</h4>
+        <label>Edible fraction from peel-on weight (0–1)</label>
+        <input type="number" id="bananaFrac" min="0" max="1" step="0.01" />
+        <label>Per 100 g (edible) — Protein</label><input type="number" id="bananaP100" step="0.01" />
+        <label>Per 100 g (edible) — Carbs</label><input type="number" id="bananaC100" step="0.01" />
+        <label>Per 100 g (edible) — Fat</label><input type="number" id="bananaF100" step="0.01" />
+        <label>Per 100 g (edible) — kJ</label><input type="number" id="bananaKJ100" step="0.1" />
+      </div>
+      <div class="set-block">
+        <h4>Chapati (per piece)</h4>
+        <label>Protein</label><input type="number" id="chapatiP" step="0.01" />
+        <label>Carbs</label><input type="number" id="chapatiC" step="0.01" />
+        <label>Fat</label><input type="number" id="chapatiF" step="0.01" />
+        <label>kcal</label><input type="number" id="chapatiKcal" step="0.1" />
+      </div>
+      <div class="set-block">
+        <h4>Meat & Curry (per 100 g)</h4>
+        <label>Meat — Protein</label><input type="number" id="meatP100" step="0.01" />
+        <label>Meat — Carbs</label><input type="number" id="meatC100" step="0.01" />
+        <label>Meat — Fat</label><input type="number" id="meatF100" step="0.01" />
+        <label>Meat — kJ (optional)</label><input type="number" id="meatKJ100" step="0.1" />
+        <label>Curry — Protein</label><input type="number" id="curryP100" step="0.01" />
+        <label>Curry — Carbs</label><input type="number" id="curryC100" step="0.01" />
+        <label>Curry — Fat</label><input type="number" id="curryF100" step="0.01" />
+        <label>Curry — kJ (optional)</label><input type="number" id="curryKJ100" step="0.1" />
+      </div>
+      <div class="set-block">
+        <h4>General</h4>
+        <button id="saveSettings" class="btn">Save Settings</button>
+        <button id="exportPresets" class="btn secondary">Export Presets</button>
+        <input type="file" id="importPresets" accept=".json" />
+      </div>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
