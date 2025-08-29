@@ -284,6 +284,7 @@ progress.prog-green::-moz-progress-bar {
 
 .table td {
 	font-weight: 600;
+	text-align: center;
 }
 
 .table.compact th,
