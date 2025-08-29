@@ -1,12 +1,5 @@
 /* =========================================================
-   Daily Macros Tracker — Full CSS (kcal-first, Apple-ish UI)
-   - Wide responsive dashboard (max 1440px)
-   - Two-column layout: Inputs (left) + Sticky summaries (right)
-   - Segmented Yes/No toggles (no dropdowns)
-   - Compact, readable tables (Protein / Carbs / Fat)
-   - Pretty Settings dialog
-   - Dynamic protein target bar colors via classes:
-       prog-red / prog-amber / prog-green
+   Daily Diet Tracker — Full CSS (kcal-first, Apple-ish UI)
    ========================================================= */
 
 /* ---------- Theme & base ---------- */
@@ -279,6 +272,7 @@ progress.prog-green::-moz-progress-bar {
 .table td {
 	padding: 9px 8px;
 	border-bottom: 1px solid var(--border);
+	vertical-align: middle;
 }
 
 .table th {
@@ -326,7 +320,7 @@ progress.prog-green::-moz-progress-bar {
 	background: var(--panel);
 }
 
-/* Remove number spinners (WebKit/Firefox) */
+/* Remove number spinners */
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
 	-webkit-appearance: none;
@@ -495,7 +489,7 @@ input[type=number] {
 	display: none;
 }
 
-/* Order of panels matches HTML: B(1), MS(2), L(3), AS(4), D(5) */
+/* Order: B(1), MS(2), L(3), AS(4), D(5) */
 #tabB:checked~.tab-panels .tab-panel:nth-child(1) {
 	display: block;
 }
@@ -522,7 +516,7 @@ input[type=number] {
 	font-weight: 700;
 }
 
-/* ---------- Settings dialog (pretty, carded) ---------- */
+/* ---------- Settings dialog (pretty, readable inputs) ---------- */
 .dialog {
 	width: min(1120px, 96vw);
 	border: 1px solid var(--border);
@@ -616,7 +610,23 @@ input[type=number] {
 	display: none;
 }
 
-/* ---------- Grid utilities (used across forms) ---------- */
+/* Readable stacked fields */
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.field .inline {
+	gap: 8px;
+}
+
+.field input[type="number"],
+.field input[type="text"] {
+	width: 100%;
+}
+
+/* ---------- Grid utilities ---------- */
 .grid-2 {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
@@ -637,10 +647,6 @@ input[type=number] {
 
 .grid-4.mini {
 	gap: 10px;
-}
-
-.macros-modal {
-	text-align: center;
 }
 
 /* ---------- Responsive ---------- */
