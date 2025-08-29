@@ -21,71 +21,12 @@
     </div>
   </header>
 
-  <!-- Dashboard grid -->
-  <main class="dashboard">
+  <!-- TODAY VIEW -->
+  <main id="todayView" class="dashboard">
     <!-- LEFT COLUMN: Inputs -->
     <section class="col col-left">
 
-      <!-- Quick entries (compact table) -->
-      <section class="card surface">
-        <div class="section-head">
-          <h2 class="title">Quick entries</h2>
-          <p class="muted">Everyday items. Values editable in Settings.</p>
-        </div>
-        <table class="table compact">
-          <thead>
-            <tr>
-              <th>Item</th><th class="r">Have?</th><th class="r">Qty</th><th class="r">Unit</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Greek yoghurt</td>
-              <td class="r"><input type="checkbox" id="togYoghurt" /></td>
-              <td class="r"><input type="number" id="yoghurtGrams" min="0" step="1" placeholder="180" /></td>
-              <td class="r"><span class="unit">g</span></td>
-            </tr>
-            <tr>
-              <td>Protein bar</td>
-              <td class="r"><input type="checkbox" id="togProteinBar" /></td>
-              <td class="r"><input type="number" id="proteinBarQty" min="0" step="1" placeholder="1" /></td>
-              <td class="r"><span class="unit">bar(s)</span></td>
-            </tr>
-            <tr>
-              <td>Eggs (1 whole + 1 whites)</td>
-              <td class="r"><input type="checkbox" id="togEggs" /></td>
-              <td class="r">
-                <div class="inline">
-                  <input type="number" id="eggsWhole" min="0" step="1" aria-label="Whole" />
-                  <span class="unit">whole</span>
-                </div>
-                <div class="inline mt4">
-                  <input type="number" id="eggsWhites" min="0" step="1" aria-label="Whites" />
-                  <span class="unit">whites</span>
-                </div>
-              </td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>Protein shake</td>
-              <td class="r"><input type="checkbox" id="togProteinShake" /></td>
-              <td class="r">
-                <div class="inline">
-                  <input type="number" id="shakeScoops" min="0" step="1" aria-label="Scoops" />
-                  <span class="unit">scoop</span>
-                </div>
-                <div class="inline mt4">
-                  <input type="number" id="shakeMilkML" min="0" step="1" aria-label="Milk ml" />
-                  <span class="unit">ml</span>
-                </div>
-              </td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <!-- Breakfast (pre/post) -->
+      <!-- Breakfast -->
       <section class="card surface">
         <h2 class="title">Breakfast</h2>
         <div class="grid-2">
@@ -141,7 +82,42 @@
         </div>
       </section>
 
-      <!-- Lunch & Dinner side-by-side -->
+      <!-- Morning Snack (eggs + milk only) -->
+      <section class="card surface">
+        <h2 class="title">Morning Snack</h2>
+        <table class="table compact">
+          <tbody>
+            <tr>
+              <td>Eggs today?</td>
+              <td class="r">
+                <div class="seg seg-small">
+                  <button class="seg-btn" data-bind="msEggsOn" data-val="no">No</button>
+                  <button class="seg-btn" data-bind="msEggsOn" data-val="yes">Yes</button>
+                </div>
+                <select id="msEggsOn" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
+              </td>
+              <td class="r">
+                <div class="inline"><input type="number" id="msEggsWhole" min="0" step="1" /><span class="unit">whole</span></div>
+                <div class="inline mt4"><input type="number" id="msEggsWhites" min="0" step="1" /><span class="unit">whites</span></div>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Milk 300 ml?</td>
+              <td class="r">
+                <div class="seg seg-small">
+                  <button class="seg-btn" data-bind="msMilk" data-val="no">No</button>
+                  <button class="seg-btn" data-bind="msMilk" data-val="yes">Yes</button>
+                </div>
+                <select id="msMilk" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
+              </td>
+              <td></td><td></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Main meals: Lunch & Dinner side-by-side -->
       <section class="card surface">
         <h2 class="title">Main meals</h2>
         <div class="grid-2">
@@ -192,72 +168,35 @@
         </div>
       </section>
 
-      <!-- Snacks & Misc -->
+      <!-- Afternoon Snack (protein bar + milk only) -->
       <section class="card surface">
-        <h2 class="title">Snacks & Misc</h2>
+        <h2 class="title">Afternoon Snack</h2>
         <table class="table compact">
           <tbody>
-            <tr>
-              <td>Eggs today?</td>
-              <td class="r">
-                <div class="seg seg-small">
-                  <button class="seg-btn" data-bind="sEggsOn" data-val="no">No</button>
-                  <button class="seg-btn" data-bind="sEggsOn" data-val="yes">Yes</button>
-                </div>
-                <select id="sEggsOn" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
-              </td>
-              <td class="r">
-                <div class="inline"><input type="number" id="sEggsWhole" min="0" step="1" /><span class="unit">whole</span></div>
-                <div class="inline mt4"><input type="number" id="sEggsWhites" min="0" step="1" /><span class="unit">whites</span></div>
-              </td>
-              <td></td>
-            </tr>
             <tr>
               <td>Protein bar</td>
               <td class="r">
                 <div class="seg seg-small">
-                  <button class="seg-btn" data-bind="sBarOn" data-val="no">No</button>
-                  <button class="seg-btn" data-bind="sBarOn" data-val="yes">Yes</button>
+                  <button class="seg-btn" data-bind="asBarOn" data-val="no">No</button>
+                  <button class="seg-btn" data-bind="asBarOn" data-val="yes">Yes</button>
                 </div>
-                <select id="sBarOn" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
+                <select id="asBarOn" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
               </td>
               <td class="r">
-                <div class="inline"><input type="number" id="sBarQty" min="0" step="1" /><span class="unit">qty</span></div>
+                <div class="inline"><input type="number" id="asBarQty" min="0" step="1" /><span class="unit">qty</span></div>
               </td>
               <td></td>
             </tr>
             <tr>
-              <td>Extra milk</td>
-              <td></td>
-              <td class="r"><input type="number" id="sMilkExtra" min="0" step="1" placeholder="0" /></td>
-              <td class="r"><span class="unit">ml</span></td>
-            </tr>
-            <tr>
-              <td>Milk with snacks?</td>
+              <td>Milk 300 ml?</td>
               <td class="r">
                 <div class="seg seg-small">
-                  <button class="seg-btn" data-bind="sMilk" data-val="no">No</button>
-                  <button class="seg-btn" data-bind="sMilk" data-val="yes">Yes</button>
+                  <button class="seg-btn" data-bind="asMilk" data-val="no">No</button>
+                  <button class="seg-btn" data-bind="asMilk" data-val="yes">Yes</button>
                 </div>
-                <select id="sMilk" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
+                <select id="asMilk" class="sr-only"><option value="no" selected>No</option><option value="yes">Yes</option></select>
               </td>
               <td></td><td></td>
-            </tr>
-            <tr>
-              <td>Misc one-off</td>
-              <td colspan="3">
-                <div class="grid-4">
-                  <input id="miscName" placeholder="Name" />
-                  <input type="number" id="miscKcal" min="0" step="0.1" placeholder="kcal" />
-                  <input type="number" id="miscP" min="0" step="0.1" placeholder="P" />
-                  <input type="number" id="miscC" min="0" step="0.1" placeholder="C" />
-                </div>
-                <div class="grid-4 mt8">
-                  <input type="number" id="miscF" min="0" step="0.1" placeholder="F" />
-                  <button id="addMisc" class="btn tiny">Add</button>
-                  <button id="clearMisc" class="btn tiny ghost danger">Clear</button>
-                </div>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -269,7 +208,7 @@
           <button id="btnExportWeek" class="btn ghost">Export week CSV</button>
           <button id="btnExportDay" class="btn ghost">Export day JSON</button>
           <button id="btnSubmit" class="btn">Submit day</button>
-          <button id="btnClearDay" class="btn ghost danger">Clear day</button>
+          <button id="btnClearDay" class="btn outline danger">Clear day</button>
         </div>
       </section>
     </section>
@@ -300,17 +239,19 @@
         </div>
       </section>
 
-      <!-- Meal tables (tabbed) -->
+      <!-- Meal tables (tabs) -->
       <section class="card surface">
         <div class="tabs">
           <input type="radio" name="mealtab" id="tabB" checked />
           <label for="tabB">Breakfast</label>
+          <input type="radio" name="mealtab" id="tabMS" />
+          <label for="tabMS">Morning</label>
           <input type="radio" name="mealtab" id="tabL" />
           <label for="tabL">Lunch</label>
+          <input type="radio" name="mealtab" id="tabAS" />
+          <label for="tabAS">Afternoon</label>
           <input type="radio" name="mealtab" id="tabD" />
           <label for="tabD">Dinner</label>
-          <input type="radio" name="mealtab" id="tabS" />
-          <label for="tabS">Snacks</label>
 
           <div class="tab-panels">
             <div class="tab-panel">
@@ -323,8 +264,22 @@
             <div class="tab-panel">
               <table class="table">
                 <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+                <tbody id="tblMorning"></tbody>
+                <tfoot><tr><th>Morning total</th><th class="r" id="kcalMorning">0</th><th class="r" id="pMorning">0</th><th class="r" id="cMorning">0</th><th class="r" id="fMorning">0</th></tr></tfoot>
+              </table>
+            </div>
+            <div class="tab-panel">
+              <table class="table">
+                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
                 <tbody id="tblLunch"></tbody>
                 <tfoot><tr><th>Lunch total</th><th class="r" id="kcalLunch">0</th><th class="r" id="pLunch">0</th><th class="r" id="cLunch">0</th><th class="r" id="fLunch">0</th></tr></tfoot>
+              </table>
+            </div>
+            <div class="tab-panel">
+              <table class="table">
+                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+                <tbody id="tblAfternoon"></tbody>
+                <tfoot><tr><th>Afternoon total</th><th class="r" id="kcalAfternoon">0</th><th class="r" id="pAfternoon">0</th><th class="r" id="cAfternoon">0</th><th class="r" id="fAfternoon">0</th></tr></tfoot>
               </table>
             </div>
             <div class="tab-panel">
@@ -334,25 +289,61 @@
                 <tfoot><tr><th>Dinner total</th><th class="r" id="kcalDinner">0</th><th class="r" id="pDinner">0</th><th class="r" id="cDinner">0</th><th class="r" id="fDinner">0</th></tr></tfoot>
               </table>
             </div>
-            <div class="tab-panel">
-              <table class="table">
-                <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
-                <tbody id="tblSnacks"></tbody>
-                <tfoot><tr><th>Snacks total</th><th class="r" id="kcalSnacks">0</th><th class="r" id="pSnacks">0</th><th class="r" id="cSnacks">0</th><th class="r" id="fSnacks">0</th></tr></tfoot>
-              </table>
-            </div>
           </div>
         </div>
       </section>
 
-      <!-- Group Totals -->
+      <!-- Daily groups table -->
       <section class="card surface">
         <h2 class="title">Daily groups</h2>
-        <div id="groupTotals" class="group-grid"></div>
+        <table class="table">
+          <thead>
+            <tr><th>Group</th><th class="r">kcal</th><th class="r">Protein</th><th class="r">Carbs</th><th class="r">Fat</th></tr>
+          </thead>
+          <tbody id="tblGroups"></tbody>
+          <tfoot>
+            <tr><th>Total</th><th class="r" id="grpKcal">0</th><th class="r" id="grpP">0</th><th class="r" id="grpC">0</th><th class="r" id="grpF">0</th></tr>
+          </tfoot>
+        </table>
       </section>
 
-      <!-- Weekly panel (shows when toggled) -->
-      <section id="weeklyPanel" class="card surface" style="display:none;">
+      <!-- Miscellaneous (separate; extra milk moved here) -->
+      <section class="card surface">
+        <h2 class="title">Miscellaneous</h2>
+        <div class="grid-4">
+          <input id="miscName" placeholder="Name" />
+          <input type="number" id="miscKcal" min="0" step="0.1" placeholder="kcal" />
+          <input type="number" id="miscP" min="0" step="0.1" placeholder="P" />
+          <input type="number" id="miscC" min="0" step="0.1" placeholder="C" />
+        </div>
+        <div class="grid-4 mt8">
+          <input type="number" id="miscF" min="0" step="0.1" placeholder="F" />
+          <button id="addMisc" class="btn tiny">Add</button>
+          <button id="clearMisc" class="btn tiny outline danger">Clear</button>
+        </div>
+        <div class="grid-3 mt8">
+          <div class="inline">
+            <label for="miscMilkML" class="subtitle">Extra milk</label>
+            <input type="number" id="miscMilkML" min="0" step="1" placeholder="0" />
+            <span class="unit">ml</span>
+          </div>
+        </div>
+
+        <div class="meal-totals mt8">
+          <table class="table">
+            <thead><tr><th>Item</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th></tr></thead>
+            <tbody id="tblMisc"></tbody>
+            <tfoot><tr><th>Misc total</th><th class="r" id="kcalMisc">0</th><th class="r" id="pMisc">0</th><th class="r" id="cMisc">0</th><th class="r" id="fMisc">0</th></tr></tfoot>
+          </table>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <!-- WEEK VIEW (separate screen for the toggle) -->
+  <section id="weeklyView" style="display:none;">
+    <div class="container-narrow">
+      <section class="card surface">
         <h2 class="title">Weekly view</h2>
         <div class="muted" id="weeklyLabel"></div>
         <table class="table mt8">
@@ -364,9 +355,13 @@
             <tr><th>Week total</th><th class="r" id="wkKcal">0</th><th class="r" id="wkP">0</th><th class="r" id="wkC">0</th><th class="r" id="wkF">0</th></tr>
           </tfoot>
         </table>
+
+        <div class="actions-row mt8">
+          <button id="btnExportWeek" class="btn ghost">Export week CSV</button>
+        </div>
       </section>
-    </aside>
-  </main>
+    </div>
+  </section>
 
   <!-- Settings (kcal-based) -->
   <dialog id="dlgSettings" class="dialog">
