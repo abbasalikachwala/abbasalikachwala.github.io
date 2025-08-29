@@ -144,8 +144,7 @@ input[type="date"] {
 
 /* ---------- Layout ---------- */
 .dashboard {
-	width: 100%;
-	max-width: 1440px;
+	width: 85%;
 	margin: 16px auto;
 	padding: 0 16px;
 	display: grid;
@@ -506,7 +505,7 @@ input[type=number] {
 
 /* ---------- Settings dialog ---------- */
 .dialog {
-	width: min(1120px, 96vw);
+	width: 85%;
 	border: 1px solid var(--border);
 	border-radius: 18px;
 	background: var(--panel);
