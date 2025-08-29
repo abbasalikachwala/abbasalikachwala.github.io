@@ -1,8 +1,10 @@
 // ====================================================================
 // Daily Diet Tracker — kcal-first Dashboard + Weekly tools
-// Weekly view: DD/MMM/YY rows, header "Week 35 — 25th August → 31st August"
-// Burned input doesn't kill caret (no full re-render on typing).
-// Meal tables merged: Morning(Breakfast+Morning Snack), Afternoon(Lunch+Afternoon), Dinner, Misc.
+// - Misc tab shows only if there's misc content today
+// - Weekly macros (P/C/F) shown as whole numbers (no decimals)
+// - Burned input doesn't kill caret (no full re-render on typing)
+// - Weekly label: "Week 35 — 25th August → 31st August"
+// - Meal tables: Morning(Breakfast+Morning Snack), Afternoon(Lunch+Afternoon), Dinner, Misc
 // ====================================================================
 
 // ---------- DOM helpers ----------
@@ -683,6 +685,39 @@ $('#miscMilkML')?.addEventListener('input', e => {
    renderAll();
 });
 
+// ---------- Tabs: show "Misc" only if there's data today ----------
+function hasMiscForCurrentDay() {
+   const date = dayPicker.value;
+   const d = getDay();
+   const arr = miscByDay[date] || [];
+   return (arr.length > 0) || ((d.miscMilkML || 0) > 0);
+}
+
+function updateMiscTabVisibility() {
+   const input = document.getElementById('tabMisc'); // radio input
+   const label = document.querySelector('label[for="tabMisc"]'); // its label
+   const panels = document.querySelectorAll('.tabs .tab-panels .tab-panel');
+   const panel = panels[3]; // 4th panel = Misc (keep tab order)
+   if (!input || !label || !panel) return;
+
+   const visible = hasMiscForCurrentDay();
+   if (visible) {
+      input.disabled = false;
+      label.style.display = '';
+      panel.style.display = '';
+   } else {
+      if (input.checked) {
+         const fallback = document.getElementById('tabMorning') ||
+            document.getElementById('tabAfternoon') ||
+            document.getElementById('tabDinner');
+         if (fallback) fallback.checked = true;
+      }
+      input.disabled = true;
+      label.style.display = 'none';
+      panel.style.display = 'none';
+   }
+}
+
 // ---------- Tables (Today view) ----------
 function fillMealTable(tbodyId, kcalId, pId, cId, fId, rows) {
    const tbody = $('#' + tbodyId);
@@ -843,7 +878,7 @@ function renderTotals() {
    const pct = pt ? Math.min(100, (tot.p / pt) * 100) : 0;
    $('#proteinProgress').value = pct;
    setProgressColor(pct);
-   $('#proteinTargetText').textContent = pt ? `Target ${pt} g — ${round(pct)}%` : '';
+   $('#proteinTargetText').textContent = pt ? `Target ${pt} g — ${Math.round(pct)}%` : '';
 }
 
 // ---------- Daily groups (Today view) ----------
@@ -993,7 +1028,7 @@ function computeTotalsForDate(date) {
    if ((d.dinner.meatG || 0) > 0) add(sum, scalePer100(settings.meatPer100g, d.dinner.meatG));
    if ((d.dinner.curryG || 0) > 0) add(sum, scalePer100(settings.curryPer100g, d.dinner.curryG));
    if ((d.dinner.chapatis || 0) > 0) add(sum, scalePerPiece(settings.chapatiPerPiece, d.dinner.chapatis));
-   if (d.dinner.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, settings.milkDefaultML));
+   if (d.dinner.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, d.dinner.milkOn ? settings.milkDefaultML : 0));
 
    // Misc list
    const arr = miscByDay[date] || [];
@@ -1027,14 +1062,17 @@ function gatherWeekData() {
          deficit
       };
    });
-   const sum = rows.reduce((a, r) => ({
-      kcal: a.kcal + r.kcal,
-      p: a.p + r.p,
-      c: a.c + r.c,
-      f: a.f + r.f,
-      burned: a.burned + r.burned,
-      deficit: a.deficit + r.deficit
-   }), {
+   // Sum using whole-number macros so totals match visible cells
+   const sum = rows.reduce((a, r) => {
+      return {
+         kcal: a.kcal + r.kcal,
+         p: a.p + Math.round(r.p),
+         c: a.c + Math.round(r.c),
+         f: a.f + Math.round(r.f),
+         burned: a.burned + r.burned,
+         deficit: a.deficit + r.deficit
+      };
+   }, {
       kcal: 0,
       p: 0,
       c: 0,
@@ -1065,13 +1103,18 @@ function renderWeek() {
 
    rows.forEach(r => {
       const future = isFuture(r.date);
+      // Whole-number macros for display
+      const rp = Math.round(r.p),
+         rc = Math.round(r.c),
+         rf = Math.round(r.f);
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
       <td>${fmtDDMMMYY(r.date)}</td>
       <td class="r">${r.kcal}</td>
-      <td class="r">${r.p}</td>
-      <td class="r">${r.c}</td>
-      <td class="r">${r.f}</td>
+      <td class="r">${rp}</td>
+      <td class="r">${rc}</td>
+      <td class="r">${rf}</td>
       <td class="r">
         <input type="number" class="wk-burn" data-date="${r.date}" min="0" step="1" ${future ? 'disabled' : ''} value="${r.burned}">
       </td>
@@ -1083,12 +1126,13 @@ function renderWeek() {
       tbody.appendChild(tr);
    });
 
-   $('#wkKcal').textContent = round(sum.kcal);
-   $('#wkP').textContent = round(sum.p);
-   $('#wkC').textContent = round(sum.c);
-   $('#wkF').textContent = round(sum.f);
-   $('#wkBurned').textContent = round(sum.burned);
-   $('#wkDeficit').textContent = round(sum.deficit);
+   // Footer: also whole-number macros
+   $('#wkKcal').textContent = Math.round(sum.kcal);
+   $('#wkP').textContent = Math.round(sum.p);
+   $('#wkC').textContent = Math.round(sum.c);
+   $('#wkF').textContent = Math.round(sum.f);
+   $('#wkBurned').textContent = Math.round(sum.burned);
+   $('#wkDeficit').textContent = Math.round(sum.deficit);
 }
 
 function updateWeekFooter() {
@@ -1102,19 +1146,19 @@ function updateWeekFooter() {
    dates.forEach(dt => {
       const t = computeTotalsForDate(dt);
       sumKcal += t.kcal;
-      sumP += t.p;
-      sumC += t.c;
-      sumF += t.f;
+      sumP += Math.round(t.p); // whole-number macros
+      sumC += Math.round(t.c);
+      sumF += Math.round(t.f);
       const b = Number(burnedByDay[dt] || 0);
       sumBurn += b;
       sumDef += round(b - t.kcal);
    });
-   $('#wkKcal').textContent = round(sumKcal);
-   $('#wkP').textContent = round(sumP);
-   $('#wkC').textContent = round(sumC);
-   $('#wkF').textContent = round(sumF);
-   $('#wkBurned').textContent = round(sumBurn);
-   $('#wkDeficit').textContent = round(sumDef);
+   $('#wkKcal').textContent = Math.round(sumKcal);
+   $('#wkP').textContent = Math.round(sumP);
+   $('#wkC').textContent = Math.round(sumC);
+   $('#wkF').textContent = Math.round(sumF);
+   $('#wkBurned').textContent = Math.round(sumBurn);
+   $('#wkDeficit').textContent = Math.round(sumDef);
 }
 
 function exportCurrentWeekCSV() {
@@ -1126,9 +1170,10 @@ function exportCurrentWeekCSV() {
    } = gatherWeekData();
    let csv = 'date,kcal,protein_g,carbs_g,fat_g,burned_kcal,deficit_kcal\n';
    rows.forEach(r => {
-      csv += `${r.date},${r.kcal},${r.p},${r.c},${r.f},${r.burned},${r.deficit}\n`;
+      // export macros as whole numbers to match UI
+      csv += `${r.date},${Math.round(r.kcal)},${Math.round(r.p)},${Math.round(r.c)},${Math.round(r.f)},${Math.round(r.burned)},${Math.round(r.deficit)}\n`;
    });
-   csv += `WEEK_${wkNum}_TOTAL,${round(sum.kcal)},${round(sum.p)},${round(sum.c)},${round(sum.f)},${round(sum.burned)},${round(sum.deficit)}\n`;
+   csv += `WEEK_${wkNum}_TOTAL,${Math.round(sum.kcal)},${Math.round(sum.p)},${Math.round(sum.c)},${Math.round(sum.f)},${Math.round(sum.burned)},${Math.round(sum.deficit)}\n`;
    const blob = new Blob([csv], {
       type: 'text/csv'
    });
@@ -1203,6 +1248,9 @@ function renderAll() {
    renderTables();
    renderTotals();
    renderGroups();
+
+   // Toggle Misc tab based on content
+   updateMiscTabVisibility();
 }
 
 // ---------- Boot ----------
