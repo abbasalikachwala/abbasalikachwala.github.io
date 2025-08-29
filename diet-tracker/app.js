@@ -1,8 +1,12 @@
 // ====================================================================
 // Daily Diet Tracker — kcal-first Dashboard + Weekly tools
-// - Client-only (GH Pages safe). Data saved in localStorage.
-// - Weekly view: edit Burned (past/today only), per-day Clear, Clear week,
-//   daily/weekly deficit (burned - intake), CSV includes burned/deficit.
+// Client-only (GH Pages safe). Data saved in localStorage.
+//
+// Weekly view:
+// - Burned kcal input (past/today only). No full re-render on typing.
+// - Per-day Clear and Clear Week.
+// - Daily/Weekly deficit = burned - intake.
+// - Pretty dates: DD/MMM/YY in rows; header "Week 35 — 25th August → 31st August".
 // ====================================================================
 
 // ---------- DOM helpers ----------
@@ -12,7 +16,6 @@ const round = (v) => Math.round((v + Number.EPSILON) * 100) / 100;
 
 // ---------- Time/Date ----------
 function todayStr(d = new Date()) {
-   // Use local timezone; produce YYYY-MM-DD
    const tzo = d.getTimezoneOffset() * 60000;
    return new Date(d - tzo).toISOString().slice(0, 10);
 }
@@ -26,7 +29,7 @@ function isFuture(dateStr) {
    return parseISODate(dateStr) > parseISODate(todayStr());
 }
 
-// ISO week label
+// ISO week number "YYYY-W##"
 function isoWeek(dStr) {
    const d = new Date(dStr + "T12:00:00");
    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -37,11 +40,10 @@ function isoWeek(dStr) {
    const week = 1 + Math.round(dayDiff / 7);
    return `${date.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
 }
-
+// Monday..Sunday array of ISO dates for the anchor week
 function weekDates(anchor) {
-   // Returns array of 7 YYYY-MM-DD for Mon..Sun of the week containing anchor date
    const d = parseISODate(anchor);
-   const day = (d.getDay() + 6) % 7; // 0=Mon
+   const day = (d.getDay() + 6) % 7; // 0 = Monday
    const monday = new Date(d);
    monday.setDate(d.getDate() - day);
    const out = [];
@@ -51,6 +53,29 @@ function weekDates(anchor) {
       out.push(todayStr(dt));
    }
    return out;
+}
+
+// --- Pretty date formats ---
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function fmtDDMMMYY(dateStr) { // "25/Aug/25"
+   const d = parseISODate(dateStr);
+   const dd = String(d.getDate()).padStart(2, "0");
+   const m = MONTHS_SHORT[d.getMonth()];
+   const yy = String(d.getFullYear()).slice(-2);
+   return `${dd}/${m}/${yy}`;
+}
+
+function ordinal(n) {
+   const s = ["th", "st", "nd", "rd"],
+      v = n % 100;
+   return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+function fmtOrdinalMonth(dateStr) { // "25th August"
+   const d = parseISODate(dateStr);
+   return `${ordinal(d.getDate())} ${MONTHS_LONG[d.getMonth()]}`;
 }
 
 // ---------- Storage ----------
@@ -96,7 +121,7 @@ const DEFAULTS = {
       c: 0.6,
       f: 0.5,
       kcal: 96.6
-   }, // edit if your scoop differs
+   }, // edit to match your scoop
    banana: {
       edibleFrac: 0.70,
       per100g: {
@@ -129,10 +154,10 @@ const DEFAULTS = {
       defaultWhites: 1,
    },
    meatPer100g: {
-      p: 31,
+      p: 0,
       c: 0,
-      f: 3.6,
-      kcal: 165
+      f: 0,
+      kcal: 0
    },
    curryPer100g: {
       p: 0,
@@ -292,7 +317,7 @@ document.addEventListener('click', (e) => {
    const t = e.target;
    if (!t) return;
 
-   // Export week CSV (button in Weekly view)
+   // Export week CSV (Weekly view)
    if (t.id === 'btnExportWeek') {
       exportCurrentWeekCSV();
    }
@@ -332,17 +357,28 @@ dayPicker.addEventListener('change', () => {
    if ($('#weeklyView').style.display !== 'none') renderWeek();
 });
 
-// Weekly: update burned via event delegation
+// Weekly: update burned WITHOUT re-rendering the table
 document.addEventListener('input', (e) => {
    const el = e.target;
    if (!el.classList || !el.classList.contains('wk-burn')) return;
+
    const date = el.dataset.date;
-   if (!date || isFuture(date)) return; // safety
+   if (!date || isFuture(date)) return;
+
    const val = Number(el.value);
-   burnedByDay[date] = isFinite(val) ? Math.max(0, val) : 0;
+   const burn = isFinite(val) ? Math.max(0, val) : 0;
+   burnedByDay[date] = burn;
    saveJSON(LS.burned, burnedByDay);
-   // Live-update totals row
-   renderWeek();
+
+   // Update this row’s deficit cell
+   const intake = computeTotalsForDate(date).kcal;
+   const deficit = round(burn - intake);
+   const tr = el.closest('tr');
+   const defCell = tr?.querySelector('.wk-def');
+   if (defCell) defCell.textContent = deficit;
+
+   // Update weekly footer totals only
+   updateWeekFooter();
 });
 
 // ---------- Clear day (Today view) ----------
@@ -976,7 +1012,7 @@ function computeTotalsForDate(date) {
    if ((d.dinner.meatG || 0) > 0) add(sum, scalePer100(settings.meatPer100g, d.dinner.meatG));
    if ((d.dinner.curryG || 0) > 0) add(sum, scalePer100(settings.curryPer100g, d.dinner.curryG));
    if ((d.dinner.chapatis || 0) > 0) add(sum, scalePerPiece(settings.chapatiPerPiece, d.dinner.chapatis));
-   if (d.dinner.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, settings.milkDefaultML));
+   if (d.dinner.milkOn && (settings.milkDefaultML || 0) > 0) add(sum, scalePer100(settings.milkPer100ml, d.dinner.milkOn ? settings.milkDefaultML : 0));
 
    // Misc list
    const arr = miscByDay[date] || [];
@@ -1033,14 +1069,18 @@ function gatherWeekData() {
 }
 
 function renderWeek() {
-   const wk = isoWeek(dayPicker.value);
-   const dates = weekDates(dayPicker.value);
-   $('#weeklyLabel').textContent = `Week ${wk} — ${dates[0]} → ${dates[6]}`;
-
    const {
+      dates,
       rows,
       sum
    } = gatherWeekData();
+
+   const wkFull = isoWeek(dayPicker.value); // "2025-W35"
+   const wkNum = parseInt(wkFull.split("-W")[1], 10); // 35
+   const start = dates[0],
+      end = dates[6];
+   $('#weeklyLabel').textContent = `Week ${wkNum} — ${fmtOrdinalMonth(start)} → ${fmtOrdinalMonth(end)}`;
+
    const tbody = $('#tblWeek');
    tbody.innerHTML = '';
 
@@ -1048,7 +1088,7 @@ function renderWeek() {
       const future = isFuture(r.date);
       const tr = document.createElement('tr');
       tr.innerHTML = `
-      <td>${r.date}</td>
+      <td>${fmtDDMMMYY(r.date)}</td>
       <td class="r">${r.kcal}</td>
       <td class="r">${r.p}</td>
       <td class="r">${r.c}</td>
@@ -1056,7 +1096,7 @@ function renderWeek() {
       <td class="r">
         <input type="number" class="wk-burn" data-date="${r.date}" min="0" step="1" ${future ? 'disabled' : ''} value="${r.burned}">
       </td>
-      <td class="r">${r.deficit}</td>
+      <td class="r wk-def">${r.deficit}</td>
       <td class="r">
         <button class="btn tiny outline danger wk-clear" data-date="${r.date}" ${future ? 'disabled' : ''}>Clear</button>
       </td>
@@ -1072,8 +1112,35 @@ function renderWeek() {
    $('#wkDeficit').textContent = round(sum.deficit);
 }
 
+function updateWeekFooter() {
+   const dates = weekDates(dayPicker.value);
+   let sumKcal = 0,
+      sumP = 0,
+      sumC = 0,
+      sumF = 0,
+      sumBurn = 0,
+      sumDef = 0;
+   dates.forEach(dt => {
+      const t = computeTotalsForDate(dt);
+      sumKcal += t.kcal;
+      sumP += t.p;
+      sumC += t.c;
+      sumF += t.f;
+      const b = Number(burnedByDay[dt] || 0);
+      sumBurn += b;
+      sumDef += round(b - t.kcal);
+   });
+   $('#wkKcal').textContent = round(sumKcal);
+   $('#wkP').textContent = round(sumP);
+   $('#wkC').textContent = round(sumC);
+   $('#wkF').textContent = round(sumF);
+   $('#wkBurned').textContent = round(sumBurn);
+   $('#wkDeficit').textContent = round(sumDef);
+}
+
 function exportCurrentWeekCSV() {
-   const wk = isoWeek(dayPicker.value);
+   const wkFull = isoWeek(dayPicker.value); // "YYYY-W##"
+   const wkNum = parseInt(wkFull.split("-W")[1], 10);
    const {
       rows,
       sum
@@ -1082,13 +1149,13 @@ function exportCurrentWeekCSV() {
    rows.forEach(r => {
       csv += `${r.date},${r.kcal},${r.p},${r.c},${r.f},${r.burned},${r.deficit}\n`;
    });
-   csv += `WEEK_TOTAL,${round(sum.kcal)},${round(sum.p)},${round(sum.c)},${round(sum.f)},${round(sum.burned)},${round(sum.deficit)}\n`;
+   csv += `WEEK_${wkNum}_TOTAL,${round(sum.kcal)},${round(sum.p)},${round(sum.c)},${round(sum.f)},${round(sum.burned)},${round(sum.deficit)}\n`;
    const blob = new Blob([csv], {
       type: 'text/csv'
    });
    const a = document.createElement('a');
    a.href = URL.createObjectURL(blob);
-   a.download = `week_${wk}.csv`;
+   a.download = `week_W${String(wkNum).padStart(2,'0')}.csv`;
    a.click();
    URL.revokeObjectURL(a.href);
 }
@@ -1115,7 +1182,7 @@ function exportDayJSON() {
 function onSubmitDay() {
    saveAll();
    alert('Day saved. Weekly totals updated.');
-   // optional: jump to Week view
+   // Optional: switch to Week view automatically
    // $('#btnWeekly').click();
 }
 
