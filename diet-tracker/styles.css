@@ -642,7 +642,7 @@ input[type=number] {
 }
 #weeklyView .table th,
 #weeklyView .table td{
-  border: 1px solid var(--border); /* inner gridlines */
+  border: 1px solid #4a4a4a; /* inner gridlines */
 }
 #weeklyView .table thead th{
   background: color-mix(in oklab, var(--panel) 94%, var(--bg));
