@@ -42,8 +42,7 @@ body {
 }
 
 .wrap {
-	width: 100%;
-	max-width: 1200px;
+	width: 85%;
 	margin: 0 auto;
 	padding: var(--sp-3);
 }
