@@ -2,8 +2,8 @@
 const R = {
   FLOUR: 190,
   YOG: 95,
-  MILK: 110,
-  SUM: 395
+  MILK: 115,
+  SUM: 400
 };
 
 // Nutrition data (per 100g or 100ml as labelled)
@@ -36,11 +36,11 @@ const BRANDS = {
       kcal100: 164 / 4.184
     },
     dairydale: {
-      kJ100: 156,
-      protein100: 4.0,
-      carbs100: 5.0,
-      fat100: 0.1,
-      kcal100: 156 / 4.184,
+      kJ100: 157,
+      protein100: 3.7,
+      carbs100: 4.9,
+      fat100: 0.3,
+      kcal100: 157 / 4.184,
       approx: true
     },
   },
