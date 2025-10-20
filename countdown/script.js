@@ -2,13 +2,13 @@
   // --- TARGET DATE SETUP (NZ TIME) ---
   const TARGET = {
     year: 2025,
-    monthIndex: 5, // June (0-based, so 5 = June)
-    day: 18,
-    hour: 18,
+    monthIndex: 11, // December
+    day: 23,
+    hour: 23,
     minute: 50,
     second: 0,
     label: "Countdown to",
-    datetime: "<span class='countdown-date'>18th June 2025, 6:50 PM</span>"
+    datetime: "<span class='countdown-date'>23rd December 2025, 11:50 PM</span>"
   };
   document.getElementById("countdown-title").innerHTML = `${TARGET.label}<br>${TARGET.datetime}`;
 
@@ -184,3 +184,4 @@
   setInterval(updateTime, 1000);
   updateTime();
 })();
+
