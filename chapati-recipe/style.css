@@ -50,7 +50,7 @@ body {
 }
 
 .wrap {
-	width: 85%;
+	width: min(92%, 1280px);
 	margin: 0 auto;
 	padding: 18px 16px 28px;
 }
@@ -208,6 +208,8 @@ body {
 	flex-direction: column;
 	gap: var(--sp-1);
 	min-width: 0;
+	align-items: center;
+	text-align: center;
 }
 
 .controls input {
@@ -264,6 +266,11 @@ body {
 	grid-template-columns: minmax(0, 1fr) auto;
 	gap: .55rem .9rem;
 	align-items: center;
+}
+
+.kv > :nth-child(2n) {
+	text-align: right;
+	justify-self: end;
 }
 
 .num {
