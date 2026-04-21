@@ -1,4 +1,5 @@
-// ===== Ratios & brand data =====
+const CHAPATI_DOUGH_G = 30;
+
 const R = {
   FLOUR: 190,
   YOG: 95,
@@ -6,78 +7,38 @@ const R = {
   SUM: 400
 };
 
-// Nutrition data (per 100g or 100ml as labelled)
-const BRANDS = {
+const NUTRITION = {
+  flour: {
+    protein100: 12.0,
+    kcal100: 311,
+    carbs100: 62.0,
+    fat100: 1.7
+  },
   yoghurt: {
-    // Values for carbs/fat are best-available approximations;
-    // adjust here easily if your label differs.
-    yoplait: {
-      kJ100: 330,
-      protein100: 10.0,
-      carbs100: 4.1,
-      fat100: 2.5,
-      kcal100: 330 / 4.184
-    },
-    gopala: {
-      kJ100: 270,
-      protein100: 3.2,
-      carbs100: 4.7,
-      fat100: 3.8,
-      kcal100: 270 / 4.184,
-      approx: true
-    },
+    protein100: 5.1,
+    kcal100: 103,
+    carbs100: 7.0,
+    fat100: 6.0
   },
   milk: {
-    value: {
-      kJ100: 164,
-      protein100: 3.8,
-      carbs100: 5.0,
-      fat100: 0.1,
-      kcal100: 164 / 4.184
-    },
-    dairydale: {
-      kJ100: 157,
-      protein100: 3.7,
-      carbs100: 4.9,
-      fat100: 0.3,
-      kcal100: 157 / 4.184,
-      approx: true
-    },
-  },
+    protein100: 3.1,
+    kcal100: 60,
+    carbs100: 4.7,
+    fat100: 3.3
+  }
 };
 
-// Flour & oil labels (kept consistent with existing calculator)
-const P_FLOUR_PER_G = 4 / 30;   // g protein per g flour  (≈13.3 g/100g)
-const K_FLOUR_PER_G = 100 / 30; // kcal per g flour       (≈333 kcal/100g)
-
-// Derive carbs & fat for flour so macros line up with ~100 kcal per 30 g
-//  - Protein 4g -> 16 kcal
-//  - Assume fat small (~2 g / 100 g), carbs make up the rest
-const F_FLOUR_PER_G = 2 / 100;  // g fat per g flour (≈2 g/100g)
-const C_FLOUR_PER_G = 0.7;      // g carbs per g flour (≈70 g/100g), matches remaining kcal
-
-const K_OIL_PER_G = 9;          // kcal per g oil/ghee
-const P_OIL_PER_G = 0;
-const C_OIL_PER_G = 0;
+const WATER_YOG = 0.80;
+const WATER_MILK = 0.87;
+const K_OIL_PER_G = 9;
 const F_OIL_PER_G = 1;
+const AUTO_OIL_PER_CHAPATI_G = 6 / 15;
 
-// Hydration assumptions
-const WATER_YOG = 0.80; // yoghurt ≈ 80% water
-const WATER_MILK = 0.90; // trim milk ≈ 90% water
-
-// Fixed add-ons per chapati
-const DUST_FLOUR_PER_CHAPATI_G = 2; // raw flour for dusting
-const GHEE_PER_CHAPATI_G = 1;       // ghee brushed after cooking
-
-// ===== Helpers =====
 const $ = (sel) => document.querySelector(sel);
-const nearest10 = (x) => Math.round(x / 10) * 10;
-const roundHalf = (x) => Math.round(x * 2) / 2;
 const fmtInt = (x) => Number.isFinite(x) ? `${Math.round(x)}` : "—";
-const fmt1 = (x) => Number.isFinite(x) ? `${(+x).toFixed(1)}` : "—";
-const note = (b) => b?.approx ? "Approx. values until label confirmed." : "";
+const fmt1 = (x) => Number.isFinite(x) ? `${x.toFixed(1)}` : "—";
+const roundTo5 = (x) => Math.round(x / 5) * 5;
 
-// Small pulse animation
 function pulse(id) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -86,81 +47,104 @@ function pulse(id) {
   el.classList.add("pulse");
 }
 
+function perGram(valuePer100) {
+  return valuePer100 / 100;
+}
+
+function hydrationFor(flourTotal, yogTotal, milkTotal) {
+  return ((yogTotal * WATER_YOG) + (milkTotal * WATER_MILK)) / flourTotal * 100;
+}
+
+function chooseRoundedIngredients(target) {
+  const rawFlour = target * (R.FLOUR / R.SUM);
+  const rawYog = target * (R.YOG / R.SUM);
+  const rawMilk = target * (R.MILK / R.SUM);
+
+  let best = null;
+
+  for (let flour = roundTo5(rawFlour) - 30; flour <= roundTo5(rawFlour) + 30; flour += 5) {
+    if (flour <= 0) continue;
+
+    for (let yog = roundTo5(rawYog) - 30; yog <= roundTo5(rawYog) + 30; yog += 5) {
+      if (yog < 0) continue;
+
+      const milk = target - flour - yog;
+      if (milk < 0 || milk % 5 !== 0) continue;
+
+      const hydration = hydrationFor(flour, yog, milk);
+      const score =
+        Math.abs(hydration - 90) * 100 +
+        Math.abs(flour - rawFlour) +
+        Math.abs(yog - rawYog) +
+        Math.abs(milk - rawMilk);
+
+      if (!best || score < best.score) {
+        best = { flourTotal: flour, yogTotal: yog, milkTotal: milk, hydration, score };
+      }
+    }
+  }
+
+  return best || {
+    flourTotal: roundTo5(rawFlour),
+    yogTotal: roundTo5(rawYog),
+    milkTotal: roundTo5(target - roundTo5(rawFlour) - roundTo5(rawYog)),
+    hydration: hydrationFor(
+      roundTo5(rawFlour),
+      roundTo5(rawYog),
+      roundTo5(target - roundTo5(rawFlour) - roundTo5(rawYog))
+    )
+  };
+}
+
 let userTouchedOil = false;
 
-// ===== Core calc =====
-function computePlan({ n, dough, oil, yogBrand, milkBrand }) {
-  if (!Number.isFinite(n) || !Number.isFinite(dough) || n <= 0 || dough <= 0) return null;
+function syncPresetState(n) {
+  document.querySelectorAll(".chapatiPreset").forEach((btn) => {
+    btn.classList.toggle("active", parseInt(btn.dataset.count, 10) === n);
+  });
+}
 
-  const target = n * dough;
+function read() {
+  const n = parseInt($("#n")?.value, 10);
+  const oilEl = $("#oil");
+  const oil = (oilEl && userTouchedOil) ? parseInt(oilEl.value, 10) : undefined;
+  return { n, oil };
+}
 
-  // Base ingredient masses
-  let flourTotal = target * (R.FLOUR / R.SUM);
-  let yogTotal = target * (R.YOG / R.SUM);
-  let milkTotal = target * (R.MILK / R.SUM);
+function computePlan({ n, oil }) {
+  if (!Number.isFinite(n) || n <= 0) return null;
 
-  flourTotal = nearest10(flourTotal);
-  yogTotal = nearest10(yogTotal);
-  milkTotal = nearest10(milkTotal);
+  const target = n * CHAPATI_DOUGH_G;
+  const rounded = chooseRoundedIngredients(target);
+  const { flourTotal, yogTotal, milkTotal } = rounded;
 
-  // Tangzhong split
-  const flourTZ = Math.max(10, nearest10(flourTotal * 0.05));
-  const flourBowl = flourTotal - flourTZ;
+  const salt = Math.floor(0.01 * target);
+  const autoOil = Math.max(5, roundTo5(n * AUTO_OIL_PER_CHAPATI_G));
+  const oilTotal = (Number.isFinite(oil) && oil >= 0) ? roundTo5(oil) : autoOil;
 
-  let milkTZ = 5 * flourTZ;
-  if (milkTotal < milkTZ) milkTotal = milkTZ;
-  const milkBowl = milkTotal - milkTZ;
-
-  // Salt & oil
-  const salt = roundHalf(0.01 * n * dough);
-
-  const autoOil = Math.round(n * (5 / 15));
-  const oilBowl = (Number.isFinite(oil) && oil > 0) ? Math.round(oil) : autoOil;
-
-  // Brand selections
-  const Y = BRANDS.yoghurt[yogBrand];
-  const M = BRANDS.milk[milkBrand];
-
-  // Automatic dusting flour (raw) & ghee per chapati
-  const dustTotalG = n * DUST_FLOUR_PER_CHAPATI_G;
-  const gheeTotalG = n * GHEE_PER_CHAPATI_G;
-
-  // Batch macros
   const proteinBatch =
-    flourTotal * P_FLOUR_PER_G +
-    dustTotalG * P_FLOUR_PER_G +
-    yogTotal * (Y.protein100 / 100) +
-    milkTotal * (M.protein100 / 100);
+    flourTotal * perGram(NUTRITION.flour.protein100) +
+    yogTotal * perGram(NUTRITION.yoghurt.protein100) +
+    milkTotal * perGram(NUTRITION.milk.protein100);
 
   const carbsBatch =
-    flourTotal * C_FLOUR_PER_G +
-    dustTotalG * C_FLOUR_PER_G +
-    yogTotal * (Y.carbs100 / 100) +
-    milkTotal * (M.carbs100 / 100);
+    flourTotal * perGram(NUTRITION.flour.carbs100) +
+    yogTotal * perGram(NUTRITION.yoghurt.carbs100) +
+    milkTotal * perGram(NUTRITION.milk.carbs100);
 
   const fatBatch =
-    flourTotal * F_FLOUR_PER_G +
-    dustTotalG * F_FLOUR_PER_G +
-    yogTotal * (Y.fat100 / 100) +
-    milkTotal * (M.fat100 / 100) +
-    oilBowl * F_OIL_PER_G +          // oil in dough
-    gheeTotalG * F_OIL_PER_G;        // ghee after cooking
+    flourTotal * perGram(NUTRITION.flour.fat100) +
+    yogTotal * perGram(NUTRITION.yoghurt.fat100) +
+    milkTotal * perGram(NUTRITION.milk.fat100) +
+    oilTotal * F_OIL_PER_G;
 
   const kcalBatch =
-    flourTotal * K_FLOUR_PER_G +
-    dustTotalG * K_FLOUR_PER_G +
-    yogTotal * (Y.kcal100 / 100) +
-    milkTotal * (M.kcal100 / 100) +
-    (oilBowl + gheeTotalG) * K_OIL_PER_G;
+    flourTotal * perGram(NUTRITION.flour.kcal100) +
+    yogTotal * perGram(NUTRITION.yoghurt.kcal100) +
+    milkTotal * perGram(NUTRITION.milk.kcal100) +
+    oilTotal * K_OIL_PER_G;
 
-  const waterGrams = yogTotal * WATER_YOG + milkTotal * WATER_MILK;
-  const hydration = +((waterGrams / flourTotal) * 100).toFixed(1);
-
-  // Per-chapati
-  const proteinPer = +(proteinBatch / n).toFixed(2);
-  const carbsPer   = +(carbsBatch   / n).toFixed(1);
-  const fatPer     = +(fatBatch     / n).toFixed(1);
-  const kcalPer    = +(kcalBatch    / n).toFixed(0);
+  const hydration = +(rounded.hydration).toFixed(1);
 
   return {
     n,
@@ -168,118 +152,81 @@ function computePlan({ n, dough, oil, yogBrand, milkBrand }) {
     flourTotal,
     yogTotal,
     milkTotal,
-    flourBowl,
-    flourTZ,
-    milkBowl,
-    milkTZ,
     salt,
-    oilBowl,
-    approxMilk: !!M.approx,
-    approxYog: !!Y.approx,
+    oilTotal,
     hydration,
-    proteinPer, carbsPer, fatPer, kcalPer,
+    proteinPer: +(proteinBatch / n).toFixed(1),
+    carbsPer: +(carbsBatch / n).toFixed(1),
+    fatPer: +(fatBatch / n).toFixed(1),
+    kcalPer: +(kcalBatch / n).toFixed(0)
   };
 }
 
-// ===== IO =====
-function read() {
-  const n = parseInt($("#n")?.value, 10);
-  const dough = parseInt($("#dough")?.value, 10);
-  const oilEl = $("#oil");
-  const oil = (oilEl && userTouchedOil) ? parseInt(oilEl.value, 10) : undefined;
-
-  const yogBrand = $("#yogBrand")?.value || "yoplait";
-  const milkBrand = $("#milkBrand")?.value || "value";
-
-  return { n, dough, oil, yogBrand, milkBrand };
-}
-
 function clearOutputs() {
-  const ids = [
-    "flourBowl", "milkBowl", "yogBowl", "salt", "oilBowl",
-    "flourTZ", "milkTZ", "flourTotal", "milkTotal", "yogTotal",
-    "targetDough", "proteinPer", "kcalPer", "carbsPer", "fatPer", "hydration",
-    "mealProtein", "mealKcal", "mealCarbs", "mealFat"
-  ];
-  ids.forEach(id => {
+  [
+    "flourTotal",
+    "milkTotal",
+    "yogTotal",
+    "saltTotal",
+    "oilTotal",
+    "targetDough",
+    "hydration",
+    "proteinPer",
+    "kcalPer",
+    "carbsPer",
+    "fatPer",
+    "mealProtein",
+    "mealKcal",
+    "mealCarbs",
+    "mealFat"
+  ].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.textContent = "—";
   });
-  const milkNote = document.getElementById("milkNote");
-  if (milkNote) milkNote.textContent = "";
 }
 
-// ===== Render =====
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = value;
+  pulse(id);
+}
+
 function render() {
-  const { n, dough, oil, yogBrand, milkBrand } = read();
+  const { n, oil } = read();
+  syncPresetState(n);
 
-  const milkNote = document.getElementById("milkNote");
-  if (milkNote) {
-    const noteText = [note(BRANDS.milk[milkBrand]), note(BRANDS.yoghurt[yogBrand])]
-      .filter(Boolean).join(" ");
-    milkNote.textContent = noteText;
-  }
-
-  const p = computePlan({ n, dough, oil, yogBrand, milkBrand });
-  if (!p) {
+  const plan = computePlan({ n, oil });
+  if (!plan) {
     clearOutputs();
     return;
   }
 
-  const set = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.textContent = val;
-      pulse(id);
-    }
-  };
+  setText("flourTotal", `${fmtInt(plan.flourTotal)} g`);
+  setText("milkTotal", `${fmtInt(plan.milkTotal)} ml`);
+  setText("yogTotal", `${fmtInt(plan.yogTotal)} g`);
+  setText("saltTotal", `${fmtInt(plan.salt)} g`);
+  setText("oilTotal", `${fmtInt(plan.oilTotal)} g`);
+  setText("targetDough", `${fmtInt(plan.target)} g`);
+  setText("hydration", `${fmt1(plan.hydration)}%`);
+  setText("proteinPer", `${fmt1(plan.proteinPer)} g`);
+  setText("kcalPer", `${fmtInt(plan.kcalPer)} kcal`);
+  setText("carbsPer", `${fmt1(plan.carbsPer)} g`);
+  setText("fatPer", `${fmt1(plan.fatPer)} g`);
 
-  // Bowl & TZ
-  set("flourBowl", fmtInt(p.flourBowl) + " g");
-  set("milkBowl", fmtInt(p.milkBowl) + " ml");
-  set("yogBowl", fmtInt(p.yogTotal) + " g");
-  set("salt", (p.salt % 1 ? p.salt.toFixed(1) : fmtInt(p.salt)) + " g");
-  set("oilBowl", fmtInt(p.oilBowl) + " g");
-
-  set("flourTZ", fmtInt(p.flourTZ) + " g");
-  set("milkTZ", fmtInt(p.milkTZ) + " ml");
-
-  // Totals & per-chapati KPIs
-  set("flourTotal", fmtInt(p.flourTotal) + " g");
-  set("milkTotal", fmtInt(p.milkTotal) + " ml");
-  set("yogTotal", fmtInt(p.yogTotal) + " g");
-  set("targetDough", fmtInt(p.target) + " g");
-
-  set("proteinPer", p.proteinPer + " g");
-  set("kcalPer", p.kcalPer + " kcal");
-  set("carbsPer", fmt1(p.carbsPer) + " g");
-  set("fatPer", fmt1(p.fatPer) + " g");
-  set("hydration", p.hydration + "%");
-
-  // Meal totals
-  const mealN = parseInt(document.getElementById("mealCount")?.value, 10);
-  const haveMeal = (mealN && mealN > 0);
-  set("mealProtein", haveMeal ? fmt1(p.proteinPer * mealN) + " g" : "—");
-  set("mealKcal",    haveMeal ? Math.round(p.kcalPer * mealN) + " kcal" : "—");
-  set("mealCarbs",   haveMeal ? fmt1(p.carbsPer * mealN) + " g" : "—");
-  set("mealFat",     haveMeal ? fmt1(p.fatPer   * mealN) + " g" : "—");
-
-  // Auto-fill oil initially
-  if (!userTouchedOil && Number.isFinite(n) && Number.isFinite(dough)) {
-    const oilEl = document.getElementById("oil");
-    if (oilEl) oilEl.value = p.oilBowl;
+  if (!userTouchedOil) {
+    const oilInput = document.getElementById("oil");
+    if (oilInput) oilInput.value = String(plan.oilTotal);
   }
+
+  const mealN = parseInt(document.getElementById("mealCount")?.value, 10);
+  const haveMeal = Number.isFinite(mealN) && mealN > 0;
+  setText("mealProtein", haveMeal ? `${fmt1(plan.proteinPer * mealN)} g` : "—");
+  setText("mealKcal", haveMeal ? `${fmtInt(plan.kcalPer * mealN)} kcal` : "—");
+  setText("mealCarbs", haveMeal ? `${fmt1(plan.carbsPer * mealN)} g` : "—");
+  setText("mealFat", haveMeal ? `${fmt1(plan.fatPer * mealN)} g` : "—");
 }
 
-/* ===== Duo mobile subtitle pills =====
-   Attach labels to each kv block (used by CSS ::before) */
-function setupDuoTitles() {
-  document.querySelectorAll("#panel-duo .duo-grid .kv").forEach((el, i) => {
-    el.setAttribute("data-title", i === 0 ? "Stand mixer" : "Tangzhong");
-  });
-}
-
-// ===== Timer (8:30) =====
 let tHandle = null;
 let remaining = 8 * 60 + 30;
 
@@ -294,7 +241,7 @@ function startTimer() {
   if (tHandle) return;
   tHandle = setInterval(() => {
     if (remaining > 0) {
-      remaining--;
+      remaining -= 1;
       displayTimer();
     } else {
       clearInterval(tHandle);
@@ -304,10 +251,9 @@ function startTimer() {
 }
 
 function pauseTimer() {
-  if (tHandle) {
-    clearInterval(tHandle);
-    tHandle = null;
-  }
+  if (!tHandle) return;
+  clearInterval(tHandle);
+  tHandle = null;
 }
 
 function resetTimer() {
@@ -316,70 +262,50 @@ function resetTimer() {
   displayTimer();
 }
 
-// ===== Events =====
-["n", "dough", "yogBrand", "milkBrand"].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener("input", render);
-});
-const oilEl = document.getElementById("oil");
-if (oilEl) oilEl.addEventListener("input", () => {
-  userTouchedOil = true;
-  render();
-});
+const nInput = document.getElementById("n");
+if (nInput) {
+  nInput.addEventListener("input", render);
+}
 
-// Meal stepper
+const oilInput = document.getElementById("oil");
+if (oilInput) {
+  oilInput.addEventListener("input", () => {
+    userTouchedOil = true;
+    render();
+  });
+}
+
 const mealBox = document.getElementById("mealCount");
 const mealMinus = document.getElementById("mealMinus");
 const mealPlus = document.getElementById("mealPlus");
+
 if (mealBox) mealBox.addEventListener("input", render);
 
 function stepMeal(delta) {
   if (!mealBox) return;
-  let v = parseInt(mealBox.value, 10);
-  if (!Number.isFinite(v)) v = 0;
-  v += delta;
-  if (v < 1) v = 1;
-  mealBox.value = v;
+  let value = parseInt(mealBox.value, 10);
+  if (!Number.isFinite(value)) value = 0;
+  value += delta;
+  if (value < 1) value = 1;
+  mealBox.value = String(value);
   render();
 }
+
 if (mealMinus) mealMinus.addEventListener("click", () => stepMeal(-1));
-if (mealPlus) mealPlus.addEventListener("click", () => stepMeal(+1));
+if (mealPlus) mealPlus.addEventListener("click", () => stepMeal(1));
 
-// Presets
-[
-  ["preset8", 8],
-  ["preset14", 14],
-  ["preset16", 16],
-  ["preset20", 20]
-].forEach(([id, val]) => {
-  const btn = document.getElementById(id);
-  if (btn) btn.addEventListener("click", () => {
-    const nEl = document.getElementById("n");
-    if (nEl) nEl.value = val;
-    document.querySelectorAll("#preset8,#preset14,#preset16,#preset20").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    render();
-  });
-});
-
-// Dough presets
-document.querySelectorAll(".doughPreset").forEach(btn => {
+document.querySelectorAll(".chapatiPreset").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const grams = parseInt(btn.dataset.dough, 10);
-    const dEl = document.getElementById("dough");
-    if (dEl) dEl.value = grams;
-    document.querySelectorAll(".doughPreset").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
+    const count = parseInt(btn.dataset.count, 10);
+    if (nInput) nInput.value = String(count);
     render();
   });
 });
 
-// Timer controls
 document.getElementById("startTimer")?.addEventListener("click", startTimer);
 document.getElementById("pauseTimer")?.addEventListener("click", pauseTimer);
 document.getElementById("resetTimer")?.addEventListener("click", resetTimer);
 
-// Init
-setupDuoTitles();
+if (nInput && !nInput.value) nInput.value = "25";
 displayTimer();
 render();

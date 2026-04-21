@@ -24,52 +24,21 @@
             <h2 class="section-title"><span>Inputs</span></h2>
             <div class="grid-controls">
               <div class="field">
-                <label>How many chapatis?</label>
+                <label for="n">How many chapatis?</label>
                 <div class="seg">
-                  <button id="preset8"  type="button" class="seg-btn">8</button>
-                  <button id="preset14" type="button" class="seg-btn">14</button>
-                  <button id="preset16" type="button" class="seg-btn">16</button>
-                  <button id="preset20" type="button" class="seg-btn">20</button>
+                  <button data-count="15" type="button" class="seg-btn chapatiPreset">15</button>
+                  <button data-count="20" type="button" class="seg-btn chapatiPreset">20</button>
+                  <button data-count="25" type="button" class="seg-btn chapatiPreset active">25</button>
+                  <button data-count="30" type="button" class="seg-btn chapatiPreset">30</button>
                 </div>
-                <input id="n" type="number" min="1" step="1" placeholder="e.g. 16" />
+                <input id="n" type="number" min="1" step="1" inputmode="numeric" value="25" placeholder="e.g. 25" />
+                <small>Each chapati is calculated at a fixed 30 g dough weight.</small>
               </div>
 
               <div class="field">
-                <label>Dough per chapati (g)</label>
-                <div class="seg">
-                  <button data-dough="25" type="button" class="seg-btn doughPreset">25</button>
-                  <button data-dough="30" type="button" class="seg-btn doughPreset">30</button>
-                  <button data-dough="35" type="button" class="seg-btn doughPreset">35</button>
-                  <button data-dough="40" type="button" class="seg-btn doughPreset">40</button>
-                </div>
-                <input id="dough" type="number" min="20" step="1" placeholder="e.g. 35" />
-              </div>
-
-              <div class="field">
-                <label>Yoghurt</label>
-                <select id="yogBrand">
-                  <option value="yoplait" selected>Yoplait Max Protein Plain</option>
-                  <option value="gopala">Gopala Full Cream</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label>Trim Milk</label>
-                <select id="milkBrand">
-                  <option value="value" selected>Value Trim Milk</option>
-                  <option value="dairydale">Dairy Dale Trim Milk</option>
-                </select>
-                <small id="milkNote" class="muted"></small>
-              </div>
-
-              <!-- Dusting flour removed.
-                   We now automatically include 2 g of raw flour per chapati for dusting,
-                   and 1 g ghee per chapati after cooking. -->
-
-              <div class="field">
-                <label>Oil in dough (g)</label>
-                <input id="oil" type="number" min="0" step="1" placeholder="auto" />
-                <small>Auto ≈ 5 g per 15 chapatis.</small>
+                <label for="oil">Oil in dough (g)</label>
+                <input id="oil" type="number" min="0" step="1" inputmode="numeric" placeholder="auto" />
+                <small>Auto-calculated at roughly 6 g per 15 chapatis.</small>
               </div>
             </div>
           </section>
@@ -84,8 +53,14 @@
               <div id="milkTotal" class="num">—</div>
               <div>Yoghurt</div>
               <div id="yogTotal" class="num">—</div>
-              <div>Target dough</div>
-              <div id="targetDough" class="num">—</div>
+              <div>Salt</div>
+              <div id="saltTotal" class="num">—</div>
+              <div>Oil</div>
+              <div id="oilTotal" class="num">—</div>
+            </div>
+            <div class="totals-foot muted">
+              <span>Target dough</span>
+              <span id="targetDough" class="num">—</span>
             </div>
             <div class="totals-foot muted">
               Approx. hydration: <span id="hydration">—</span>
@@ -104,40 +79,10 @@
           </section>
         </div>
 
-        <!-- RIGHT COLUMN -->
         <div class="col">
-          <!-- Stand mixer + Tangzhong -->
-          <section class="panel glass duo delay-1" id="panel-duo">
-            <div class="duo-head">
-              <h2 class="section-title"><span>Stand mixer</span></h2>
-              <h2 class="section-title"><span>Tangzhong</span></h2>
-            </div>
-            <div class="duo-grid">
-              <div class="kv">
-                <div>Flour</div>
-                <div id="flourBowl" class="num">—</div>
-                <div>Salt</div>
-                <div id="salt" class="num">—</div>
-                <div>Milk</div>
-                <div id="milkBowl" class="num">—</div>
-                <div>Yoghurt</div>
-                <div id="yogBowl" class="num">—</div>
-                <div>Oil</div>
-                <div id="oilBowl" class="num">—</div>
-              </div>
-              <div class="split-line" aria-hidden="true"></div>
-              <div class="kv">
-                <div>Flour</div>
-                <div id="flourTZ" class="num">—</div>
-                <div>Milk</div>
-                <div id="milkTZ" class="num">—</div>
-              </div>
-            </div>
-          </section>
-
           <!-- Per-chapati KPIs -->
-          <section class="panel glass kpis pretty delay-2" id="panel-kpis">
-            <h2 class="section-title"><span>Per chapati</span></h2>
+          <section class="panel glass kpis pretty delay-1" id="panel-kpis">
+            <h2 class="section-title"><span>Per chapati (30 g)</span></h2>
             <div class="stats stats-4">
               <div class="stat">
                 <div class="stat-label">Protein</div>
