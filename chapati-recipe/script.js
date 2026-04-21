@@ -32,7 +32,8 @@ const WATER_YOG = 0.80;
 const WATER_MILK = 0.87;
 const K_OIL_PER_G = 9;
 const F_OIL_PER_G = 1;
-const AUTO_OIL_PER_CHAPATI_G = 6 / 15;
+const AUTO_OIL_BASE_PER_CHAPATI_G = 5 / 15;
+const OIL_INCREASE_FACTOR = 1.15;
 
 const $ = (sel) => document.querySelector(sel);
 const fmtInt = (x) => Number.isFinite(x) ? `${Math.round(x)}` : "—";
@@ -96,8 +97,6 @@ function chooseRoundedIngredients(target) {
   };
 }
 
-let userTouchedOil = false;
-
 function syncPresetState(n) {
   document.querySelectorAll(".chapatiPreset").forEach((btn) => {
     btn.classList.toggle("active", parseInt(btn.dataset.count, 10) === n);
@@ -106,12 +105,10 @@ function syncPresetState(n) {
 
 function read() {
   const n = parseInt($("#n")?.value, 10);
-  const oilEl = $("#oil");
-  const oil = (oilEl && userTouchedOil) ? parseInt(oilEl.value, 10) : undefined;
-  return { n, oil };
+  return { n };
 }
 
-function computePlan({ n, oil }) {
+function computePlan({ n }) {
   if (!Number.isFinite(n) || n <= 0) return null;
 
   const target = n * CHAPATI_DOUGH_G;
@@ -119,8 +116,7 @@ function computePlan({ n, oil }) {
   const { flourTotal, yogTotal, milkTotal } = rounded;
 
   const salt = Math.floor(0.01 * target);
-  const autoOil = Math.max(5, roundTo5(n * AUTO_OIL_PER_CHAPATI_G));
-  const oilTotal = (Number.isFinite(oil) && oil >= 0) ? roundTo5(oil) : autoOil;
+  const oilTotal = Math.max(1, Math.round(n * AUTO_OIL_BASE_PER_CHAPATI_G * OIL_INCREASE_FACTOR));
 
   const proteinBatch =
     flourTotal * perGram(NUTRITION.flour.protein100) +
@@ -193,10 +189,10 @@ function setText(id, value) {
 }
 
 function render() {
-  const { n, oil } = read();
+  const { n } = read();
   syncPresetState(n);
 
-  const plan = computePlan({ n, oil });
+  const plan = computePlan({ n });
   if (!plan) {
     clearOutputs();
     return;
@@ -213,11 +209,6 @@ function render() {
   setText("kcalPer", `${fmtInt(plan.kcalPer)} kcal`);
   setText("carbsPer", `${fmt1(plan.carbsPer)} g`);
   setText("fatPer", `${fmt1(plan.fatPer)} g`);
-
-  if (!userTouchedOil) {
-    const oilInput = document.getElementById("oil");
-    if (oilInput) oilInput.value = String(plan.oilTotal);
-  }
 
   const mealN = parseInt(document.getElementById("mealCount")?.value, 10);
   const haveMeal = Number.isFinite(mealN) && mealN > 0;
@@ -265,14 +256,6 @@ function resetTimer() {
 const nInput = document.getElementById("n");
 if (nInput) {
   nInput.addEventListener("input", render);
-}
-
-const oilInput = document.getElementById("oil");
-if (oilInput) {
-  oilInput.addEventListener("input", () => {
-    userTouchedOil = true;
-    render();
-  });
 }
 
 const mealBox = document.getElementById("mealCount");
