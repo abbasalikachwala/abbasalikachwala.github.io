@@ -187,13 +187,15 @@ body {
 /* -------- Controls -------- */
 .grid-controls {
 	display: grid;
-	grid-template-columns: repeat(2, minmax(260px, 1fr));
+	grid-template-columns: minmax(0, 1fr);
 	gap: var(--sp-2);
+	max-width: 460px;
+	margin: 0 auto;
 }
 
 @media (max-width: 1100px) {
 	.grid-controls {
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 1fr;
 	}
 }
 
@@ -209,6 +211,10 @@ body {
 	gap: var(--sp-1);
 	min-width: 0;
 	align-items: center;
+	text-align: center;
+}
+
+.controls .section-title {
 	text-align: center;
 }
 
