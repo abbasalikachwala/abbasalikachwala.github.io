@@ -50,14 +50,14 @@ body {
 }
 
 .wrap {
-	width: min(92%, 1280px);
+	width: min(88%, 1280px);
 	margin: 0 auto;
 	padding: 18px 16px 28px;
 }
 
 .hero {
 	margin-bottom: var(--sp-3);
-	text-align: left;
+	text-align: center;
 }
 
 .hero h1 {
@@ -135,6 +135,10 @@ body {
 	.hero {
 		text-align: center;
 	}
+
+	.section-title {
+		text-align: left;
+	}
 }
 
 /* -------- Panels (fast “glass”) -------- */
@@ -169,7 +173,7 @@ body {
 /* -------- Section titles (centered pill) -------- */
 .section-title {
 	margin: 0 0 var(--sp-2) 0;
-	text-align: left;
+	text-align: center;
 	font-family: var(--displayFont);
 	font-size: 1.08rem;
 	color: var(--accent-strong);
