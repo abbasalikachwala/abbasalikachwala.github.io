@@ -50,7 +50,7 @@ body {
 }
 
 .wrap {
-	width: min(100%, 520px);
+	width: 85%;
 	margin: 0 auto;
 	padding: 18px 16px 28px;
 }
