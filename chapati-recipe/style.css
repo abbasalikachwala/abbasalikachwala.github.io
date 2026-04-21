@@ -297,11 +297,12 @@ body {
 	display: grid;
 	gap: var(--sp-2);
 	align-items: stretch;
+	grid-auto-rows: 1fr;
 }
 
 /* new 4-up stats layout */
 .stats-4 {
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 @media (max-width: 720px) {
@@ -320,6 +321,9 @@ body {
 	border: 1px solid rgba(33, 118, 217, .14);
 	border-radius: 16px;
 	box-shadow: inset 0 6px 16px rgba(33, 118, 217, .06);
+	min-height: 132px;
+	inline-size: 100%;
+	min-width: 0;
 }
 
 .stat-label {
@@ -333,6 +337,10 @@ body {
 	font-weight: 800;
 	letter-spacing: .2px;
 	color: #0f1b2d;
+	inline-size: 100%;
+	text-align: center;
+	line-height: 1.1;
+	overflow-wrap: anywhere;
 }
 
 /* -------- Timer & Buttons -------- */
@@ -421,15 +429,6 @@ body {
 	border-radius: 12px;
 	background: #fff;
 	font: inherit;
-}
-
-.input-note {
-	margin: 0;
-	padding: 14px 16px;
-	border-radius: 16px;
-	background: linear-gradient(180deg, rgba(232, 243, 255, .95), rgba(255, 255, 255, .94));
-	border: 1px solid rgba(33, 118, 217, .14);
-	color: var(--muted);
 }
 
 @media (max-width: 959px) {
