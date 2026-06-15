@@ -1,331 +1,1172 @@
-const CHAPATI_DOUGH_G = 30;
+"use strict";
 
-const R = {
-  FLOUR: 190,
-  YOG: 95,
-  MILK: 115,
-  SUM: 400
-};
+// ======================================================
+// Configuration
+// ======================================================
 
-const NUTRITION = {
-  flour: {
+const CONFIG = Object.freeze({
+  doughPerChapatiG: 30,
+
+  targetHydrationPct: 85,
+  saltPctOfFlour: 1,
+
+  oilGPer15Chapatis: 5,
+  oilMultiplier: 1.15,
+
+  yoghurtWaterFraction: 0.80,
+  milkWaterFraction: 0.87,
+
+  liquidRatio: Object.freeze({
+    yoghurt: 95,
+    milk: 115
+  }),
+
+  // Used only for converting calculated milk mass to
+  // an approximate volume for display.
+  milkDensityGPerMl: 1.03,
+
+  timerSeconds: 8 * 60 + 30,
+
+  limits: Object.freeze({
+    minChapatis: 1,
+    maxChapatis: 500,
+    minMealCount: 1,
+    maxMealCount: 100
+  })
+});
+
+const NUTRITION = Object.freeze({
+  flour: Object.freeze({
     protein100: 12.0,
     kcal100: 311,
     carbs100: 62.0,
     fat100: 1.7
-  },
-  yoghurt: {
+  }),
+
+  yoghurt: Object.freeze({
     protein100: 5.1,
     kcal100: 103,
     carbs100: 7.0,
     fat100: 6.0
-  },
-  milk: {
+  }),
+
+  milk: Object.freeze({
     protein100: 3.1,
     kcal100: 60,
     carbs100: 4.7,
     fat100: 3.3
+  }),
+
+  oil: Object.freeze({
+    protein100: 0,
+    kcal100: 900,
+    carbs100: 0,
+    fat100: 100
+  })
+});
+
+// All recipe masses are calculated internally in 0.1 g units.
+// Integer arithmetic prevents floating-point mass-balance errors.
+const MASS_SCALE = 10;
+
+
+// ======================================================
+// Configuration validation
+// ======================================================
+
+function validateConfiguration() {
+  const {
+    doughPerChapatiG,
+    targetHydrationPct,
+    saltPctOfFlour,
+    oilGPer15Chapatis,
+    oilMultiplier,
+    yoghurtWaterFraction,
+    milkWaterFraction,
+    liquidRatio,
+    milkDensityGPerMl,
+    timerSeconds,
+    limits
+  } = CONFIG;
+
+  if (!Number.isFinite(doughPerChapatiG) || doughPerChapatiG <= 0) {
+    throw new Error(
+      "CONFIG.doughPerChapatiG must be greater than zero."
+    );
   }
-};
 
-const WATER_YOG = 0.80;
-const WATER_MILK = 0.87;
-const K_OIL_PER_G = 9;
-const F_OIL_PER_G = 1;
-const AUTO_OIL_BASE_PER_CHAPATI_G = 5 / 15;
-const OIL_INCREASE_FACTOR = 1.15;
-const TARGET_HYDRATION = 85; // Changed from 90 to 85
+  if (
+    !Number.isFinite(targetHydrationPct) ||
+    targetHydrationPct <= 0
+  ) {
+    throw new Error(
+      "CONFIG.targetHydrationPct must be greater than zero."
+    );
+  }
 
-// ===== DOM Utilities =====
-const $ = (sel) => document.querySelector(sel);
-const fmtInt = (x) => Number.isFinite(x) ? `${Math.round(x)}` : "—";
-const fmt1 = (x) => Number.isFinite(x) ? `${x.toFixed(1)}` : "—";
-const roundTo5 = (x) => Math.round(x / 5) * 5;
+  if (
+    !Number.isFinite(saltPctOfFlour) ||
+    saltPctOfFlour < 0
+  ) {
+    throw new Error(
+      "CONFIG.saltPctOfFlour cannot be negative."
+    );
+  }
 
-// ===== Pulse Animation =====
-function pulse(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.remove("pulse");
-  void el.offsetWidth; // Trigger reflow
-  el.classList.add("pulse");
-}
+  if (
+    !Number.isFinite(oilGPer15Chapatis) ||
+    oilGPer15Chapatis < 0 ||
+    !Number.isFinite(oilMultiplier) ||
+    oilMultiplier < 0
+  ) {
+    throw new Error(
+      "Configured oil values cannot be negative."
+    );
+  }
 
-// ===== Nutrition Helpers =====
-function perGram(valuePer100) {
-  return valuePer100 / 100;
-}
-
-function hydrationFor(flourTotal, yogTotal, milkTotal) {
-  const water = (yogTotal * WATER_YOG) + (milkTotal * WATER_MILK);
-  return (water / flourTotal) * 100;
-}
-
-// ===== Ingredient Rounding =====
-/**
- * Choose rounded ingredients that sum to exactly the target dough weight.
- * Prioritizes hitting the target hydration (85%), then minimizes deviation
- * from the ideal ratios.
- */
-function chooseRoundedIngredients(target) {
-  // Start with ideal proportions
-  const idealFlour = target * (R.FLOUR / R.SUM);
-  const idealYog = target * (R.YOG / R.SUM);
-  const idealMilk = target * (R.MILK / R.SUM);
-
-  let best = null;
-
-  // Try flour values around the ideal, in steps of 5g
-  for (let flour = roundTo5(idealFlour) - 30; flour <= roundTo5(idealFlour) + 30; flour += 5) {
-    if (flour <= 0) continue;
-
-    // Try yogurt values around the ideal, in steps of 5g
-    for (let yog = roundTo5(idealYog) - 30; yog <= roundTo5(idealYog) + 30; yog += 5) {
-      if (yog < 0) continue;
-
-      // Milk is calculated as the remainder to ensure exact sum
-      const milk = target - flour - yog;
-      if (milk < 0 || milk % 5 !== 0) continue;
-
-      // Calculate how close we are to target hydration
-      const hydration = hydrationFor(flour, yog, milk);
-      const hydrationError = Math.abs(hydration - TARGET_HYDRATION);
-
-      // Scoring: prioritize hydration, then ingredient ratio accuracy
-      const score =
-        hydrationError * 100 +
-        Math.abs(flour - idealFlour) +
-        Math.abs(yog - idealYog) +
-        Math.abs(milk - idealMilk);
-
-      if (!best || score < best.score) {
-        best = {
-          flourTotal: flour,
-          yogTotal: yog,
-          milkTotal: milk,
-          hydration,
-          score
-        };
-      }
+  for (const [name, fraction] of Object.entries({
+    yoghurtWaterFraction,
+    milkWaterFraction
+  })) {
+    if (
+      !Number.isFinite(fraction) ||
+      fraction < 0 ||
+      fraction > 1
+    ) {
+      throw new Error(
+        `CONFIG.${name} must be between 0 and 1.`
+      );
     }
   }
 
-  // Fallback (should rarely be needed with proper search range)
-  if (!best) {
-    const flour = roundTo5(idealFlour);
-    const yog = roundTo5(idealYog);
-    const milk = target - flour - yog;
-
-    best = {
-      flourTotal: flour,
-      yogTotal: yog,
-      milkTotal: Math.max(0, milk),
-      hydration: hydrationFor(flour, yog, Math.max(0, milk))
-    };
+  if (
+    !Number.isFinite(liquidRatio.yoghurt) ||
+    !Number.isFinite(liquidRatio.milk) ||
+    liquidRatio.yoghurt < 0 ||
+    liquidRatio.milk < 0 ||
+    liquidRatio.yoghurt + liquidRatio.milk <= 0
+  ) {
+    throw new Error(
+      "CONFIG.liquidRatio must have a positive total."
+    );
   }
 
-  return best;
+  if (
+    !Number.isFinite(milkDensityGPerMl) ||
+    milkDensityGPerMl <= 0
+  ) {
+    throw new Error(
+      "CONFIG.milkDensityGPerMl must be greater than zero."
+    );
+  }
+
+  if (
+    !Number.isInteger(timerSeconds) ||
+    timerSeconds <= 0
+  ) {
+    throw new Error(
+      "CONFIG.timerSeconds must be a positive integer."
+    );
+  }
+
+  if (
+    !Number.isInteger(limits.minChapatis) ||
+    !Number.isInteger(limits.maxChapatis) ||
+    limits.minChapatis <= 0 ||
+    limits.maxChapatis < limits.minChapatis
+  ) {
+    throw new Error(
+      "Chapati count limits are invalid."
+    );
+  }
+
+  if (
+    !Number.isInteger(limits.minMealCount) ||
+    !Number.isInteger(limits.maxMealCount) ||
+    limits.minMealCount <= 0 ||
+    limits.maxMealCount < limits.minMealCount
+  ) {
+    throw new Error(
+      "Meal count limits are invalid."
+    );
+  }
 }
 
-// ===== UI State =====
-function syncPresetState(n) {
-  document.querySelectorAll(".chapatiPreset").forEach((btn) => {
-    btn.classList.toggle("active", parseInt(btn.dataset.count, 10) === n);
+function validateNutritionData() {
+  const requiredFields = [
+    "protein100",
+    "kcal100",
+    "carbs100",
+    "fat100"
+  ];
+
+  for (const [ingredient, values] of Object.entries(NUTRITION)) {
+    for (const field of requiredFields) {
+      const value = values[field];
+
+      if (!Number.isFinite(value) || value < 0) {
+        throw new Error(
+          `Invalid nutrition value: ${ingredient}.${field}`
+        );
+      }
+    }
+  }
+}
+
+
+// ======================================================
+// Precomputed recipe model
+// ======================================================
+
+function buildRecipeModel() {
+  const ratioTotal =
+    CONFIG.liquidRatio.yoghurt +
+    CONFIG.liquidRatio.milk;
+
+  const yoghurtShare =
+    CONFIG.liquidRatio.yoghurt / ratioTotal;
+
+  const milkShare =
+    CONFIG.liquidRatio.milk / ratioTotal;
+
+  const averageLiquidWaterFraction =
+    yoghurtShare * CONFIG.yoghurtWaterFraction +
+    milkShare * CONFIG.milkWaterFraction;
+
+  const hydrationFraction =
+    CONFIG.targetHydrationPct / 100;
+
+  const saltFraction =
+    CONFIG.saltPctOfFlour / 100;
+
+  /*
+   * Hydration:
+   *
+   * water / flour = hydration fraction
+   *
+   * water:
+   * total liquid × average water fraction
+   *
+   * Therefore:
+   * total liquid / flour
+   * = hydration fraction / average water fraction
+   */
+  const liquidPerGramFlour =
+    hydrationFraction / averageLiquidWaterFraction;
+
+  return Object.freeze({
+    yoghurtShare,
+    milkShare,
+    averageLiquidWaterFraction,
+    hydrationFraction,
+    saltFraction,
+    liquidPerGramFlour
   });
 }
 
-function read() {
-  const n = parseInt($("#n")?.value, 10);
-  return { n };
+validateConfiguration();
+validateNutritionData();
+
+const RECIPE_MODEL = buildRecipeModel();
+
+
+// ======================================================
+// DOM utilities
+// ======================================================
+
+const $ = (selector) => document.querySelector(selector);
+
+function getElement(id) {
+  return document.getElementById(id);
 }
 
-// ===== Computation =====
-function computePlan({ n }) {
-  if (!Number.isFinite(n) || n <= 0) return null;
+function pulse(element) {
+  element.classList.remove("pulse");
 
-  const target = n * CHAPATI_DOUGH_G;
-  const rounded = chooseRoundedIngredients(target);
-  const { flourTotal, yogTotal, milkTotal } = rounded;
+  // Restart the CSS animation.
+  void element.offsetWidth;
 
-  const salt = Math.floor(0.01 * target);
-  const oilTotal = Math.max(1, Math.round(n * AUTO_OIL_BASE_PER_CHAPATI_G * OIL_INCREASE_FACTOR));
+  element.classList.add("pulse");
+}
 
-  // Calculate nutrition per batch
-  const proteinBatch =
-    flourTotal * perGram(NUTRITION.flour.protein100) +
-    yogTotal * perGram(NUTRITION.yoghurt.protein100) +
-    milkTotal * perGram(NUTRITION.milk.protein100);
+function setText(id, value, shouldPulse = true) {
+  const element = getElement(id);
 
-  const carbsBatch =
-    flourTotal * perGram(NUTRITION.flour.carbs100) +
-    yogTotal * perGram(NUTRITION.yoghurt.carbs100) +
-    milkTotal * perGram(NUTRITION.milk.carbs100);
+  if (!element || element.textContent === value) {
+    return;
+  }
 
-  const fatBatch =
-    flourTotal * perGram(NUTRITION.flour.fat100) +
-    yogTotal * perGram(NUTRITION.yoghurt.fat100) +
-    milkTotal * perGram(NUTRITION.milk.fat100) +
-    oilTotal * F_OIL_PER_G;
+  element.textContent = value;
 
-  const kcalBatch =
-    flourTotal * perGram(NUTRITION.flour.kcal100) +
-    yogTotal * perGram(NUTRITION.yoghurt.kcal100) +
-    milkTotal * perGram(NUTRITION.milk.kcal100) +
-    oilTotal * K_OIL_PER_G;
+  if (shouldPulse) {
+    pulse(element);
+  }
+}
 
-  const hydration = +(rounded.hydration).toFixed(1);
+
+// ======================================================
+// Numeric and formatting utilities
+// ======================================================
+
+function gramsToUnits(grams) {
+  return Math.round(grams * MASS_SCALE);
+}
+
+function unitsToGrams(units) {
+  return units / MASS_SCALE;
+}
+
+function perGram(valuePer100G) {
+  return valuePer100G / 100;
+}
+
+function roundToOneDecimal(value) {
+  return Math.round(value * 10) / 10;
+}
+
+function formatMass(value) {
+  if (!Number.isFinite(value)) {
+    return "—";
+  }
+
+  const rounded = roundToOneDecimal(value);
+
+  return Number.isInteger(rounded)
+    ? String(rounded)
+    : rounded.toFixed(1);
+}
+
+function formatOneDecimal(value) {
+  return Number.isFinite(value)
+    ? value.toFixed(1)
+    : "—";
+}
+
+function formatInteger(value) {
+  return Number.isFinite(value)
+    ? String(Math.round(value))
+    : "—";
+}
+
+function parseIntegerInRange(value, min, max) {
+  const text = String(value ?? "").trim();
+
+  if (text === "") {
+    return null;
+  }
+
+  const number = Number(text);
+
+  return (
+    Number.isSafeInteger(number) &&
+    number >= min &&
+    number <= max
+  )
+    ? number
+    : null;
+}
+
+
+// ======================================================
+// Recipe calculations
+// ======================================================
+
+function calculateOilG(chapatiCount) {
+  return (
+    chapatiCount /
+    15 *
+    CONFIG.oilGPer15Chapatis *
+    CONFIG.oilMultiplier
+  );
+}
+
+function calculateHydrationPct(flourG, yoghurtG, milkG) {
+  if (!Number.isFinite(flourG) || flourG <= 0) {
+    throw new Error(
+      "Flour mass must be greater than zero."
+    );
+  }
+
+  const waterG =
+    yoghurtG * CONFIG.yoghurtWaterFraction +
+    milkG * CONFIG.milkWaterFraction;
+
+  return (waterG / flourG) * 100;
+}
+
+/**
+ * Calculates the ideal continuous formula before practical
+ * 0.1 g rounding is applied.
+ */
+function calculateIdealFormula(targetG, oilG) {
+  const remainingAfterOilG = targetG - oilG;
+
+  if (remainingAfterOilG <= 0) {
+    throw new Error(
+      "Oil exceeds or equals the target dough mass."
+    );
+  }
+
+  /*
+   * Final dough:
+   *
+   * target
+   * = flour
+   * + liquid
+   * + salt
+   * + oil
+   *
+   * liquid = flour × liquidPerGramFlour
+   * salt   = flour × saltFraction
+   */
+  const flourG =
+    remainingAfterOilG /
+    (
+      1 +
+      RECIPE_MODEL.liquidPerGramFlour +
+      RECIPE_MODEL.saltFraction
+    );
+
+  const totalLiquidG =
+    flourG * RECIPE_MODEL.liquidPerGramFlour;
 
   return {
-    n,
-    target,
-    flourTotal,
-    yogTotal,
-    milkTotal,
-    salt,
-    oilTotal,
-    hydration,
-    proteinPer: +(proteinBatch / n).toFixed(1),
-    carbsPer: +(carbsBatch / n).toFixed(1),
-    fatPer: +(fatBatch / n).toFixed(1),
-    kcalPer: +(kcalBatch / n).toFixed(0)
+    flourG,
+
+    yoghurtG:
+      totalLiquidG * RECIPE_MODEL.yoghurtShare,
+
+    milkG:
+      totalLiquidG * RECIPE_MODEL.milkShare,
+
+    saltG:
+      flourG * RECIPE_MODEL.saltFraction,
+
+    oilG
   };
 }
 
-// ===== Rendering =====
-function clearOutputs() {
-  const outputIds = [
-    "flourTotal", "milkTotal", "yogTotal", "saltTotal", "oilTotal",
-    "targetDough", "hydration", "proteinPer", "kcalPer", "carbsPer",
-    "fatPer", "mealProtein", "mealKcal", "mealCarbs", "mealFat"
-  ];
+/**
+ * Converts the ideal recipe into a practical 0.1 g recipe.
+ *
+ * The final dough mass remains exact because milk receives the
+ * final rounding remainder.
+ */
+function calculateFormula(targetG, oilG) {
+  const targetUnits = gramsToUnits(targetG);
+  const oilUnits = gramsToUnits(oilG);
 
-  outputIds.forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = "—";
-  });
+  const ideal = calculateIdealFormula(
+    targetG,
+    unitsToGrams(oilUnits)
+  );
+
+  const flourUnits = gramsToUnits(ideal.flourG);
+
+  // Because flourUnits and saltUnits use the same mass scale,
+  // the salt percentage can be applied directly.
+  const saltUnits = Math.round(
+    flourUnits * RECIPE_MODEL.saltFraction
+  );
+
+  const liquidUnits =
+    targetUnits -
+    oilUnits -
+    flourUnits -
+    saltUnits;
+
+  if (liquidUnits < 0) {
+    throw new Error(
+      "The target dough mass is too small for this recipe."
+    );
+  }
+
+  const yoghurtUnits = Math.round(
+    liquidUnits * RECIPE_MODEL.yoghurtShare
+  );
+
+  // Milk absorbs the final 0.1 g rounding remainder.
+  const milkUnits =
+    liquidUnits - yoghurtUnits;
+
+  if (yoghurtUnits < 0 || milkUnits < 0) {
+    throw new Error(
+      "Calculated liquid masses cannot be negative."
+    );
+  }
+
+  const formula = {
+    flourG: unitsToGrams(flourUnits),
+    yoghurtG: unitsToGrams(yoghurtUnits),
+    milkG: unitsToGrams(milkUnits),
+    saltG: unitsToGrams(saltUnits),
+    oilG: unitsToGrams(oilUnits)
+  };
+
+  const actualDoughUnits =
+    flourUnits +
+    yoghurtUnits +
+    milkUnits +
+    saltUnits +
+    oilUnits;
+
+  if (actualDoughUnits !== targetUnits) {
+    throw new Error(
+      `Dough mass mismatch: expected ${targetG} g, ` +
+      `calculated ${unitsToGrams(actualDoughUnits)} g.`
+    );
+  }
+
+  return {
+    ...formula,
+
+    targetG: unitsToGrams(targetUnits),
+    actualDoughG: unitsToGrams(actualDoughUnits),
+
+    hydrationPct: calculateHydrationPct(
+      formula.flourG,
+      formula.yoghurtG,
+      formula.milkG
+    )
+  };
 }
 
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = value;
-  pulse(id);
+
+// ======================================================
+// Nutrition calculations
+// ======================================================
+
+function calculateNutrition(ingredients) {
+  const ingredientMasses = {
+    flour: ingredients.flourG,
+    yoghurt: ingredients.yoghurtG,
+    milk: ingredients.milkG,
+    oil: ingredients.oilG
+  };
+
+  const totals = {
+    proteinG: 0,
+    carbsG: 0,
+    fatG: 0,
+    kcal: 0
+  };
+
+  for (
+    const [ingredientName, massG]
+    of Object.entries(ingredientMasses)
+  ) {
+    const nutrition = NUTRITION[ingredientName];
+
+    if (!nutrition) {
+      throw new Error(
+        `Missing nutrition data for ${ingredientName}.`
+      );
+    }
+
+    totals.proteinG +=
+      massG * perGram(nutrition.protein100);
+
+    totals.carbsG +=
+      massG * perGram(nutrition.carbs100);
+
+    totals.fatG +=
+      massG * perGram(nutrition.fat100);
+
+    totals.kcal +=
+      massG * perGram(nutrition.kcal100);
+  }
+
+  return totals;
+}
+
+function divideNutrition(nutrition, divisor) {
+  if (!Number.isFinite(divisor) || divisor <= 0) {
+    throw new Error(
+      "Nutrition divisor must be greater than zero."
+    );
+  }
+
+  return {
+    proteinG: nutrition.proteinG / divisor,
+    carbsG: nutrition.carbsG / divisor,
+    fatG: nutrition.fatG / divisor,
+    kcal: nutrition.kcal / divisor
+  };
+}
+
+function multiplyNutrition(nutrition, multiplier) {
+  if (!Number.isFinite(multiplier) || multiplier < 0) {
+    throw new Error(
+      "Nutrition multiplier cannot be negative."
+    );
+  }
+
+  return {
+    proteinG: nutrition.proteinG * multiplier,
+    carbsG: nutrition.carbsG * multiplier,
+    fatG: nutrition.fatG * multiplier,
+    kcal: nutrition.kcal * multiplier
+  };
+}
+
+
+// ======================================================
+// Complete plan calculation
+// ======================================================
+
+function calculatePlan(chapatiCount) {
+  const {
+    minChapatis,
+    maxChapatis
+  } = CONFIG.limits;
+
+  if (
+    !Number.isSafeInteger(chapatiCount) ||
+    chapatiCount < minChapatis ||
+    chapatiCount > maxChapatis
+  ) {
+    throw new Error(
+      `Chapati count must be between ` +
+      `${minChapatis} and ${maxChapatis}.`
+    );
+  }
+
+  const targetG =
+    chapatiCount * CONFIG.doughPerChapatiG;
+
+  const oilG =
+    calculateOilG(chapatiCount);
+
+  const formula =
+    calculateFormula(targetG, oilG);
+
+  const batchNutrition =
+    calculateNutrition(formula);
+
+  const perChapatiNutrition =
+    divideNutrition(
+      batchNutrition,
+      chapatiCount
+    );
+
+  return {
+    chapatiCount,
+
+    dough: {
+      targetG: formula.targetG,
+      actualG: formula.actualDoughG,
+      perChapatiG:
+        formula.actualDoughG / chapatiCount
+    },
+
+    ingredients: {
+      flourG: formula.flourG,
+      yoghurtG: formula.yoghurtG,
+      milkG: formula.milkG,
+      saltG: formula.saltG,
+      oilG: formula.oilG
+    },
+
+    hydrationPct:
+      formula.hydrationPct,
+
+    nutrition: {
+      batch: batchNutrition,
+      perChapati: perChapatiNutrition
+    }
+  };
+}
+
+
+// ======================================================
+// UI state
+// ======================================================
+
+function readChapatiCount() {
+  return parseIntegerInRange(
+    $("#n")?.value,
+    CONFIG.limits.minChapatis,
+    CONFIG.limits.maxChapatis
+  );
+}
+
+function readMealCount() {
+  return parseIntegerInRange(
+    $("#mealCount")?.value,
+    CONFIG.limits.minMealCount,
+    CONFIG.limits.maxMealCount
+  );
+}
+
+function syncPresetState(chapatiCount) {
+  document
+    .querySelectorAll(".chapatiPreset")
+    .forEach((button) => {
+      const presetCount =
+        Number(button.dataset.count);
+
+      button.classList.toggle(
+        "active",
+        presetCount === chapatiCount
+      );
+    });
+}
+
+
+// ======================================================
+// Error handling
+// ======================================================
+
+function showError(message) {
+  const element = $("#calculationError");
+
+  if (!element) {
+    return;
+  }
+
+  element.textContent = message;
+  element.hidden = false;
+}
+
+function clearError() {
+  const element = $("#calculationError");
+
+  if (!element) {
+    return;
+  }
+
+  element.textContent = "";
+  element.hidden = true;
+}
+
+
+// ======================================================
+// Rendering
+// ======================================================
+
+const OUTPUT_IDS = Object.freeze([
+  "flourTotal",
+  "milkTotal",
+  "yogTotal",
+  "saltTotal",
+  "oilTotal",
+  "targetDough",
+  "actualDough",
+  "hydration",
+  "proteinPer",
+  "kcalPer",
+  "carbsPer",
+  "fatPer",
+  "mealProtein",
+  "mealKcal",
+  "mealCarbs",
+  "mealFat"
+]);
+
+function clearOutputs() {
+  for (const id of OUTPUT_IDS) {
+    setText(id, "—", false);
+  }
+}
+
+function renderPlan(plan) {
+  const {
+    ingredients,
+    nutrition,
+    dough
+  } = plan;
+
+  const milkMl =
+    ingredients.milkG /
+    CONFIG.milkDensityGPerMl;
+
+  setText(
+    "flourTotal",
+    `${formatMass(ingredients.flourG)} g`
+  );
+
+  setText(
+    "yogTotal",
+    `${formatMass(ingredients.yoghurtG)} g`
+  );
+
+  setText(
+    "milkTotal",
+    `${formatMass(milkMl)} ml ` +
+    `(${formatMass(ingredients.milkG)} g)`
+  );
+
+  setText(
+    "saltTotal",
+    `${formatMass(ingredients.saltG)} g`
+  );
+
+  setText(
+    "oilTotal",
+    `${formatMass(ingredients.oilG)} g`
+  );
+
+  setText(
+    "targetDough",
+    `${formatMass(dough.targetG)} g`
+  );
+
+  // Optional output. Safe if the element is absent.
+  setText(
+    "actualDough",
+    `${formatMass(dough.actualG)} g`
+  );
+
+  setText(
+    "hydration",
+    `${formatOneDecimal(plan.hydrationPct)}%`
+  );
+
+  setText(
+    "proteinPer",
+    `${formatOneDecimal(
+      nutrition.perChapati.proteinG
+    )} g`
+  );
+
+  setText(
+    "kcalPer",
+    `${formatInteger(
+      nutrition.perChapati.kcal
+    )} kcal`
+  );
+
+  setText(
+    "carbsPer",
+    `${formatOneDecimal(
+      nutrition.perChapati.carbsG
+    )} g`
+  );
+
+  setText(
+    "fatPer",
+    `${formatOneDecimal(
+      nutrition.perChapati.fatG
+    )} g`
+  );
+
+  const mealCount = readMealCount();
+
+  if (!mealCount) {
+    setText("mealProtein", "—");
+    setText("mealKcal", "—");
+    setText("mealCarbs", "—");
+    setText("mealFat", "—");
+    return;
+  }
+
+  const mealNutrition =
+    multiplyNutrition(
+      nutrition.perChapati,
+      mealCount
+    );
+
+  setText(
+    "mealProtein",
+    `${formatOneDecimal(mealNutrition.proteinG)} g`
+  );
+
+  setText(
+    "mealKcal",
+    `${formatInteger(mealNutrition.kcal)} kcal`
+  );
+
+  setText(
+    "mealCarbs",
+    `${formatOneDecimal(mealNutrition.carbsG)} g`
+  );
+
+  setText(
+    "mealFat",
+    `${formatOneDecimal(mealNutrition.fatG)} g`
+  );
 }
 
 function render() {
-  const { n } = read();
-  syncPresetState(n);
+  const chapatiCount =
+    readChapatiCount();
 
-  const plan = computePlan({ n });
-  if (!plan) {
+  syncPresetState(chapatiCount);
+
+  if (!chapatiCount) {
+    clearError();
     clearOutputs();
     return;
   }
 
-  // Update ingredient totals
-  setText("flourTotal", `${fmtInt(plan.flourTotal)} g`);
-  setText("milkTotal", `${fmtInt(plan.milkTotal)} ml`);
-  setText("yogTotal", `${fmtInt(plan.yogTotal)} g`);
-  setText("saltTotal", `${fmtInt(plan.salt)} g`);
-  setText("oilTotal", `${fmtInt(plan.oilTotal)} g`);
-  setText("targetDough", `${fmtInt(plan.target)} g`);
-  setText("hydration", `${fmt1(plan.hydration)}%`);
+  try {
+    const plan =
+      calculatePlan(chapatiCount);
 
-  // Update per-chapati nutrition
-  setText("proteinPer", `${fmt1(plan.proteinPer)} g`);
-  setText("kcalPer", `${fmtInt(plan.kcalPer)} kcal`);
-  setText("carbsPer", `${fmt1(plan.carbsPer)} g`);
-  setText("fatPer", `${fmt1(plan.fatPer)} g`);
+    clearError();
+    renderPlan(plan);
+  } catch (error) {
+    console.error(error);
 
-  // Update meal totals if meal count is specified
-  const mealN = parseInt(document.getElementById("mealCount")?.value, 10);
-  const haveMeal = Number.isFinite(mealN) && mealN > 0;
+    clearOutputs();
 
-  setText("mealProtein", haveMeal ? `${fmt1(plan.proteinPer * mealN)} g` : "—");
-  setText("mealKcal", haveMeal ? `${fmtInt(plan.kcalPer * mealN)} kcal` : "—");
-  setText("mealCarbs", haveMeal ? `${fmt1(plan.carbsPer * mealN)} g` : "—");
-  setText("mealFat", haveMeal ? `${fmt1(plan.fatPer * mealN)} g` : "—");
+    showError(
+      error instanceof Error
+        ? error.message
+        : "Unable to calculate the dough recipe."
+    );
+  }
 }
 
-// ===== Timer =====
-let tHandle = null;
-let remaining = 8 * 60 + 30;
 
-function displayTimer() {
-  const m = Math.floor(remaining / 60).toString().padStart(2, "0");
-  const s = Math.floor(remaining % 60).toString().padStart(2, "0");
-  const t = $("#timer");
-  if (t) t.textContent = `${m}:${s}`;
-}
-
-function startTimer() {
-  if (tHandle) return;
-  tHandle = setInterval(() => {
-    if (remaining > 0) {
-      remaining -= 1;
-      displayTimer();
-    } else {
-      clearInterval(tHandle);
-      tHandle = null;
-    }
-  }, 1000);
-}
-
-function pauseTimer() {
-  if (!tHandle) return;
-  clearInterval(tHandle);
-  tHandle = null;
-}
-
-function resetTimer() {
-  pauseTimer();
-  remaining = 8 * 60 + 30;
-  displayTimer();
-}
-
-// ===== Event Listeners =====
-
-// Chapati count input
-const nInput = document.getElementById("n");
-if (nInput) {
-  nInput.addEventListener("input", render);
-}
-
+// ======================================================
 // Meal count controls
-const mealBox = document.getElementById("mealCount");
-const mealMinus = document.getElementById("mealMinus");
-const mealPlus = document.getElementById("mealPlus");
+// ======================================================
 
-if (mealBox) mealBox.addEventListener("input", render);
+function changeMealCount(delta) {
+  const input = $("#mealCount");
 
-function stepMeal(delta) {
-  if (!mealBox) return;
-  let value = parseInt(mealBox.value, 10);
-  if (!Number.isFinite(value)) value = 0;
-  value += delta;
-  if (value < 1) value = 1;
-  mealBox.value = String(value);
+  if (!input) {
+    return;
+  }
+
+  const current =
+    readMealCount() ??
+    CONFIG.limits.minMealCount;
+
+  const next = Math.min(
+    CONFIG.limits.maxMealCount,
+    Math.max(
+      CONFIG.limits.minMealCount,
+      current + delta
+    )
+  );
+
+  input.value = String(next);
+
   render();
 }
 
-if (mealMinus) mealMinus.addEventListener("click", () => stepMeal(-1));
-if (mealPlus) mealPlus.addEventListener("click", () => stepMeal(1));
 
-// Preset buttons
-document.querySelectorAll(".chapatiPreset").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const count = parseInt(btn.dataset.count, 10);
-    if (nInput) nInput.value = String(count);
-    render();
+// ======================================================
+// Drift-resistant timer
+// ======================================================
+
+const timerState = {
+  remainingSeconds:
+    CONFIG.timerSeconds,
+
+  deadlineMs: null,
+  intervalId: null
+};
+
+function displayTimer() {
+  const minutes = Math.floor(
+    timerState.remainingSeconds / 60
+  )
+    .toString()
+    .padStart(2, "0");
+
+  const seconds = (
+    timerState.remainingSeconds % 60
+  )
+    .toString()
+    .padStart(2, "0");
+
+  setText(
+    "timer",
+    `${minutes}:${seconds}`,
+    false
+  );
+}
+
+function clearTimerInterval() {
+  if (timerState.intervalId !== null) {
+    window.clearInterval(
+      timerState.intervalId
+    );
+  }
+
+  timerState.intervalId = null;
+  timerState.deadlineMs = null;
+}
+
+function calculateRemainingTimerSeconds() {
+  if (timerState.deadlineMs === null) {
+    return timerState.remainingSeconds;
+  }
+
+  return Math.max(
+    0,
+    Math.ceil(
+      (
+        timerState.deadlineMs -
+        Date.now()
+      ) / 1000
+    )
+  );
+}
+
+function updateTimer() {
+  if (timerState.deadlineMs === null) {
+    return;
+  }
+
+  timerState.remainingSeconds =
+    calculateRemainingTimerSeconds();
+
+  displayTimer();
+
+  if (timerState.remainingSeconds === 0) {
+    clearTimerInterval();
+  }
+}
+
+function startTimer() {
+  if (
+    timerState.intervalId !== null ||
+    timerState.remainingSeconds <= 0
+  ) {
+    return;
+  }
+
+  timerState.deadlineMs =
+    Date.now() +
+    timerState.remainingSeconds * 1000;
+
+  timerState.intervalId =
+    window.setInterval(
+      updateTimer,
+      250
+    );
+
+  updateTimer();
+}
+
+function pauseTimer() {
+  if (timerState.intervalId === null) {
+    return;
+  }
+
+  timerState.remainingSeconds =
+    calculateRemainingTimerSeconds();
+
+  clearTimerInterval();
+  displayTimer();
+}
+
+function resetTimer() {
+  clearTimerInterval();
+
+  timerState.remainingSeconds =
+    CONFIG.timerSeconds;
+
+  displayTimer();
+}
+
+
+// ======================================================
+// Event listeners
+// ======================================================
+
+const chapatiCountInput = $("#n");
+const mealCountInput = $("#mealCount");
+
+chapatiCountInput?.addEventListener(
+  "input",
+  render
+);
+
+mealCountInput?.addEventListener(
+  "input",
+  render
+);
+
+$("#mealMinus")?.addEventListener(
+  "click",
+  () => changeMealCount(-1)
+);
+
+$("#mealPlus")?.addEventListener(
+  "click",
+  () => changeMealCount(1)
+);
+
+document
+  .querySelectorAll(".chapatiPreset")
+  .forEach((button) => {
+    button.addEventListener(
+      "click",
+      () => {
+        const count =
+          parseIntegerInRange(
+            button.dataset.count,
+            CONFIG.limits.minChapatis,
+            CONFIG.limits.maxChapatis
+          );
+
+        if (
+          count === null ||
+          !chapatiCountInput
+        ) {
+          return;
+        }
+
+        chapatiCountInput.value =
+          String(count);
+
+        render();
+      }
+    );
   });
-});
 
-// Timer controls
-document.getElementById("startTimer")?.addEventListener("click", startTimer);
-document.getElementById("pauseTimer")?.addEventListener("click", pauseTimer);
-document.getElementById("resetTimer")?.addEventListener("click", resetTimer);
+$("#startTimer")?.addEventListener(
+  "click",
+  startTimer
+);
 
-// ===== Initialization =====
-if (nInput && !nInput.value) nInput.value = "25";
+$("#pauseTimer")?.addEventListener(
+  "click",
+  pauseTimer
+);
+
+$("#resetTimer")?.addEventListener(
+  "click",
+  resetTimer
+);
+
+// Immediately reconcile the timer after returning to
+// a browser tab that was suspended in the background.
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (
+      document.visibilityState === "visible" &&
+      timerState.intervalId !== null
+    ) {
+      updateTimer();
+    }
+  }
+);
+
+
+// ======================================================
+// Initialisation
+// ======================================================
+
+if (
+  chapatiCountInput &&
+  !chapatiCountInput.value
+) {
+  chapatiCountInput.value = "25";
+}
+
+if (
+  mealCountInput &&
+  !mealCountInput.value
+) {
+  mealCountInput.value = "1";
+}
+
 displayTimer();
 render();
