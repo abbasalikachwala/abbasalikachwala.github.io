@@ -20,8 +20,8 @@ const CONFIG = Object.freeze({
     milk: 115
   }),
 
-  // Used only to display an approximate volume. All recipe
-  // calculations use milk mass in grams.
+  // Used only for display. All recipe calculations use
+  // milk mass in grams.
   milkDensityGPerMl: 1.03,
 
   timerSeconds: 8 * 60 + 30,
@@ -65,7 +65,6 @@ const NUTRITION = Object.freeze({
 });
 
 // Integer decigrams are used internally: 1 unit = 0.1 g.
-// This prevents floating-point drift in the mass-balance check.
 const MASS_SCALE = 10;
 
 
@@ -77,14 +76,17 @@ function validateConfiguration() {
   const positiveValues = {
     doughPerChapatiG: CONFIG.doughPerChapatiG,
     targetHydrationPct: CONFIG.targetHydrationPct,
-    milkDensityGPerMl: CONFIG.milkDensityGPerMl,
-    timerSeconds: CONFIG.timerSeconds
+    milkDensityGPerMl: CONFIG.milkDensityGPerMl
   };
 
   for (const [name, value] of Object.entries(positiveValues)) {
     if (!Number.isFinite(value) || value <= 0) {
       throw new Error(`CONFIG.${name} must be greater than zero.`);
     }
+  }
+
+  if (!Number.isSafeInteger(CONFIG.timerSeconds) || CONFIG.timerSeconds <= 0) {
+    throw new Error("CONFIG.timerSeconds must be a positive integer.");
   }
 
   const nonNegativeValues = {
@@ -110,14 +112,15 @@ function validateConfiguration() {
     }
   }
 
-  const liquidRatioTotal =
-    CONFIG.liquidRatio.yoghurt + CONFIG.liquidRatio.milk;
+  const yoghurtRatio = CONFIG.liquidRatio.yoghurt;
+  const milkRatio = CONFIG.liquidRatio.milk;
+  const liquidRatioTotal = yoghurtRatio + milkRatio;
 
   if (
-    !Number.isFinite(CONFIG.liquidRatio.yoghurt) ||
-    !Number.isFinite(CONFIG.liquidRatio.milk) ||
-    CONFIG.liquidRatio.yoghurt < 0 ||
-    CONFIG.liquidRatio.milk < 0 ||
+    !Number.isFinite(yoghurtRatio) ||
+    !Number.isFinite(milkRatio) ||
+    yoghurtRatio < 0 ||
+    milkRatio < 0 ||
     liquidRatioTotal <= 0
   ) {
     throw new Error("CONFIG.liquidRatio must have a positive total.");
@@ -162,21 +165,21 @@ function buildRecipeModel() {
   const ratioTotal =
     CONFIG.liquidRatio.yoghurt + CONFIG.liquidRatio.milk;
 
-  const yoghurtShare = CONFIG.liquidRatio.yoghurt / ratioTotal;
-  const milkShare = CONFIG.liquidRatio.milk / ratioTotal;
+  const yoghurtShare =
+    CONFIG.liquidRatio.yoghurt / ratioTotal;
 
   const averageLiquidWaterFraction =
     yoghurtShare * CONFIG.yoghurtWaterFraction +
-    milkShare * CONFIG.milkWaterFraction;
+    (1 - yoghurtShare) * CONFIG.milkWaterFraction;
 
-  const hydrationFraction = CONFIG.targetHydrationPct / 100;
-  const saltFraction = CONFIG.saltPctOfFlour / 100;
+  const hydrationFraction =
+    CONFIG.targetHydrationPct / 100;
+
+  const saltFraction =
+    CONFIG.saltPctOfFlour / 100;
 
   return Object.freeze({
     yoghurtShare,
-    milkShare,
-    averageLiquidWaterFraction,
-    hydrationFraction,
     saltFraction,
     liquidPerGramFlour:
       hydrationFraction / averageLiquidWaterFraction
@@ -210,9 +213,8 @@ function setText(id, value, { animate = true } = {}) {
 }
 
 function pulse(element) {
-  const reduceMotion = window.matchMedia?.(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
+  const reduceMotion =
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
   if (reduceMotion) {
     return;
@@ -245,6 +247,14 @@ function clearError() {
   element.hidden = true;
 }
 
+function setInputValidity(input, isInvalid) {
+  if (!input) {
+    return;
+  }
+
+  input.setAttribute("aria-invalid", String(isInvalid));
+}
+
 
 // =====================================================
 // Numeric and formatting utilities
@@ -268,15 +278,22 @@ function formatMass(value) {
   }
 
   const rounded = Math.round(value * 10) / 10;
-  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+
+  return Number.isInteger(rounded)
+    ? String(rounded)
+    : rounded.toFixed(1);
 }
 
 function formatOneDecimal(value) {
-  return Number.isFinite(value) ? value.toFixed(1) : "—";
+  return Number.isFinite(value)
+    ? value.toFixed(1)
+    : "—";
 }
 
 function formatInteger(value) {
-  return Number.isFinite(value) ? String(Math.round(value)) : "—";
+  return Number.isFinite(value)
+    ? String(Math.round(value))
+    : "—";
 }
 
 function parseIntegerInRange(value, min, max) {
@@ -288,7 +305,11 @@ function parseIntegerInRange(value, min, max) {
 
   const number = Number(text);
 
-  return Number.isSafeInteger(number) && number >= min && number <= max
+  return (
+    Number.isSafeInteger(number) &&
+    number >= min &&
+    number <= max
+  )
     ? number
     : null;
 }
@@ -322,62 +343,64 @@ function calculateHydrationPct(flourG, yoghurtG, milkG) {
   return (waterG / flourG) * 100;
 }
 
-function calculateIdealFormula(targetG, oilG) {
+function calculateIdealFlourG(targetG, oilG) {
   const remainingAfterOilG = targetG - oilG;
 
   if (remainingAfterOilG <= 0) {
     throw new Error("Oil exceeds or equals the target dough mass.");
   }
 
-  const flourG =
+  return (
     remainingAfterOilG /
     (
       1 +
       RECIPE_MODEL.liquidPerGramFlour +
       RECIPE_MODEL.saltFraction
-    );
-
-  const totalLiquidG = flourG * RECIPE_MODEL.liquidPerGramFlour;
-
-  return {
-    flourG,
-    yoghurtG: totalLiquidG * RECIPE_MODEL.yoghurtShare,
-    milkG: totalLiquidG * RECIPE_MODEL.milkShare,
-    saltG: flourG * RECIPE_MODEL.saltFraction,
-    oilG
-  };
+    )
+  );
 }
 
 /**
- * Converts the ideal continuous formula into a practical 0.1 g recipe.
- * Milk absorbs the final rounding remainder, ensuring that all ingredient
- * masses add up to exactly the requested final dough mass.
+ * Converts the continuous recipe into a practical 0.1 g formula.
+ * Milk absorbs the final rounding remainder, so all ingredients
+ * always add up to the requested final dough mass.
  */
 function calculateFormula(targetG, oilG) {
   const targetUnits = gramsToUnits(targetG);
   const oilUnits = gramsToUnits(oilG);
   const roundedOilG = unitsToGrams(oilUnits);
 
-  const ideal = calculateIdealFormula(targetG, roundedOilG);
+  const flourUnits = gramsToUnits(
+    calculateIdealFlourG(targetG, roundedOilG)
+  );
 
-  const flourUnits = gramsToUnits(ideal.flourG);
-  const saltUnits = Math.round(flourUnits * RECIPE_MODEL.saltFraction);
+  const saltUnits = Math.round(
+    flourUnits * RECIPE_MODEL.saltFraction
+  );
 
   const liquidUnits =
-    targetUnits - oilUnits - flourUnits - saltUnits;
+    targetUnits -
+    oilUnits -
+    flourUnits -
+    saltUnits;
 
   if (liquidUnits <= 0) {
-    throw new Error("The target dough mass is too small for this recipe.");
+    throw new Error(
+      "The target dough mass is too small for this recipe."
+    );
   }
 
   const yoghurtUnits = Math.round(
     liquidUnits * RECIPE_MODEL.yoghurtShare
   );
 
-  const milkUnits = liquidUnits - yoghurtUnits;
+  const milkUnits =
+    liquidUnits - yoghurtUnits;
 
   if (yoghurtUnits < 0 || milkUnits < 0) {
-    throw new Error("Calculated liquid masses cannot be negative.");
+    throw new Error(
+      "Calculated liquid masses cannot be negative."
+    );
   }
 
   const ingredients = {
@@ -389,7 +412,11 @@ function calculateFormula(targetG, oilG) {
   };
 
   const actualDoughUnits =
-    flourUnits + yoghurtUnits + milkUnits + saltUnits + oilUnits;
+    flourUnits +
+    yoghurtUnits +
+    milkUnits +
+    saltUnits +
+    oilUnits;
 
   if (actualDoughUnits !== targetUnits) {
     throw new Error(
@@ -433,10 +460,17 @@ function calculateNutrition(ingredients) {
   for (const [ingredientName, massG] of Object.entries(masses)) {
     const nutrition = NUTRITION[ingredientName];
 
-    totals.proteinG += massG * perGram(nutrition.protein100);
-    totals.carbsG += massG * perGram(nutrition.carbs100);
-    totals.fatG += massG * perGram(nutrition.fat100);
-    totals.kcal += massG * perGram(nutrition.kcal100);
+    totals.proteinG +=
+      massG * perGram(nutrition.protein100);
+
+    totals.carbsG +=
+      massG * perGram(nutrition.carbs100);
+
+    totals.fatG +=
+      massG * perGram(nutrition.fat100);
+
+    totals.kcal +=
+      massG * perGram(nutrition.kcal100);
   }
 
   return totals;
@@ -444,7 +478,9 @@ function calculateNutrition(ingredients) {
 
 function scaleNutrition(nutrition, factor) {
   if (!Number.isFinite(factor) || factor < 0) {
-    throw new Error("Nutrition scale factor cannot be negative.");
+    throw new Error(
+      "Nutrition scale factor cannot be negative."
+    );
   }
 
   return {
@@ -461,7 +497,10 @@ function scaleNutrition(nutrition, factor) {
 // =====================================================
 
 function calculatePlan(chapatiCount) {
-  const { minChapatis, maxChapatis } = CONFIG.limits;
+  const {
+    minChapatis,
+    maxChapatis
+  } = CONFIG.limits;
 
   if (
     !Number.isSafeInteger(chapatiCount) ||
@@ -469,17 +508,28 @@ function calculatePlan(chapatiCount) {
     chapatiCount > maxChapatis
   ) {
     throw new Error(
-      `Chapati count must be between ${minChapatis} and ${maxChapatis}.`
+      `Chapati count must be between ` +
+      `${minChapatis} and ${maxChapatis}.`
     );
   }
 
-  const targetG = chapatiCount * CONFIG.doughPerChapatiG;
-  const formula = calculateFormula(targetG, calculateOilG(chapatiCount));
-  const batchNutrition = calculateNutrition(formula);
-  const perChapatiNutrition = scaleNutrition(
-    batchNutrition,
-    1 / chapatiCount
-  );
+  const targetG =
+    chapatiCount * CONFIG.doughPerChapatiG;
+
+  const formula =
+    calculateFormula(
+      targetG,
+      calculateOilG(chapatiCount)
+    );
+
+  const batchNutrition =
+    calculateNutrition(formula);
+
+  const perChapatiNutrition =
+    scaleNutrition(
+      batchNutrition,
+      1 / chapatiCount
+    );
 
   return {
     chapatiCount,
@@ -487,7 +537,8 @@ function calculatePlan(chapatiCount) {
     dough: {
       targetG: formula.targetG,
       actualG: formula.actualDoughG,
-      perChapatiG: formula.actualDoughG / chapatiCount
+      perChapatiG:
+        formula.actualDoughG / chapatiCount
     },
 
     ingredients: {
@@ -498,7 +549,8 @@ function calculatePlan(chapatiCount) {
       oilG: formula.oilG
     },
 
-    hydrationPct: formula.hydrationPct,
+    hydrationPct:
+      formula.hydrationPct,
 
     nutrition: {
       batch: batchNutrition,
@@ -532,34 +584,72 @@ function readMealCount() {
 }
 
 function syncPresetState(chapatiCount) {
-  document.querySelectorAll(".chapatiPreset").forEach((button) => {
-    const presetCount = Number(button.dataset.count);
-    const isActive = presetCount === chapatiCount;
+  document
+    .querySelectorAll(".chapatiPreset")
+    .forEach((button) => {
+      const presetCount =
+        Number(button.dataset.count);
 
-    button.classList.toggle("active", isActive);
-    button.setAttribute("aria-pressed", String(isActive));
-  });
+      const isActive =
+        presetCount === chapatiCount;
+
+      button.classList.toggle(
+        "active",
+        isActive
+      );
+
+      button.setAttribute(
+        "aria-pressed",
+        String(isActive)
+      );
+    });
+}
+
+function syncMealControls() {
+  const minusButton = $("#mealMinus");
+  const plusButton = $("#mealPlus");
+  const mealCount = readMealCount();
+
+  if (minusButton) {
+    minusButton.disabled =
+      mealCount === null ||
+      mealCount <= CONFIG.limits.minMealCount;
+  }
+
+  if (plusButton) {
+    plusButton.disabled =
+      mealCount !== null &&
+      mealCount >= CONFIG.limits.maxMealCount;
+  }
 }
 
 function getChapatiInputError() {
-  if (!chapatiCountInput || isBlank(chapatiCountInput.value)) {
+  if (
+    !chapatiCountInput ||
+    isBlank(chapatiCountInput.value)
+  ) {
     return "";
   }
 
   return (
     `Enter a whole chapati count between ` +
-    `${CONFIG.limits.minChapatis} and ${CONFIG.limits.maxChapatis}.`
+    `${CONFIG.limits.minChapatis} and ` +
+    `${CONFIG.limits.maxChapatis}.`
   );
 }
 
 function getMealInputError() {
-  if (!mealCountInput || isBlank(mealCountInput.value)) {
+  if (
+    !mealCountInput ||
+    isBlank(mealCountInput.value)
+  ) {
     return "";
   }
 
   return (
     `Meal count must be a whole number between ` +
-    `${CONFIG.limits.minMealCount} and ${CONFIG.limits.maxMealCount}.`
+    `${CONFIG.limits.minMealCount} and ` +
+    `${CONFIG.limits.maxMealCount}.`
   );
 }
 
@@ -574,12 +664,19 @@ const OUTPUT_IDS = Object.freeze([
   "yogTotal",
   "saltTotal",
   "oilTotal",
-  "targetDough",
+  "finalDough",
   "hydration",
   "proteinPer",
   "kcalPer",
   "carbsPer",
   "fatPer",
+  "mealProtein",
+  "mealKcal",
+  "mealCarbs",
+  "mealFat"
+]);
+
+const MEAL_OUTPUT_IDS = Object.freeze([
   "mealProtein",
   "mealKcal",
   "mealCarbs",
@@ -593,82 +690,178 @@ function clearOutputs() {
 }
 
 function clearMealOutputs() {
-  for (const id of ["mealProtein", "mealKcal", "mealCarbs", "mealFat"]) {
+  for (const id of MEAL_OUTPUT_IDS) {
     setText(id, "—", { animate: false });
   }
 }
 
 function renderPlan(plan) {
-  const { ingredients, nutrition, dough } = plan;
-  const milkMl = ingredients.milkG / CONFIG.milkDensityGPerMl;
+  const {
+    ingredients,
+    nutrition,
+    dough
+  } = plan;
 
-  setText("flourTotal", `${formatMass(ingredients.flourG)} g`);
+  const milkMl =
+    ingredients.milkG /
+    CONFIG.milkDensityGPerMl;
+
+  setText(
+    "flourTotal",
+    `${formatMass(ingredients.flourG)} g`
+  );
+
   setText(
     "milkTotal",
-    `${formatMass(milkMl)} ml (${formatMass(ingredients.milkG)} g)`
+    `${formatMass(milkMl)} ml ` +
+    `(${formatMass(ingredients.milkG)} g)`
   );
-  setText("yogTotal", `${formatMass(ingredients.yoghurtG)} g`);
-  setText("saltTotal", `${formatMass(ingredients.saltG)} g`);
-  setText("oilTotal", `${formatMass(ingredients.oilG)} g`);
-  setText("targetDough", `${formatMass(dough.actualG)} g`);
-  setText("hydration", `${formatOneDecimal(plan.hydrationPct)}%`);
+
+  setText(
+    "yogTotal",
+    `${formatMass(ingredients.yoghurtG)} g`
+  );
+
+  setText(
+    "saltTotal",
+    `${formatMass(ingredients.saltG)} g`
+  );
+
+  setText(
+    "oilTotal",
+    `${formatMass(ingredients.oilG)} g`
+  );
+
+  setText(
+    "finalDough",
+    `${formatMass(dough.actualG)} g`
+  );
+
+  setText(
+    "hydration",
+    `${formatOneDecimal(plan.hydrationPct)}%`
+  );
 
   setText(
     "proteinPer",
-    `${formatOneDecimal(nutrition.perChapati.proteinG)} g`
-  );
-  setText(
-    "kcalPer",
-    `${formatInteger(nutrition.perChapati.kcal)} kcal`
-  );
-  setText(
-    "carbsPer",
-    `${formatOneDecimal(nutrition.perChapati.carbsG)} g`
-  );
-  setText(
-    "fatPer",
-    `${formatOneDecimal(nutrition.perChapati.fatG)} g`
+    `${formatOneDecimal(
+      nutrition.perChapati.proteinG
+    )} g`
   );
 
-  const mealCount = readMealCount();
+  setText(
+    "kcalPer",
+    `${formatInteger(
+      nutrition.perChapati.kcal
+    )} kcal`
+  );
+
+  setText(
+    "carbsPer",
+    `${formatOneDecimal(
+      nutrition.perChapati.carbsG
+    )} g`
+  );
+
+  setText(
+    "fatPer",
+    `${formatOneDecimal(
+      nutrition.perChapati.fatG
+    )} g`
+  );
+
+  const mealCount =
+    readMealCount();
 
   if (mealCount === null) {
     clearMealOutputs();
     return;
   }
 
-  const mealNutrition = scaleNutrition(
-    nutrition.perChapati,
-    mealCount
+  const mealNutrition =
+    scaleNutrition(
+      nutrition.perChapati,
+      mealCount
+    );
+
+  setText(
+    "mealProtein",
+    `${formatOneDecimal(mealNutrition.proteinG)} g`
   );
 
-  setText("mealProtein", `${formatOneDecimal(mealNutrition.proteinG)} g`);
-  setText("mealKcal", `${formatInteger(mealNutrition.kcal)} kcal`);
-  setText("mealCarbs", `${formatOneDecimal(mealNutrition.carbsG)} g`);
-  setText("mealFat", `${formatOneDecimal(mealNutrition.fatG)} g`);
+  setText(
+    "mealKcal",
+    `${formatInteger(mealNutrition.kcal)} kcal`
+  );
+
+  setText(
+    "mealCarbs",
+    `${formatOneDecimal(mealNutrition.carbsG)} g`
+  );
+
+  setText(
+    "mealFat",
+    `${formatOneDecimal(mealNutrition.fatG)} g`
+  );
 }
 
 function render() {
-  const chapatiCount = readChapatiCount();
+  const chapatiCount =
+    readChapatiCount();
+
+  const chapatiInvalid =
+    chapatiCount === null &&
+    !isBlank(chapatiCountInput?.value);
+
   syncPresetState(chapatiCount);
+  syncMealControls();
+  setInputValidity(
+    chapatiCountInput,
+    chapatiInvalid
+  );
 
   if (chapatiCount === null) {
     clearOutputs();
+    setInputValidity(mealCountInput, false);
 
-    const error = getChapatiInputError();
-    error ? showError(error) : clearError();
+    const error =
+      getChapatiInputError();
+
+    error
+      ? showError(error)
+      : clearError();
+
     return;
   }
 
   try {
-    const plan = calculatePlan(chapatiCount);
-    const mealError = getMealInputError();
+    const plan =
+      calculatePlan(chapatiCount);
 
-    mealError ? showError(mealError) : clearError();
+    const mealCount =
+      readMealCount();
+
+    const mealInvalid =
+      mealCount === null &&
+      !isBlank(mealCountInput?.value);
+
+    setInputValidity(
+      mealCountInput,
+      mealInvalid
+    );
+
+    const mealError =
+      getMealInputError();
+
+    mealError
+      ? showError(mealError)
+      : clearError();
+
     renderPlan(plan);
   } catch (error) {
     console.error(error);
     clearOutputs();
+
     showError(
       error instanceof Error
         ? error.message
@@ -687,13 +880,23 @@ function changeMealCount(delta) {
     return;
   }
 
-  const current = readMealCount() ?? CONFIG.limits.minMealCount;
-  const next = Math.min(
-    CONFIG.limits.maxMealCount,
-    Math.max(CONFIG.limits.minMealCount, current + delta)
-  );
+  const current =
+    readMealCount();
 
-  mealCountInput.value = String(next);
+  const next =
+    current === null
+      ? CONFIG.limits.minMealCount
+      : Math.min(
+          CONFIG.limits.maxMealCount,
+          Math.max(
+            CONFIG.limits.minMealCount,
+            current + delta
+          )
+        );
+
+  mealCountInput.value =
+    String(next);
+
   render();
 }
 
@@ -703,7 +906,9 @@ function changeMealCount(delta) {
 // =====================================================
 
 const timerState = {
-  remainingSeconds: CONFIG.timerSeconds,
+  remainingSeconds:
+    CONFIG.timerSeconds,
+
   deadlineMs: null,
   intervalId: null
 };
@@ -716,42 +921,62 @@ function syncTimerControls() {
   const startButton = $("#startTimer");
   const pauseButton = $("#pauseTimer");
   const resetButton = $("#resetTimer");
-  const running = isTimerRunning();
-  const completed = timerState.remainingSeconds === 0;
-  const untouched = timerState.remainingSeconds === CONFIG.timerSeconds;
+
+  const running =
+    isTimerRunning();
+
+  const completed =
+    timerState.remainingSeconds === 0;
+
+  const untouched =
+    timerState.remainingSeconds ===
+    CONFIG.timerSeconds;
 
   if (startButton) {
-    startButton.disabled = running || completed;
-    startButton.setAttribute("aria-disabled", String(running || completed));
+    startButton.disabled =
+      running || completed;
   }
 
   if (pauseButton) {
-    pauseButton.disabled = !running;
-    pauseButton.setAttribute("aria-disabled", String(!running));
+    pauseButton.disabled =
+      !running;
   }
 
   if (resetButton) {
-    resetButton.disabled = untouched && !running;
-    resetButton.setAttribute("aria-disabled", String(untouched && !running));
+    resetButton.disabled =
+      untouched && !running;
   }
 }
 
 function displayTimer() {
-  const minutes = Math.floor(timerState.remainingSeconds / 60)
-    .toString()
-    .padStart(2, "0");
+  const minutes =
+    Math.floor(
+      timerState.remainingSeconds / 60
+    )
+      .toString()
+      .padStart(2, "0");
 
-  const seconds = (timerState.remainingSeconds % 60)
-    .toString()
-    .padStart(2, "0");
+  const seconds =
+    (
+      timerState.remainingSeconds % 60
+    )
+      .toString()
+      .padStart(2, "0");
 
-  setText("timer", `${minutes}:${seconds}`, { animate: false });
+  setText(
+    "timer",
+    `${minutes}:${seconds}`,
+    { animate: false }
+  );
+
   syncTimerControls();
 }
 
 function clearTimerInterval() {
   if (timerState.intervalId !== null) {
-    window.clearInterval(timerState.intervalId);
+    window.clearInterval(
+      timerState.intervalId
+    );
   }
 
   timerState.intervalId = null;
@@ -765,7 +990,12 @@ function calculateRemainingTimerSeconds() {
 
   return Math.max(
     0,
-    Math.ceil((timerState.deadlineMs - Date.now()) / 1000)
+    Math.ceil(
+      (
+        timerState.deadlineMs -
+        Date.now()
+      ) / 1000
+    )
   );
 }
 
@@ -774,24 +1004,46 @@ function updateTimer() {
     return;
   }
 
-  timerState.remainingSeconds = calculateRemainingTimerSeconds();
+  timerState.remainingSeconds =
+    calculateRemainingTimerSeconds();
 
   if (timerState.remainingSeconds === 0) {
     clearTimerInterval();
+
+    setText(
+      "timerStatus",
+      "Rest timer complete.",
+      { animate: false }
+    );
   }
 
   displayTimer();
 }
 
 function startTimer() {
-  if (isTimerRunning() || timerState.remainingSeconds <= 0) {
+  if (
+    isTimerRunning() ||
+    timerState.remainingSeconds <= 0
+  ) {
     return;
   }
 
-  timerState.deadlineMs =
-    Date.now() + timerState.remainingSeconds * 1000;
+  setText(
+    "timerStatus",
+    "",
+    { animate: false }
+  );
 
-  timerState.intervalId = window.setInterval(updateTimer, 250);
+  timerState.deadlineMs =
+    Date.now() +
+    timerState.remainingSeconds * 1000;
+
+  timerState.intervalId =
+    window.setInterval(
+      updateTimer,
+      250
+    );
+
   displayTimer();
 }
 
@@ -800,14 +1052,25 @@ function pauseTimer() {
     return;
   }
 
-  timerState.remainingSeconds = calculateRemainingTimerSeconds();
+  timerState.remainingSeconds =
+    calculateRemainingTimerSeconds();
+
   clearTimerInterval();
   displayTimer();
 }
 
 function resetTimer() {
   clearTimerInterval();
-  timerState.remainingSeconds = CONFIG.timerSeconds;
+
+  timerState.remainingSeconds =
+    CONFIG.timerSeconds;
+
+  setText(
+    "timerStatus",
+    "",
+    { animate: false }
+  );
+
   displayTimer();
 }
 
@@ -816,38 +1079,81 @@ function resetTimer() {
 // Event listeners
 // =====================================================
 
-chapatiCountInput?.addEventListener("input", render);
-mealCountInput?.addEventListener("input", render);
+chapatiCountInput?.addEventListener(
+  "input",
+  render
+);
 
-$("#mealMinus")?.addEventListener("click", () => changeMealCount(-1));
-$("#mealPlus")?.addEventListener("click", () => changeMealCount(1));
+mealCountInput?.addEventListener(
+  "input",
+  render
+);
 
-for (const button of document.querySelectorAll(".chapatiPreset")) {
-  button.addEventListener("click", () => {
-    const count = parseIntegerInRange(
-      button.dataset.count,
-      CONFIG.limits.minChapatis,
-      CONFIG.limits.maxChapatis
-    );
+$("#mealMinus")?.addEventListener(
+  "click",
+  () => changeMealCount(-1)
+);
 
-    if (count === null || !chapatiCountInput) {
-      return;
+$("#mealPlus")?.addEventListener(
+  "click",
+  () => changeMealCount(1)
+);
+
+for (
+  const button of
+  document.querySelectorAll(".chapatiPreset")
+) {
+  button.addEventListener(
+    "click",
+    () => {
+      const count =
+        parseIntegerInRange(
+          button.dataset.count,
+          CONFIG.limits.minChapatis,
+          CONFIG.limits.maxChapatis
+        );
+
+      if (
+        count === null ||
+        !chapatiCountInput
+      ) {
+        return;
+      }
+
+      chapatiCountInput.value =
+        String(count);
+
+      render();
     }
-
-    chapatiCountInput.value = String(count);
-    render();
-  });
+  );
 }
 
-$("#startTimer")?.addEventListener("click", startTimer);
-$("#pauseTimer")?.addEventListener("click", pauseTimer);
-$("#resetTimer")?.addEventListener("click", resetTimer);
+$("#startTimer")?.addEventListener(
+  "click",
+  startTimer
+);
 
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && isTimerRunning()) {
-    updateTimer();
+$("#pauseTimer")?.addEventListener(
+  "click",
+  pauseTimer
+);
+
+$("#resetTimer")?.addEventListener(
+  "click",
+  resetTimer
+);
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (
+      document.visibilityState === "visible" &&
+      isTimerRunning()
+    ) {
+      updateTimer();
+    }
   }
-});
+);
 
 
 // =====================================================
@@ -855,11 +1161,17 @@ document.addEventListener("visibilitychange", () => {
 // =====================================================
 
 function initialise() {
-  if (chapatiCountInput && isBlank(chapatiCountInput.value)) {
+  if (
+    chapatiCountInput &&
+    isBlank(chapatiCountInput.value)
+  ) {
     chapatiCountInput.value = "25";
   }
 
-  if (mealCountInput && isBlank(mealCountInput.value)) {
+  if (
+    mealCountInput &&
+    isBlank(mealCountInput.value)
+  ) {
     mealCountInput.value = "1";
   }
 
