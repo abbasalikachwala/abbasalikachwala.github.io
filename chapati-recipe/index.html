@@ -2,94 +2,124 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Chapati Recipe Calculator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Calculate a precise chapati dough recipe, ingredient totals, nutrition, meal totals, and resting time." />
     <meta name="color-scheme" content="light" />
-    <!-- Fallback display font if local Georgia isn’t present -->
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+
+    <title>Chapati Recipe Calculator</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
   </head>
+
   <body>
     <main class="wrap">
       <header class="hero">
         <h1>Chapati Recipe Calculator</h1>
+        <p class="hero-subtitle">Precisely scaled ingredients for 30 g dough portions.</p>
       </header>
 
-      <section class="layout">
-        <!-- LEFT COLUMN -->
+      <p id="calculationError" class="error-message" role="alert" hidden></p>
+
+      <section class="layout" aria-label="Chapati recipe calculator">
         <div class="col">
-          <!-- Controls -->
-          <section class="panel glass controls delay-1" id="panel-inputs">
-            <h2 class="section-title"><span>Inputs</span></h2>
+          <section class="panel glass controls delay-1" id="panel-inputs" aria-labelledby="inputsTitle">
+            <h2 class="section-title" id="inputsTitle"><span>Inputs</span></h2>
+
             <div class="grid-controls">
               <div class="field">
                 <label for="n">How many chapatis?</label>
-                <div class="seg">
-                  <button data-count="15" type="button" class="seg-btn chapatiPreset">15</button>
-                  <button data-count="20" type="button" class="seg-btn chapatiPreset">20</button>
-                  <button data-count="25" type="button" class="seg-btn chapatiPreset active">25</button>
-                  <button data-count="30" type="button" class="seg-btn chapatiPreset">30</button>
+
+                <div class="seg" role="group" aria-label="Chapati count presets">
+                  <button type="button" data-count="15" class="seg-btn chapatiPreset" aria-pressed="false">15</button>
+                  <button type="button" data-count="20" class="seg-btn chapatiPreset" aria-pressed="false">20</button>
+                  <button type="button" data-count="25" class="seg-btn chapatiPreset active" aria-pressed="true">25</button>
+                  <button type="button" data-count="30" class="seg-btn chapatiPreset" aria-pressed="false">30</button>
                 </div>
-                <input id="n" type="number" min="1" step="1" inputmode="numeric" value="25" placeholder="e.g. 25" />
-                <small>Each chapati is calculated at a fixed 30 g dough weight.</small>
+
+                <input
+                  id="n"
+                  type="number"
+                  min="1"
+                  max="500"
+                  step="1"
+                  inputmode="numeric"
+                  value="25"
+                  aria-describedby="nHelp"
+                  autocomplete="off"
+                />
+
+                <small id="nHelp">Each chapati uses exactly 30 g of final dough.</small>
               </div>
             </div>
           </section>
 
-          <!-- Totals -->
-          <section class="panel glass totals delay-2" id="panel-totals">
-            <h2 class="section-title"><span>Totals</span></h2>
-            <div class="kv">
-              <div>Flour</div>
-              <div id="flourTotal" class="num">—</div>
-              <div>Milk</div>
-              <div id="milkTotal" class="num">—</div>
-              <div>Yoghurt</div>
-              <div id="yogTotal" class="num">—</div>
-              <div>Salt</div>
-              <div id="saltTotal" class="num">—</div>
-              <div>Oil</div>
-              <div id="oilTotal" class="num">—</div>
-            </div>
-            <div class="totals-foot muted">
-              <span>Target dough</span>
+          <section class="panel glass totals delay-2" id="panel-totals" aria-labelledby="totalsTitle">
+            <h2 class="section-title" id="totalsTitle"><span>Ingredients</span></h2>
+
+            <dl class="kv">
+              <dt>Flour</dt>
+              <dd id="flourTotal" class="num">—</dd>
+
+              <dt>Milk</dt>
+              <dd id="milkTotal" class="num">—</dd>
+
+              <dt>Yoghurt</dt>
+              <dd id="yogTotal" class="num">—</dd>
+
+              <dt>Salt</dt>
+              <dd id="saltTotal" class="num">—</dd>
+
+              <dt>Oil</dt>
+              <dd id="oilTotal" class="num">—</dd>
+            </dl>
+
+            <div class="totals-foot">
+              <span>Final dough</span>
               <span id="targetDough" class="num">—</span>
             </div>
+
             <div class="totals-foot muted">
-              Approx. hydration: <span id="hydration">—</span>
+              <span>Approx. hydration</span>
+              <span id="hydration" class="num">—</span>
             </div>
           </section>
 
-          <!-- Timer -->
-          <section class="panel glass timer center fill delay-3" id="panel-timer">
-            <h2 class="section-title"><span>Timer</span></h2>
-            <div class="timer-face" id="timer">08:30</div>
+          <section class="panel glass timer center fill delay-3" id="panel-timer" aria-labelledby="timerTitle">
+            <h2 class="section-title" id="timerTitle"><span>Rest timer</span></h2>
+
+            <div class="timer-face" id="timer" role="timer" aria-label="Time remaining">08:30</div>
+
             <div class="row">
-              <button id="startTimer" class="btn">Start</button>
-              <button id="pauseTimer" class="btn ghost">Pause</button>
-              <button id="resetTimer" class="btn ghost">Reset</button>
+              <button type="button" id="startTimer" class="btn">Start</button>
+              <button type="button" id="pauseTimer" class="btn ghost">Pause</button>
+              <button type="button" id="resetTimer" class="btn ghost">Reset</button>
             </div>
           </section>
         </div>
 
         <div class="col">
-          <!-- Per-chapati KPIs -->
-          <section class="panel glass kpis pretty delay-1" id="panel-kpis">
-            <h2 class="section-title"><span>Per chapati (30 g)</span></h2>
+          <section class="panel glass kpis pretty delay-1" id="panel-kpis" aria-labelledby="perChapatiTitle">
+            <h2 class="section-title" id="perChapatiTitle"><span>Per chapati (30 g)</span></h2>
+
             <div class="stats stats-4">
               <div class="stat">
                 <div class="stat-label">Protein</div>
                 <div class="stat-value" id="proteinPer">—</div>
               </div>
+
               <div class="stat">
                 <div class="stat-label">Calories</div>
                 <div class="stat-value" id="kcalPer">—</div>
               </div>
+
               <div class="stat">
                 <div class="stat-label">Carbs</div>
                 <div class="stat-value" id="carbsPer">—</div>
               </div>
+
               <div class="stat">
                 <div class="stat-label">Fat</div>
                 <div class="stat-value" id="fatPer">—</div>
@@ -97,27 +127,43 @@
             </div>
           </section>
 
-          <!-- Meal totals -->
-          <section class="panel glass mealcard delay-3" id="panel-meal">
-            <h2 class="section-title"><span>This meal</span></h2>
+          <section class="panel glass mealcard delay-3" id="panel-meal" aria-labelledby="mealTitle">
+            <h2 class="section-title" id="mealTitle"><span>This meal</span></h2>
+
             <div class="meal-row">
-              <button id="mealMinus" type="button" class="step" aria-label="Minus one">–</button>
-              <input id="mealCount" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 3" />
-              <button id="mealPlus" type="button" class="step" aria-label="Plus one">+</button>
+              <button id="mealMinus" type="button" class="step" aria-label="Decrease meal chapati count">−</button>
+
+              <label for="mealCount" class="visually-hidden">Chapatis in this meal</label>
+              <input
+                id="mealCount"
+                type="number"
+                min="1"
+                max="100"
+                step="1"
+                inputmode="numeric"
+                value="1"
+                autocomplete="off"
+              />
+
+              <button id="mealPlus" type="button" class="step" aria-label="Increase meal chapati count">+</button>
             </div>
+
             <div class="stats stats-4">
               <div class="stat">
                 <div class="stat-label">Protein</div>
                 <div class="stat-value" id="mealProtein">—</div>
               </div>
+
               <div class="stat">
                 <div class="stat-label">Calories</div>
                 <div class="stat-value" id="mealKcal">—</div>
               </div>
+
               <div class="stat">
                 <div class="stat-label">Carbs</div>
                 <div class="stat-value" id="mealCarbs">—</div>
               </div>
+
               <div class="stat">
                 <div class="stat-label">Fat</div>
                 <div class="stat-value" id="mealFat">—</div>
@@ -126,6 +172,10 @@
           </section>
         </div>
       </section>
+
+      <noscript>
+        <p class="error-message">JavaScript must be enabled to use this calculator.</p>
+      </noscript>
     </main>
 
     <script src="script.js"></script>
