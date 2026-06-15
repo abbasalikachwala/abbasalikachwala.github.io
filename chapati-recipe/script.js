@@ -6,7 +6,10 @@
 
 const CONFIG = Object.freeze({
   doughPerChapatiG: 30,
+
   targetHydrationPct: 85,
+  hydrationTolerancePct: 5,
+
   saltPctOfFlour: 1,
 
   oilGPer15Chapatis: 5,
@@ -20,8 +23,13 @@ const CONFIG = Object.freeze({
     milk: 115
   }),
 
-  // Used only for display. All recipe calculations use
-  // milk mass in grams.
+  // Main ingredients are weighed in 5 g increments.
+  mainIngredientStepG: 5,
+
+  // Salt and oil are weighed to the nearest whole gram.
+  seasoningStepG: 1,
+
+  // Used only for display. All calculations use milk mass.
   milkDensityGPerMl: 1.03,
 
   timerSeconds: 8 * 60 + 30,
@@ -64,9 +72,6 @@ const NUTRITION = Object.freeze({
   })
 });
 
-// Integer decigrams are used internally: 1 unit = 0.1 g.
-const MASS_SCALE = 10;
-
 
 // =====================================================
 // Validation and recipe model
@@ -76,7 +81,10 @@ function validateConfiguration() {
   const positiveValues = {
     doughPerChapatiG: CONFIG.doughPerChapatiG,
     targetHydrationPct: CONFIG.targetHydrationPct,
-    milkDensityGPerMl: CONFIG.milkDensityGPerMl
+    hydrationTolerancePct: CONFIG.hydrationTolerancePct,
+    milkDensityGPerMl: CONFIG.milkDensityGPerMl,
+    mainIngredientStepG: CONFIG.mainIngredientStepG,
+    seasoningStepG: CONFIG.seasoningStepG
   };
 
   for (const [name, value] of Object.entries(positiveValues)) {
@@ -126,6 +134,13 @@ function validateConfiguration() {
     throw new Error("CONFIG.liquidRatio must have a positive total.");
   }
 
+  const minimumHydration =
+    CONFIG.targetHydrationPct - CONFIG.hydrationTolerancePct;
+
+  if (minimumHydration < 0) {
+    throw new Error("Hydration tolerance produces an invalid lower bound.");
+  }
+
   const { limits } = CONFIG;
 
   if (
@@ -168,9 +183,12 @@ function buildRecipeModel() {
   const yoghurtShare =
     CONFIG.liquidRatio.yoghurt / ratioTotal;
 
+  const milkShare =
+    CONFIG.liquidRatio.milk / ratioTotal;
+
   const averageLiquidWaterFraction =
     yoghurtShare * CONFIG.yoghurtWaterFraction +
-    (1 - yoghurtShare) * CONFIG.milkWaterFraction;
+    milkShare * CONFIG.milkWaterFraction;
 
   const hydrationFraction =
     CONFIG.targetHydrationPct / 100;
@@ -180,6 +198,7 @@ function buildRecipeModel() {
 
   return Object.freeze({
     yoghurtShare,
+    milkShare,
     saltFraction,
     liquidPerGramFlour:
       hydrationFraction / averageLiquidWaterFraction
@@ -260,12 +279,8 @@ function setInputValidity(input, isInvalid) {
 // Numeric and formatting utilities
 // =====================================================
 
-function gramsToUnits(grams) {
-  return Math.round(grams * MASS_SCALE);
-}
-
-function unitsToGrams(units) {
-  return units / MASS_SCALE;
+function roundToStep(value, step) {
+  return Math.round(value / step) * step;
 }
 
 function perGram(valuePer100G) {
@@ -277,11 +292,22 @@ function formatMass(value) {
     return "—";
   }
 
-  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(value)
+    ? String(value)
+    : value.toFixed(1);
+}
 
-  return Number.isInteger(rounded)
-    ? String(rounded)
-    : rounded.toFixed(1);
+function formatSignedMass(value) {
+  if (!Number.isFinite(value)) {
+    return "—";
+  }
+
+  if (value === 0) {
+    return "0 g";
+  }
+
+  const sign = value > 0 ? "+" : "−";
+  return `${sign}${formatMass(Math.abs(value))} g`;
 }
 
 function formatOneDecimal(value) {
@@ -318,16 +344,36 @@ function isBlank(value) {
   return String(value ?? "").trim() === "";
 }
 
+function compareCandidates(a, b) {
+  if (a.massErrorG !== b.massErrorG) {
+    return a.massErrorG - b.massErrorG;
+  }
+
+  if (a.hydrationErrorPct !== b.hydrationErrorPct) {
+    return a.hydrationErrorPct - b.hydrationErrorPct;
+  }
+
+  if (a.liquidRatioErrorPct !== b.liquidRatioErrorPct) {
+    return a.liquidRatioErrorPct - b.liquidRatioErrorPct;
+  }
+
+  return a.idealDeviationG - b.idealDeviationG;
+}
+
 
 // =====================================================
 // Recipe calculations
 // =====================================================
 
 function calculateOilG(chapatiCount) {
-  return (
+  const rawOilG =
     (chapatiCount / 15) *
     CONFIG.oilGPer15Chapatis *
-    CONFIG.oilMultiplier
+    CONFIG.oilMultiplier;
+
+  return roundToStep(
+    rawOilG,
+    CONFIG.seasoningStepG
   );
 }
 
@@ -343,98 +389,191 @@ function calculateHydrationPct(flourG, yoghurtG, milkG) {
   return (waterG / flourG) * 100;
 }
 
-function calculateIdealFlourG(targetG, oilG) {
+function calculateIdealFormula(targetG, oilG) {
   const remainingAfterOilG = targetG - oilG;
 
   if (remainingAfterOilG <= 0) {
     throw new Error("Oil exceeds or equals the target dough mass.");
   }
 
-  return (
+  const flourG =
     remainingAfterOilG /
     (
       1 +
       RECIPE_MODEL.liquidPerGramFlour +
       RECIPE_MODEL.saltFraction
-    )
-  );
+    );
+
+  const totalLiquidG =
+    flourG * RECIPE_MODEL.liquidPerGramFlour;
+
+  return {
+    flourG,
+    yoghurtG:
+      totalLiquidG * RECIPE_MODEL.yoghurtShare,
+    milkG:
+      totalLiquidG * RECIPE_MODEL.milkShare
+  };
 }
 
 /**
- * Converts the continuous recipe into a practical 0.1 g formula.
- * Milk absorbs the final rounding remainder, so all ingredients
- * always add up to the requested final dough mass.
+ * Finds a practical recipe using:
+ * - 5 g increments for flour, yoghurt, and milk
+ * - 1 g increments for salt and oil
+ * - hydration constrained to target ± tolerance
+ *
+ * Candidate priority:
+ * 1. smallest final dough difference
+ * 2. closest hydration to the target
+ * 3. closest yoghurt-to-milk ratio
+ * 4. closest overall formula to the continuous ideal
  */
 function calculateFormula(targetG, oilG) {
-  const targetUnits = gramsToUnits(targetG);
-  const oilUnits = gramsToUnits(oilG);
-  const roundedOilG = unitsToGrams(oilUnits);
+  const ideal =
+    calculateIdealFormula(targetG, oilG);
 
-  const flourUnits = gramsToUnits(
-    calculateIdealFlourG(targetG, roundedOilG)
-  );
+  const mainStep =
+    CONFIG.mainIngredientStepG;
 
-  const saltUnits = Math.round(
-    flourUnits * RECIPE_MODEL.saltFraction
-  );
+  const minimumHydration =
+    CONFIG.targetHydrationPct -
+    CONFIG.hydrationTolerancePct;
 
-  const liquidUnits =
-    targetUnits -
-    oilUnits -
-    flourUnits -
-    saltUnits;
+  const maximumHydration =
+    CONFIG.targetHydrationPct +
+    CONFIG.hydrationTolerancePct;
 
-  if (liquidUnits <= 0) {
+  const flourCentre =
+    roundToStep(ideal.flourG, mainStep);
+
+  // A ±100 g flour search is ample because the ideal solution
+  // is already close and hydration may vary by up to 5 points.
+  const flourSearchRadiusG = 100;
+
+  let best = null;
+
+  for (
+    let flourG = Math.max(mainStep, flourCentre - flourSearchRadiusG);
+    flourG <= flourCentre + flourSearchRadiusG;
+    flourG += mainStep
+  ) {
+    const saltG =
+      roundToStep(
+        flourG * RECIPE_MODEL.saltFraction,
+        CONFIG.seasoningStepG
+      );
+
+    const idealMainIngredientsG =
+      targetG - saltG - oilG;
+
+    if (idealMainIngredientsG <= flourG) {
+      continue;
+    }
+
+    const idealLiquidTotalG =
+      idealMainIngredientsG - flourG;
+
+    const liquidCentreG =
+      roundToStep(idealLiquidTotalG, mainStep);
+
+    // Test nearby total-liquid amounts so the search can trade
+    // a very small mass deviation for better hydration/ratio.
+    for (
+      let liquidTotalG = Math.max(mainStep, liquidCentreG - 15);
+      liquidTotalG <= liquidCentreG + 15;
+      liquidTotalG += mainStep
+    ) {
+      const yoghurtCentreG =
+        roundToStep(
+          liquidTotalG * RECIPE_MODEL.yoghurtShare,
+          mainStep
+        );
+
+      for (
+        let yoghurtG = Math.max(0, yoghurtCentreG - 15);
+        yoghurtG <= Math.min(liquidTotalG, yoghurtCentreG + 15);
+        yoghurtG += mainStep
+      ) {
+        const milkG =
+          liquidTotalG - yoghurtG;
+
+        if (milkG < 0 || milkG % mainStep !== 0) {
+          continue;
+        }
+
+        const hydrationPct =
+          calculateHydrationPct(
+            flourG,
+            yoghurtG,
+            milkG
+          );
+
+        if (
+          hydrationPct < minimumHydration ||
+          hydrationPct > maximumHydration
+        ) {
+          continue;
+        }
+
+        const actualDoughG =
+          flourG +
+          yoghurtG +
+          milkG +
+          saltG +
+          oilG;
+
+        const actualYoghurtShare =
+          liquidTotalG > 0
+            ? yoghurtG / liquidTotalG
+            : 0;
+
+        const candidate = {
+          flourG,
+          yoghurtG,
+          milkG,
+          saltG,
+          oilG,
+          targetG,
+          actualDoughG,
+          differenceG:
+            actualDoughG - targetG,
+          hydrationPct,
+
+          massErrorG:
+            Math.abs(actualDoughG - targetG),
+
+          hydrationErrorPct:
+            Math.abs(
+              hydrationPct -
+              CONFIG.targetHydrationPct
+            ),
+
+          liquidRatioErrorPct:
+            Math.abs(
+              actualYoghurtShare -
+              RECIPE_MODEL.yoghurtShare
+            ) * 100,
+
+          idealDeviationG:
+            Math.abs(flourG - ideal.flourG) +
+            Math.abs(yoghurtG - ideal.yoghurtG) +
+            Math.abs(milkG - ideal.milkG)
+        };
+
+        if (!best || compareCandidates(candidate, best) < 0) {
+          best = candidate;
+        }
+      }
+    }
+  }
+
+  if (!best) {
     throw new Error(
-      "The target dough mass is too small for this recipe."
+      "No practical 5 g recipe could be found within the allowed hydration range."
     );
   }
 
-  const yoghurtUnits = Math.round(
-    liquidUnits * RECIPE_MODEL.yoghurtShare
-  );
-
-  const milkUnits =
-    liquidUnits - yoghurtUnits;
-
-  if (yoghurtUnits < 0 || milkUnits < 0) {
-    throw new Error(
-      "Calculated liquid masses cannot be negative."
-    );
-  }
-
-  const ingredients = {
-    flourG: unitsToGrams(flourUnits),
-    yoghurtG: unitsToGrams(yoghurtUnits),
-    milkG: unitsToGrams(milkUnits),
-    saltG: unitsToGrams(saltUnits),
-    oilG: roundedOilG
-  };
-
-  const actualDoughUnits =
-    flourUnits +
-    yoghurtUnits +
-    milkUnits +
-    saltUnits +
-    oilUnits;
-
-  if (actualDoughUnits !== targetUnits) {
-    throw new Error(
-      `Dough mass mismatch: expected ${targetG} g, calculated ` +
-      `${unitsToGrams(actualDoughUnits)} g.`
-    );
-  }
-
-  return {
-    ...ingredients,
-    targetG: unitsToGrams(targetUnits),
-    actualDoughG: unitsToGrams(actualDoughUnits),
-    hydrationPct: calculateHydrationPct(
-      ingredients.flourG,
-      ingredients.yoghurtG,
-      ingredients.milkG
-    )
-  };
+  return best;
 }
 
 
@@ -537,7 +676,8 @@ function calculatePlan(chapatiCount) {
     dough: {
       targetG: formula.targetG,
       actualG: formula.actualDoughG,
-      perChapatiG:
+      differenceG: formula.differenceG,
+      actualPerChapatiG:
         formula.actualDoughG / chapatiCount
     },
 
@@ -664,7 +804,9 @@ const OUTPUT_IDS = Object.freeze([
   "yogTotal",
   "saltTotal",
   "oilTotal",
-  "finalDough",
+  "targetDough",
+  "actualDough",
+  "doughDifference",
   "hydration",
   "proteinPer",
   "kcalPer",
@@ -733,8 +875,18 @@ function renderPlan(plan) {
   );
 
   setText(
-    "finalDough",
+    "targetDough",
+    `${formatMass(dough.targetG)} g`
+  );
+
+  setText(
+    "actualDough",
     `${formatMass(dough.actualG)} g`
+  );
+
+  setText(
+    "doughDifference",
+    formatSignedMass(dough.differenceG)
   );
 
   setText(
